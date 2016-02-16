@@ -1,0 +1,38 @@
+{
+  "name": "Kurtography",
+  "version": "0.1.0",
+  "description": "Cartography application supported by Kuzzle",
+  "main": "app.js",
+  "scripts": {
+    "test": "beefy app-map.js:bundle.js --live",
+    "bundle": "browserify app-map.js -o ./public/js/bundle.js",
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.13.4",
+    "jade": "^1.11.0",
+    "bootstrap": "^3.3.6",
+    "jquery": "^2.2.0",
+    "kuzzle-sdk": "^1.4.2",
+    "leaflet": "^0.7.7",
+    "leaflet-draw": "^0.2.3",
+    "geojson": "^0.3.0"
+  },
+  "devDependencies": {
+    "beefy": "^2.1.5",
+    "browserify": "^13.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HamHamFonFon/kurtogaphy.git"
+  },
+  "keywords": [
+    "nodejs",
+    "kuzzle"
+  ],
+  "author": "HamHamFonFon <smeaudre@kaliop.com> (S. Meaudre)",
+  "license": "GPL v3",
+  "bugs": {
+    "url": "https://github.com/HamHamFonFon/kurtogaphy/issues"
+  }
+}
