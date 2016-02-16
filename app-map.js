@@ -15,17 +15,15 @@ var K = require('kuzzle-sdk');
 global.GeoJSON = require('geojson');
 var L = require('leaflet');
 var LD = require('leaflet-draw');
-
+require('leaflet-easybutton');
 /**
  * Construction
  * @type {exports|module.exports}
  */
-// Initialisation de Kuzzle
-var kuzzle = require("./public/src/kuzzle");
 
 // Initialisation de la map
 var mapLf = require("./public/src/leaflet");
 var map = mapLf.initmap();
 
 // Ajout des données
-mapLf.addDatas(map);
+//mapLf.loadKuzzleLayers(map);

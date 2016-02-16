@@ -9,14 +9,15 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "^4.13.4",
-    "jade": "^1.11.0",
     "bootstrap": "^3.3.6",
+    "express": "^4.13.4",
+    "geojson": "^0.3.0",
+    "jade": "^1.11.0",
     "jquery": "^2.2.0",
     "kuzzle-sdk": "^1.4.2",
     "leaflet": "^0.7.7",
     "leaflet-draw": "^0.2.3",
-    "geojson": "^0.3.0"
+    "leaflet-easybutton": "^1.2.0"
   },
   "devDependencies": {
     "beefy": "^2.1.5",

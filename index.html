@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
 		<link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
         <link rel="stylesheet" href="node_modules/leaflet-draw/dist/leaflet.draw.css" />
+        <link rel="stylesheet" href="node_modules/leaflet-easybutton/src/easy-button.css" />
 		<!--[if lte IE 8]>
 			<link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.ie.css" />
 		<![endif]-->
@@ -25,7 +26,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#">Where Is My Kat ?</a>
+                    <a class="navbar-brand" href="#">Kurtography : webmapping application supported by Kuzzle</a>
                 </div>
 
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -42,120 +43,8 @@
         <div class="container-fluid">
             <div class="row">
 
-                <!-- Aside -->
-                <aside class="col-xs-2 col-sm-2 col-lg-2">
-
-                    <div class="row">
-                        <div id="tabInformations" class="col-xs-12 col-md-12 col-lg-12 aside hidden">
-                            <div class="table-responsive">
-                                <input type="hidden" name="guid" id="guid">
-                                <table class="table table-striped" data-id="infos-cat">
-                                    <tr data-id="name">
-                                        <th class="col-md-2">Nom</th>
-                                        <th></th>
-                                    </tr>
-                                    <tr data-id="age">
-                                        <td class="col-md-2">Âge</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr data-id="genre">
-                                        <td class="col-md-2">Genre</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr data-id="tatouage">
-                                        <td class="col-md-2">Tatouage</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr date-id="puce">
-                                        <td class="col-md-2">Pucé</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr data-id="race">
-                                        <td class="col-md-2">Race</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr data-id="colors">
-                                        <td class="col-md-2">Couleurs</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr data-id="weight">
-                                        <td class="col-md-2">Poids</td>
-                                        <td></td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <p data-id="other"></p>
-                        </div>
-
-                        <div id="tabAddCat" class="col-xs-12 col-md-12 col-lg-12 aside hidden">
-
-                            <form class="form" name="formAddCat" method="POST" >
-                                <div class="form-group">
-                                    <label class="sr-only" for="name">Name</label>
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="Ex: Bazoo, Lazer..." disabled required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="sr-only" for="age">Age</label>
-                                    <input type="text" class="form-control" id="age" name="age" placeholder="Ex: 4" disabled>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="radio-inline">
-                                        <input type="radio" name="genre" id="genre1" value="male" disabled> Male
-                                    </label>
-
-                                    <label class="radio-inline">
-                                        <input type="radio" name="genre" id="genre2" value="female" disabled> Female
-                                    </label>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="sr-only" for="tattoo">Tattoo</label>
-                                    <input type="text" class="form-control" name="tattoo" id="tattoo" placeholder="Tattoo..." disabled>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="radio-inline">
-                                        <input type="radio" name="puce" id="puce1" value="oui" disabled> Oui
-                                    </label>
-
-                                    <label class="radio-inline">
-                                        <input type="radio" name="puce" id="puce2" value="non" disabled> Non
-                                    </label>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="sr-only" for="race">Race</label>
-                                    <input type="text" class="form-control" id="race" name="race" placeholder="Ex : main coon, persan..." disabled>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="sr-only" for="colors">Color</label>
-                                    <input type="text" class="form-control" name="colors" id="colors" placeholder="Ex : black..." disabled required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="sr-only" for="weight">Weight</label>
-                                    <input type="text" class="form-control" name="weight" id="weight" placeholder="Ex : 4 kg..." disabled>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="control-label" for="other">Autres</label>
-                                    <textarea id="other" name="other" class="form-control" rows="3" disabled placeholder="Signes disctinctifs..."></textarea>
-                                </div>
-
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn-warning" disabled>Submit</button>
-                                </div>
-                            </form>
-                        </div>
-
-                    </div>
-                </aside>
-
                 <!-- Map -->
-                <div class="col-xs-10 col-sm-10 col-lg-10 map no-gutter">
+                <div class="col-xs-12 col-sm-12 col-lg-12 map no-gutter">
                     <div id="map"></div>
                 </div>
                 </div>

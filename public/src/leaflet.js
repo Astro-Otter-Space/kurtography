@@ -10,28 +10,33 @@ function initMap ()
 {
     L.Icon.Default.imagePath = '/leaflet/dist/images/';
     var positions = getPosition();
-
     var zoom = 18;
 
+    // Map initialisation
     var map = L.map('map', {
         scrollWheelZoom: true
     }).setView([positions.lat, positions.lon], zoom);
 
     // set an attribution string
     var attribution = '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors';
-
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: attribution
     }).addTo(map);
 
-    // Create a zone of research
-    var circle = L.circle([ positions.lat, positions.lon], 100, {
-        color: "orange",
-        fillColor: '#FF8000',
-        fillOpacity: 0.2
-    });
-    circle.addTo(map);
+    // Ajout bouton custum
+    L.easyButton('glyphicon glyphicon-plus', function(btn, map){
+        console.log("Creation new layer");
+    }, 'Add a new layer', 'add_layer').addTo(map);
+
+    L.easyButton('glyphicon glyphicon-th-list', function(btn, map){
+        console.log("Select a layer");
+    }, 'Select a layer', 'edit_layer').addTo(map);
+
+    // Map d edition
+    var kuzzleMapEditing;
+    var kuzzleMapDeleting = false;
+    var disableEditing = false;
 
     // Ajout couche edition
     var drawnItems = new L.FeatureGroup();
@@ -40,13 +45,19 @@ function initMap ()
     // Initialise the FeatureGroup to store editable layers
     var optionsDraw = {
         draw : {
-            polygon: false,
+            polygon: {
+                shapeOptions: {
+                    color: 'steelblue'
+                },
+                showArea: true,
+            },
+            polyline: {
+                shapeOptions: {
+                    color: 'steelblue'
+                },
+            },
+            rect: false,
             circle: false,
-            rectangle: false,
-            polyline: false
-        },
-        marker: {
-            icon: new getSmallCatIcon
         },
         edit: {
             featureGroup: drawnItems
@@ -59,23 +70,6 @@ function initMap ()
         var type = e.layerType,
             layer = e.layer;
 
-        if (type === 'marker') {
-
-            // le submit du formulaire se fait via Express et Router
-            jQuery('form[name="formAddCat"]').find("button").on('click', function (ev) {
-                ev.preventDefault();
-                var formData = jQuery('form[name="formAddCat"]').serializeArray();
-                var data = {};
-
-                 formData.map(function(x){
-                    data[x.name] = x.value;
-                });
-
-                // Donnée a envoyer à Kuzzle
-                var dataGeoJson = GeoJSON.parse(JSON.stringify(data), {Point: [layer.getLatLng().lat, layer.getLatLng().lng]});
-                console.log(dataGeoJson);
-            });
-        }
 
         drawnItems.addLayer(layer);
     });
@@ -83,6 +77,16 @@ function initMap ()
     return map;
 }
 
+function startEditing(layer)
+{
+    layer.editing.enable();
+    kuzzleMapEditing = layer;
+}
+
+function stopEditing()
+{
+
+}
 
 /***
  * Ajout des données sur la map
@@ -90,17 +94,17 @@ function initMap ()
  * @param L
  * @param jq
  */
-function addDatas (map)
-{
-    var datas = L.geoJson(getDatas(), {
-        pointToLayer: function(feature, latlng) {
-            return L.marker(latlng);
-        },
-        onEachFeature: onEachFeature
-    });
-
-    datas.addTo(map);
-}
+//function addDatas (map)
+//{
+//    var datas = L.geoJson(getDatas(), {
+//        pointToLayer: function(feature, latlng) {
+//            return L.marker(latlng);
+//        },
+//        onEachFeature: onEachFeature
+//    });
+//
+//    datas.addTo(map);
+//}
 
 /**
  * Gestion du click sur un item
@@ -271,4 +275,4 @@ function getDatas()
 }
 
 exports.initmap = initMap;
-exports.addDatas = addDatas;
+//exports.addDatas = addDatas;

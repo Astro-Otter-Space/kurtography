@@ -15,15 +15,9 @@ app.use(express.static(__dirname + '/node_modules'));
 
 app.get('/', function(req, res) {
     res.render('map', {
-        title: 'Where is my Kat ? - A kuzzle coding challenge'
+        title: 'Kurtography - webmapping application supported by Kuzzle'
     });
 });
-
-app.post('/add-a-cat', function(req, res) {
-    //console.log('body: ' + JSON.stringify(req.body));
-    //res.send(req.body);
-});
-
 
 // Choix du port 9966 pour avoir le même que pour browserfy
 app.listen(9966);
