@@ -21,3 +21,11 @@ app.get('/', function(req, res) {
 
 // Choix du port 9966 pour avoir le même que pour browserfy
 app.listen(9966);
+
+/**
+ * KUZZLE
+ */
+var Kuzzle = require('kuzzle-sdk');
+var kuzzle = new Kuzzle('http://localhost:7515');
+
+//https://github.com/kuzzleio/kuzzle/blob/master/docs/filters.md#geospacial
