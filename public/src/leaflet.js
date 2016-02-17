@@ -10,37 +10,31 @@ function initMap ()
 {
     L.Icon.Default.imagePath = '/leaflet/dist/images/';
     var positions = getPosition();
-    var zoom = 18;
+    var zoom = 15;
+
+    // Create base Layer
+    var baseLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    });
 
     // Map initialisation
-    var map = L.map('map', {
-        scrollWheelZoom: true
+    this._map = L.map('map', {
+        scrollWheelZoom: true,
+        layers: [baseLayer]
     }).setView([positions.lat, positions.lon], zoom);
 
-    // set an attribution string
-    var attribution = '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors';
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: attribution
-    }).addTo(map);
 
-    // Ajout bouton custum
-    L.easyButton('glyphicon glyphicon-plus', function(btn, map){
-        console.log("Creation new layer");
-    }, 'Add a new layer', 'add_layer').addTo(map);
-
-    L.easyButton('glyphicon glyphicon-th-list', function(btn, map){
-        console.log("Select a layer");
-    }, 'Select a layer', 'edit_layer').addTo(map);
-
-    // Map d edition
+    /**
+     * EDITION CARTOGRAPHIQUE
+     */
     var kuzzleMapEditing;
     var kuzzleMapDeleting = false;
     var disableEditing = false;
 
     // Ajout couche edition
     var drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
+    this._map.addLayer(drawnItems);
 
     // Initialise the FeatureGroup to store editable layers
     var optionsDraw = {
@@ -64,47 +58,22 @@ function initMap ()
         }
     };
     var drawControl = new L.Control.Draw(optionsDraw);
-    map.addControl(drawControl);
-
-    map.on('draw:created', function (e) {
-        var type = e.layerType,
-            layer = e.layer;
-
-
-        drawnItems.addLayer(layer);
-    });
-
-    return map;
+    this._map.addControl(drawControl);
 }
 
-function startEditing(layer)
-{
-    layer.editing.enable();
-    kuzzleMapEditing = layer;
-}
-
-function stopEditing()
-{
-
-}
-
-/***
- * Ajout des données sur la map
- * TODO : faire rentrer es données de kuzzle et non le MOCK
- * @param L
- * @param jq
+/**
+ * List of layers enreg in Kuzzle
+ * @returns {{Where is my cat ?}}
  */
-//function addDatas (map)
-//{
-//    var datas = L.geoJson(getDatas(), {
-//        pointToLayer: function(feature, latlng) {
-//            return L.marker(latlng);
-//        },
-//        onEachFeature: onEachFeature
-//    });
-//
-//    datas.addTo(map);
-//}
+function addLayersFromKuzzle()
+{
+    var kuzzleLayers = {
+        "Where is my cat ?" :  L.geoJson(mockDatas(), { onEachFeature: onEachFeature }),
+    };
+
+    L.control.layers(kuzzleLayers).addTo(this._map);
+}
+
 
 /**
  * Gestion du click sur un item
@@ -127,6 +96,7 @@ function onEachFeature(feature, layer) {
 function mouseclickfunction(e)
 {
     var properties = e.target.feature.properties;
+    alert(properties.name);
 }
 
 /**
@@ -150,7 +120,7 @@ function getPosition()
  * MOCK de données
  * @returns {{type: string, features: *[]}}
  */
-function getDatas()
+function mockDatas()
 {
     // /!\ coordinates: [lon, lat]
     return {
@@ -275,4 +245,4 @@ function getDatas()
 }
 
 exports.initmap = initMap;
-//exports.addDatas = addDatas;
+exports.addLayersFromKuzzle = addLayersFromKuzzle;

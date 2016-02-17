@@ -12,10 +12,11 @@ require('bootstrap');
 var K = require('kuzzle-sdk');
 
 // Leaflet
-global.GeoJSON = require('geojson');
+require('geojson');
 var L = require('leaflet');
 var LD = require('leaflet-draw');
 require('leaflet-easybutton');
+
 /**
  * Construction
  * @type {exports|module.exports}
@@ -23,7 +24,7 @@ require('leaflet-easybutton');
 
 // Initialisation de la map
 var mapLf = require("./public/src/leaflet");
-var map = mapLf.initmap();
+mapLf.initmap();
 
 // Ajout des données
-//mapLf.loadKuzzleLayers(map);
+mapLf.addLayersFromKuzzle();
