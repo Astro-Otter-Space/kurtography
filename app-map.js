@@ -12,6 +12,8 @@ require('bootstrap');
 
 var ol = require('openlayers');
 global.ol = ol;
+require('./node_modules/ol3-layerswitcher/src/ol3-layerswitcher');
+
 require('geojson');
 
 /**
@@ -273,9 +275,10 @@ var mockWhereIsArnaud = {
     ]
 };
 
-var objMock = {"Where is my cat ?" : mockGeoJSONCat/*, "Mes balades à vélos" :  mockGeoJSONVelos/*, "Ou a été Arnaud ?" : mockWhereIsArnaud*/};
+var objMock = {"Where is my cat ?" : mockGeoJSONCat, "Mes balades à vélos" :  mockGeoJSONVelos/*, "Ou a été Arnaud ?" : mockWhereIsArnaud*/};
 
 // Initalisation de la map Openlayers
 var mapOl = require('./public/src/openlayers');
-mapOl.initmap();
-mapOl.addLayersFromKuzzle(objMock);
+
+mapOl.initmap(objMock);
+//mapOl.addLayersFromKuzzle(objMock);

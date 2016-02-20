@@ -27,7 +27,8 @@
   },
   "keywords": [
     "nodejs",
-    "kuzzle"
+    "kuzzle",
+    "openlayers"
   ],
   "author": "HamHamFonFon <smeaudre@kaliop.com> (S. Meaudre)",
   "license": "GPL v3",
