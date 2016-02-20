@@ -10,7 +10,7 @@ function initMap ()
 {
     L.Icon.Default.imagePath = '/leaflet/dist/images/';
     var positions = getPosition();
-    var zoom = 15;
+    var zoom = 13;
 
     // Create base Layer
     var baseLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -24,69 +24,126 @@ function initMap ()
         layers: [baseLayer]
     }).setView([positions.lat, positions.lon], zoom);
 
-
-    /**
-     * EDITION CARTOGRAPHIQUE
-     */
-    var kuzzleMapEditing;
-    var kuzzleMapDeleting = false;
-    var disableEditing = false;
-
-    // Ajout couche edition
-    var drawnItems = new L.FeatureGroup();
-    this._map.addLayer(drawnItems);
-
-    // Initialise the FeatureGroup to store editable layers
-    var optionsDraw = {
-        draw : {
-            polygon: {
-                shapeOptions: {
-                    color: 'steelblue'
-                },
-                showArea: true,
-            },
-            polyline: {
-                shapeOptions: {
-                    color: 'steelblue'
-                },
-            },
-            rect: false,
-            circle: false,
-        },
-        edit: {
-            featureGroup: drawnItems
-        }
-    };
-    var drawControl = new L.Control.Draw(optionsDraw);
-    this._map.addControl(drawControl);
 }
+
 
 /**
  * List of layers enreg in Kuzzle
  * @returns {{Where is my cat ?}}
  */
-function addLayersFromKuzzle()
+function addLayersFromKuzzle(objMock)
 {
-    var kuzzleLayers = {
-        "Where is my cat ?" :  L.geoJson(mockDatas(), { onEachFeature: onEachFeature }),
+    /**
+     var kuzzleLayers = {
+        Layer 1" :  L.geoJson(jsonDatas1, { onEachFeature: onEachFeature }),
+        Layer 2" :  L.geoJson(jsonDatas2, { onEachFeature: onEachFeature }),
+    };
+     */
+    var kuzzleLayers = {};
+    for (key in objMock)
+    {
+        kuzzleLayers[key] = L.geoJson(objMock[key]);
+    }
+
+    L.control.layers(kuzzleLayers, null, {position: 'bottomright', collapsed: true}).addTo(this._map);
+
+    this._map.on('baselayerchange', function (eventLayer) {
+        console.log("Type : " + objMock[eventLayer.name]);
+    });
+
+    //drawFeatures(editableLayers);
+}
+
+/**
+ * Defaults Control Drawing panel
+ */
+function drawingPanelDefault()
+{
+
+    var drawnItems = new L.FeatureGroup();
+    this._map.addLayer(drawnItems);
+
+    // Initialise the FeatureGroup to store editable layers
+    var optionsDraw = {
+        position: 'bottomright',
+        draw : {
+            polygon: false /*{
+                shapeOptions: {
+                    color: 'steelblue'
+                },
+                showArea: true,
+            }*/,
+            polyline: false /*{
+                metric: true,
+                shapeOptions: {
+                    color: 'steelblue'
+                },
+            } */,
+            marker: false /*{
+
+            }*/,
+            rectangle: false,
+            circle: false
+        },
+        edit: {
+            featureGroup: drawnItems,
+            edit: false
+        }
     };
 
-    L.control.layers(kuzzleLayers).addTo(this._map);
+
+    this.drawControl = new L.Control.Draw(optionsDraw);
+    this._map.addControl(this.drawControl);
+
+    drawnItems.eachLayer(function(layer) {
+       console.log(layer.name);
+    });
 }
 
 
+function setDrawingTools(layerType) {
+    this._map.removeControl(this.drawControl);
+}
+
+var getShapeType = function(layer) {
+
+    if (layer instanceof L.Circle) {
+        return 'circle';
+    }
+
+    if (layer instanceof L.Marker) {
+        return 'marker';
+    }
+
+    if ((layer instanceof L.Polyline) && ! (layer instanceof L.Polygon)) {
+        return 'polyline';
+    }
+
+    if ((layer instanceof L.Polygon) && ! (layer instanceof L.Rectangle)) {
+        return 'polygon';
+    }
+
+    if (layer instanceof L.Rectangle) {
+        return 'rectangle';
+    }
+
+};
+
+
 /**
- * Gestion du click sur un item
+ * Gestion du click sur un item de la couche
  * @param feature
  * @param layer
  */
 function onEachFeature(feature, layer) {
+    layer.on({
+    });
     // does this feature have a property named popupContent?
-    if (feature.properties && feature.properties.name) {
-        layer.on({
-            click: mouseclickfunction
-        })
-    }
+    //if (feature.properties && feature.properties.name) {
+    //    layer.on({
+    //        click: mouseclickfunction
+    //    })
+    //}
 }
 
 /**
@@ -96,7 +153,6 @@ function onEachFeature(feature, layer) {
 function mouseclickfunction(e)
 {
     var properties = e.target.feature.properties;
-    alert(properties.name);
 }
 
 /**
@@ -116,133 +172,6 @@ function getPosition()
     }
 }
 
-/**
- * MOCK de données
- * @returns {{type: string, features: *[]}}
- */
-function mockDatas()
-{
-    // /!\ coordinates: [lon, lat]
-    return {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "properties": {
-                    "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                    "name": "Lazerboom",
-                    "age" : "4",
-                    "genre": "male",
-                    "tattoo": "Non",
-                    "puce" : "Non",
-                    "race": "Chat de goutiere",
-                    "colors": "Gris",
-                    "weight": "8.5kg",
-                    "other" : "Un peu bête"
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [3.8766369223594666, 43.610814638046364]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": {
-                    "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                    "name": "Bazookat",
-                    "age" : "4",
-                    "genre": "male",
-                    "tattoo": "",
-                    "puce" : "",
-                    "race": "",
-                    "colors": "roux et blanc",
-                    "weight": "6",
-                    "other" : "Très peureux"
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [3.8927556574344635, 43.60116585356501]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": {
-                    "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                    "name": "Globule",
-                    "age" : "",
-                    "genre": "female",
-                    "tattoo": "",
-                    "puce" : "",
-                    "race": "",
-                    "colors": "Grise et blanche",
-                    "weight": "4.2",
-                    "other" : "Yeux bleu"
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [3.8272064924240112, 43.63473958501086]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": {
-                    "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                    "name": "Isidore",
-                    "age" : "",
-                    "genre": "male",
-                    "tattoo": "",
-                    "puce" : "",
-                    "race": "",
-                    "colors": "noir et blanc",
-                    "weight": "",
-                    "other" : "Il mord"
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [3.9002135396003723, 43.63078647624538]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": {
-                    "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                    "name": "Kiwi",
-                    "age" : "",
-                    "genre": "male",
-                    "tattoo": "",
-                    "puce" : "",
-                    "race": "",
-                    "colors": "noir",
-                    "weight": "",
-                    "other" : "Lunatique"
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [3.8289445638656616, 43.61617052139826]
-                }
-            },
-            {
-                "type": "Feature",
-                "properties": {
-                    "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                    "name": "Kafi",
-                    "age" : "",
-                    "genre": "femelle",
-                    "tattoo": "",
-                    "puce" : "",
-                    "race": "",
-                    "colors": "",
-                    "weight": "",
-                    "other" : ""
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [3.8291913270950317, 43.615595728630446]
-                }
-            }
-        ]
-    };
-}
-
 exports.initmap = initMap;
+exports.drawingPanelDefault = drawingPanelDefault;
 exports.addLayersFromKuzzle = addLayersFromKuzzle;

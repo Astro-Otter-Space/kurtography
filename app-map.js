@@ -3,16 +3,16 @@
  * Appel des modules
  * @type {*|exports|module.exports}
  */
+
+
 // Jquery + Bootstrap
 var $ = require('jquery');
 global.jQuery = $;
 require('bootstrap');
 
-// Leaflet
+var ol = require('openlayers');
+global.ol = ol;
 require('geojson');
-var L = require('leaflet');
-var LD = require('leaflet-draw');
-require('leaflet-easybutton');
 
 /**
  * Construction
@@ -138,13 +138,144 @@ var mockGeoJSONCat = {
         }
     ]
 };
+var mockGeoJSONVelos = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
+                "name": "Ballade à San Francisco"
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [-122.48369693756104, 37.83381888486939],
+                    [-122.48348236083984, 37.83317489144141],
+                    [-122.48339653015138, 37.83270036637107],
+                    [-122.48356819152832, 37.832056363179625],
+                    [-122.48404026031496, 37.83114119107971],
+                    [-122.48404026031496, 37.83049717427869],
+                    [-122.48348236083984, 37.829920943955045],
+                    [-122.48356819152832, 37.82954808664175],
+                    [-122.48507022857666, 37.82944639795659],
+                    [-122.48610019683838, 37.82880236636284],
+                    [-122.48695850372314, 37.82931081282506],
+                    [-122.48700141906738, 37.83080223556934],
+                    [-122.48751640319824, 37.83168351665737],
+                    [-122.48803138732912, 37.832158048267786],
+                    [-122.48888969421387, 37.83297152392784],
+                    [-122.48987674713133, 37.83263257682617],
+                    [-122.49043464660643, 37.832937629287755],
+                    [-122.49125003814696, 37.832429207817725],
+                    [-122.49163627624512, 37.832564787218985],
+                    [-122.49223709106445, 37.83337825839438],
+                    [-122.49378204345702, 37.83368330777276]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
+                "name": "Ballade Agropolis"
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [3.8766369223594666, 43.610814638046364]
+                ]
+            }
+        },
+    ]
+};
+var mockWhereIsArnaud = {
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
+                "name": "Arnaud 1"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [436256968, 39108042]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
+                "name": "Arnaud 2"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [436256944, 39108172]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
+                "name": "Arnaud 3"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
 
-var objMock = {"Where is my cat ?" : mockGeoJSONCat };
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
+                "name": "Arnaud 4"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [436256796, 39107696]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
+                "name": "Arnaud 5"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [436256721, 39107700]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
+                "name": "Arnaud 6"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [436256853, 39108035]
+            }
+        },{
+            "type": "Feature",
+            "properties": {
+                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
+                "name": "Arnaud 7"
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [436256931, 39107571]
+            }
+        }
+    ]
+};
 
-// Initialisation de la map
-var mapLf = require("./public/src/leaflet");
-mapLf.initmap();
-// Ajout des données
-mapLf.addLayersFromKuzzle(objMock);
-mapLf.drawFeatures();
+var objMock = {"Where is my cat ?" : mockGeoJSONCat/*, "Mes balades à vélos" :  mockGeoJSONVelos/*, "Ou a été Arnaud ?" : mockWhereIsArnaud*/};
 
+// Initalisation de la map Openlayers
+var mapOl = require('./public/src/openlayers');
+mapOl.initmap();
+mapOl.addLayersFromKuzzle(objMock);

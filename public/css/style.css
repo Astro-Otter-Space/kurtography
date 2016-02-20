@@ -24,3 +24,9 @@ body { padding-top: 50px; }
 #add-cat{
     z-index: 10000;
 }
+
+.ol-mouse-position{
+    background: rgba(0, 60, 136, 0.5);
+    opacity:0.6;
+    color: #FFFFFF;
+}
