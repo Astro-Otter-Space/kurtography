@@ -13,13 +13,7 @@ require('bootstrap');
 var ol = require('openlayers');
 global.ol = ol;
 require('./node_modules/ol3-layerswitcher/src/ol3-layerswitcher');
-
-require('geojson');
-
-/**
- * Construction
- * @type {exports|module.exports}
- */
+require('./public/src/ol3-drawbuttons');
 
 var mockGeoJSONCat = {
     "type": "FeatureCollection",
@@ -281,4 +275,3 @@ var objMock = {"Where is my cat ?" : mockGeoJSONCat, "Mes balades à vélos" :  
 var mapOl = require('./public/src/openlayers');
 
 mapOl.initmap(objMock);
-//mapOl.addLayersFromKuzzle(objMock);

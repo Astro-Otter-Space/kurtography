@@ -41,7 +41,7 @@ function initMap(mockDatas)
                     return ol.coordinate.format(coordinate, 'LonLat : {y}, {x}', 4);
                 },
                 projection: 'EPSG:4326',
-            }),
+            })
         ]),
         view: new ol.View({
             center: new ol.geom.Point([lon, lat]) .transform('EPSG:4326', 'EPSG:3857').getCoordinates(),
@@ -49,23 +49,26 @@ function initMap(mockDatas)
         })
     });
 
+    // Ajout des boutons de dessins
+    var buttonsDrawControls = new ol.control.DrawButtons();
+    this._map.addControl(buttonsDrawControls);
 
     // Ajout du LayerSwitcher
     var layerSwitcher = new ol.control.LayerSwitcher({
         tipLabel: 'Légende' // Optional label for button
     });
-
     this._map.addControl(layerSwitcher);
-    //console.log(kuzzleGroup.getLayers()));
+
+
 
     // Detection de la couche selectionne
-    kuzzleGroup.getLayers().forEach(function(layer) {
-        console.log(layer);
-    });
-
+    //kuzzleGroup.getLayers().forEach(function(layer) {
+    //    console.log(layer);
+    //});
 
     return this._map;
 }
+
 
 /**
  * Ajout des données
