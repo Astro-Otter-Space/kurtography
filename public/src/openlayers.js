@@ -87,8 +87,6 @@ function addLayersFromKuzzle(mockDatas)
             })
         });
 
-
-
         // Creation du layer
         var kuzzleVectorLayer = new ol.layer.Vector({
             source: kuzzleVectorSource,

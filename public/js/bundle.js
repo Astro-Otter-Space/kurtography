@@ -13861,18 +13861,50 @@ ol.control.DrawButtons = function (opt_options) {
 
 ol.inherits(ol.control.DrawButtons, ol.control.Control);
 
+
+// -> http://blog.awesomemap.tools/demo-draw-and-modify-openlayers-3/
+
 // Dessinage sur la carte
 ol.control.DrawButtons.prototype.drawOnMap = function(typeDraw)
 {
     var map = this.getMap();
+
+    //var mod = new ol.interaction.Modify({
+    //    features: '', //fo.getFeatures()
+    //    deleteCondition: function(event) {
+    //        return ol.events.condition.shiftKeyOnly(event) && ol.events.condition.singleClick(event);
+    //    }
+    //});
+    //map.addInteraction(mod);
+
+    var geometryFctDraw = "";
+    if (typeDraw == 'Square' || typeDraw == 'Circle') {
+        geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
+
+    } else if(typeDraw == 'LineString' || typeDraw == 'Polygon') {
+        geometryFctDraw = function(c, g) {
+            if (!g) {
+                g = new ol.geom.Polygon(g);
+            }
+            var start = c[0];
+            var end = c[1];
+            g.setCoordinates([
+                [start, [start[0], end[1]], end, [end[0], start[1]], start]
+            ]);
+            return g;
+        }
+    }
+
+    // Dessin
     var draw = new ol.interaction.Draw({
-        source : '',
+        source : testSource,
         type: typeDraw,
-
+        //geometryFunction: geometryFctDraw
     });
-
     map.addInteraction(draw);
-}
+};
+
+
 
 // Disabled draw buttons
 ol.control.DrawButtons.prototype.disableButtons_ = function(button)
@@ -13981,6 +14013,8 @@ function addLayersFromKuzzle(mockDatas)
             })
         });
 
+
+
         // Creation du layer
         var kuzzleVectorLayer = new ol.layer.Vector({
             source: kuzzleVectorSource,
@@ -13991,7 +14025,11 @@ function addLayersFromKuzzle(mockDatas)
                 return tabStyles[feature.getGeometry().getType()];
             }
         });
-
+        // TEST
+        if (key == "Where is my cat ?") {
+            this.testSource = kuzzleVectorLayer;
+        }
+        // Fin test
         tabKuzzleLayers.push(kuzzleVectorLayer);
     }
     return tabKuzzleLayers;
