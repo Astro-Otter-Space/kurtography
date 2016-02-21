@@ -87,6 +87,8 @@ function addLayersFromKuzzle(mockDatas)
             })
         });
 
+
+
         // Creation du layer
         var kuzzleVectorLayer = new ol.layer.Vector({
             source: kuzzleVectorSource,
@@ -97,7 +99,11 @@ function addLayersFromKuzzle(mockDatas)
                 return tabStyles[feature.getGeometry().getType()];
             }
         });
-
+        // TEST
+        if (key == "Where is my cat ?") {
+            this.testSource = kuzzleVectorLayer;
+        }
+        // Fin test
         tabKuzzleLayers.push(kuzzleVectorLayer);
     }
     return tabKuzzleLayers;
