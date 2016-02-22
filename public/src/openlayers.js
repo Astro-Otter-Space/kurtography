@@ -80,16 +80,19 @@ function addLayersFromKuzzle(mockDatas)
     var tabKuzzleLayers = [];
     for (key in mockDatas)
     {
+        var kuzzleGeoJSON = new ol.format.GeoJSON().readFeatures(mockDatas[key], {
+            featureProjection: 'EPSG:3857'
+        });
+
         // Recuperation du geoJSON
-        var kuzzleVectorSource = new ol.source.Vector({
-            features:  new ol.format.GeoJSON().readFeatures(mockDatas[key], {
-                featureProjection: 'EPSG:3857'
-            })
+        var kuzzleSourceVector = new ol.source.Vector({
+            features: kuzzleGeoJSON,
+            wrapX: false
         });
 
         // Creation du layer
-        var kuzzleVectorLayer = new ol.layer.Vector({
-            source: kuzzleVectorSource,
+        var kuzzleLayerVector = new ol.layer.Vector({
+            source: kuzzleSourceVector,
             title: key,
             type: 'base',
             visible: false,
@@ -99,10 +102,10 @@ function addLayersFromKuzzle(mockDatas)
         });
         // TEST
         if (key == "Where is my cat ?") {
-            this.testSource = kuzzleVectorLayer;
+            this.testSource = kuzzleSourceVector;
         }
         // Fin test
-        tabKuzzleLayers.push(kuzzleVectorLayer);
+        tabKuzzleLayers.push(kuzzleLayerVector);
     }
     return tabKuzzleLayers;
 }
@@ -153,7 +156,13 @@ function getStylesFeatures()
                 color: 'green',
                 width: 5
             })
-        })]
+        })],
+        'Polygon': [new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'green',
+                width: 5
+            })
+        })],
     };
 
     return styles;

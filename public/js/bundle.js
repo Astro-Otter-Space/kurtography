@@ -13799,64 +13799,92 @@ ol.control.DrawButtons = function (opt_options) {
 
     var options = opt_options || {};
 
-    // Container
+    var this_ = this;
+
+    // Default values
+    this.typeSelect = 'Point';
+    this.map = this.getMap();
+
+    // Classes CSS
     this.olClassName = 'ol-unselectable ol-control';
     this.drawContainer = 'toggle-control';
     this.drawClassName = this.olClassName + ' ' + this.drawContainer;
 
-    var element = document.createElement('div');
-    element.className = this.drawClassName;
-
     // Boutons
+    var elementDrawButtons = new ol.Collection();
+    var elementDrawControls = new ol.Collection();
+
+    // Events listeners
+    var handleButtonClick = function (e)
+    {
+        e = e || window.event;
+        this_.drawOnMap(e);
+        e.preventDefault();
+    };
+
+    var handleControlsClick = function (e)
+    {
+
+    }
+
     // Marker
     var buttonPoint = this.buttonPoint = document.createElement('button');
     buttonPoint.setAttribute('title', 'Draw point');
-    buttonPoint.id = 'drawPoint';
+    buttonPoint.id = buttonPoint.draw = 'Point';
     buttonPoint.className = 'glyphicon glyphicon-map-marker';
-    element.appendChild(buttonPoint);
+    buttonPoint.addEventListener('click', handleButtonClick, false);
+    elementDrawButtons.push(buttonPoint);
 
     // Line
     var buttonLine = this.buttonLine = document.createElement('button');
     buttonLine.setAttribute('title', 'Draw line');
-    buttonLine.id = 'drawLine';
+    buttonLine.id = buttonLine.draw = 'LineString';
     buttonLine.className = 'glyphicon glyphicon-vector-path-line';
-    element.appendChild(buttonLine);
+    buttonLine.addEventListener('click', handleButtonClick, false);
+    elementDrawButtons.push(buttonLine);
+
+    // Square
+    var buttonSquare = this.buttonCircle = document.createElement('button');
+    buttonSquare.setAttribute('title', 'Draw square');
+    buttonSquare.id = buttonSquare.draw = 'Square';
+    buttonSquare.className = 'glyphicon glyphicon-vector-path-square';
+    buttonSquare.addEventListener('click', handleButtonClick, false);
+    elementDrawButtons.push(buttonSquare);
+
+    // Circle
+    var buttonCircle = this.buttonCircle = document.createElement('button');
+    buttonCircle.setAttribute('title', 'Draw circle');
+    buttonCircle.id = buttonCircle.draw = 'Circle';
+    buttonCircle.className = 'glyphicon glyphicon-vector-path-circle';
+    buttonCircle.addEventListener('click', handleButtonClick, false);
+    elementDrawButtons.push(buttonCircle);
 
     // Polygone
     var buttonPolygone = this.buttonPolygone = document.createElement('button');
     buttonPolygone.setAttribute('title', 'Draw polygone');
-    buttonPolygone.id = 'drawPolygone';
+    buttonPolygone.id = buttonPolygone.draw = 'Polygon';
     buttonPolygone.className = 'glyphicon glyphicon-vector-path-polygon';
-    element.appendChild(buttonPolygone);
+    buttonPolygone.addEventListener('click', handleButtonClick, false);
+    elementDrawButtons.push(buttonPolygone);
 
-    var this_ = this;
+    // Edit
 
-    buttonPoint.onclick = function(e) {
-        e = e || window.event;
-        this_.disableButtons_(e.target);
-        this_.drawOnMap('Point');
-        e.preventDefault();
-    };
+    // Delete
 
-    buttonLine.onclick = function(e) {
-        e = e || window.event;
-        this_.disableButtons_(e.target);
-        this_.drawOnMap('LineString');
-        e.preventDefault();
-    };
 
-    buttonPolygone.onclick = function(e) {
-        e = e || window.event;
-        this_.disableButtons_(e.target);
-        this_.drawOnMap('Polygon');
-        e.preventDefault();
-    };
+    // Container
+    var element = document.createElement('div');
+    element.className = this.drawClassName;
+    // Add buttons to container
+    elementDrawButtons.forEach(function(button) {
+        element.appendChild(button);
+    });
+
 
     ol.control.Control.call(this, {
         element: element,
         target: options.target
     });
-
 };
 
 ol.inherits(ol.control.DrawButtons, ol.control.Control);
@@ -13865,62 +13893,76 @@ ol.inherits(ol.control.DrawButtons, ol.control.Control);
 // -> http://blog.awesomemap.tools/demo-draw-and-modify-openlayers-3/
 
 // Dessinage sur la carte
-ol.control.DrawButtons.prototype.drawOnMap = function(typeDraw)
+ol.control.DrawButtons.prototype.drawOnMap = function(evt)
 {
-    var map = this.getMap();
+    this.map = this.getMap();
+    var geometryFctDraw;
+    var typeSelect = evt.target.draw;
+    console.log(typeSelect);
+    // Specific for square
 
+    if (typeSelect == 'Square') {
+        typeSelect = 'Circle';
+        geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
+    }
+
+    // Dessin
+    var draw = this.draw = new ol.interaction.Draw({
+        source : new ol.source.Vector({wrapX: false}),
+        type: /** @type {ol.geom.GeometryType} */ (typeSelect),
+        geometryFunction : geometryFctDraw
+    });
+
+    // Fin edition
+    draw.on('drawstart', this.drawStart, this);
+    draw.on('drawend', this.drawEnd, this);
+
+    this.map.addInteraction(draw);
+
+    // Modification / suppression
     //var mod = new ol.interaction.Modify({
-    //    features: '', //fo.getFeatures()
     //    deleteCondition: function(event) {
     //        return ol.events.condition.shiftKeyOnly(event) && ol.events.condition.singleClick(event);
     //    }
     //});
-    //map.addInteraction(mod);
-
-    var geometryFctDraw = "";
-    if (typeDraw == 'Square' || typeDraw == 'Circle') {
-        geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
-
-    } else if(typeDraw == 'LineString' || typeDraw == 'Polygon') {
-        geometryFctDraw = function(c, g) {
-            if (!g) {
-                g = new ol.geom.Polygon(g);
-            }
-            var start = c[0];
-            var end = c[1];
-            g.setCoordinates([
-                [start, [start[0], end[1]], end, [end[0], start[1]], start]
-            ]);
-            return g;
-        }
-    }
-
-    // Dessin
-    var draw = new ol.interaction.Draw({
-        source : testSource,
-        type: typeDraw,
-        //geometryFunction: geometryFctDraw
-    });
-    map.addInteraction(draw);
+    //this.map.addInteraction(mod);
 };
 
+/**
+ * @param evt
+ */
+ol.control.DrawButtons.prototype.drawStart = function() {
+    console.log("Start editing");
+};
 
+/**
+ *
+ * @param evt
+ */
+ol.control.DrawButtons.prototype.drawEnd = function(evt) {
+    var parser = new ol.format.GeoJSON();
+    //var features = evt.getFeatures();
+    //var featuresGeoJSON = parser.writeFeatures(features);
+    //console.log('GeoJSON : ' + featuresGeoJSON);
+    console.log("TODO : Envoie des données à Kuzzle");
+    this.map.removeInteraction(this.draw);
+};
 
 // Disabled draw buttons
-ol.control.DrawButtons.prototype.disableButtons_ = function(button)
-{
-    //document.querySelectorAll('button[id^=\'' + button.id + '\']').setAttribute('disabled', 'disabled');
-    // TODO : make it without jQuery
-    jQuery('.'+this.drawContainer).children().not('button#' + button.id).each(function() {
-        jQuery(this).attr('disabled', 'disabled');
-    });
-};
+//ol.control.DrawButtons.prototype.disableButtons_ = function(button)
+//{
+//    //document.querySelectorAll('button[id^=\'' + button.id + '\']').setAttribute('disabled', 'disabled');
+//    // TODO : make it without jQuery
+//    jQuery('.'+this.drawContainer).children().not('button#' + button.id).each(function() {
+//        jQuery(this).attr('disabled', 'disabled');
+//    });
+//};
 
 // Enabled draw button
-ol.control.DrawButtons.enableButtons_ = function()
-{
-    jQuery('.'+this.drawContainer).children().removeAttr('disabled');
-};
+//ol.control.DrawButtons.enableButtons_ = function()
+//{
+//    jQuery('.'+this.drawContainer).children().removeAttr('disabled');
+//};
 
 
 },{}],19:[function(require,module,exports){
@@ -14006,18 +14048,19 @@ function addLayersFromKuzzle(mockDatas)
     var tabKuzzleLayers = [];
     for (key in mockDatas)
     {
-        // Recuperation du geoJSON
-        var kuzzleVectorSource = new ol.source.Vector({
-            features:  new ol.format.GeoJSON().readFeatures(mockDatas[key], {
-                featureProjection: 'EPSG:3857'
-            })
+        var kuzzleGeoJSON = new ol.format.GeoJSON().readFeatures(mockDatas[key], {
+            featureProjection: 'EPSG:3857'
         });
 
-
+        // Recuperation du geoJSON
+        var kuzzleSourceVector = new ol.source.Vector({
+            features: kuzzleGeoJSON,
+            wrapX: false
+        });
 
         // Creation du layer
-        var kuzzleVectorLayer = new ol.layer.Vector({
-            source: kuzzleVectorSource,
+        var kuzzleLayerVector = new ol.layer.Vector({
+            source: kuzzleSourceVector,
             title: key,
             type: 'base',
             visible: false,
@@ -14027,10 +14070,10 @@ function addLayersFromKuzzle(mockDatas)
         });
         // TEST
         if (key == "Where is my cat ?") {
-            this.testSource = kuzzleVectorLayer;
+            this.testSource = kuzzleSourceVector;
         }
         // Fin test
-        tabKuzzleLayers.push(kuzzleVectorLayer);
+        tabKuzzleLayers.push(kuzzleLayerVector);
     }
     return tabKuzzleLayers;
 }
@@ -14081,7 +14124,13 @@ function getStylesFeatures()
                 color: 'green',
                 width: 5
             })
-        })]
+        })],
+        'Polygon': [new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'green',
+                width: 5
+            })
+        })],
     };
 
     return styles;
