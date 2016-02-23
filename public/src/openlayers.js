@@ -73,6 +73,7 @@ function initMap(mockDatas)
 /**
  * Ajout des données
  * @param mockDatas
+ * http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Component/GeofieldWidget/js/GeofieldWidget.js
  */
 function addLayersFromKuzzle(mockDatas)
 {
@@ -144,25 +145,41 @@ function errorNavigatorCoords()
 function getStylesFeatures()
 {
     var styles = {
+
         'Point': [new ol.style.Style({
             image: new ol.style.Circle({
                 fill: new ol.style.Fill({ color: [254,170,1,1] }), // interieur
-                stroke: new ol.style.Stroke({ color: [0,0,0,1] }), // bordure
+                stroke: new ol.style.Stroke({ color: [255,102,0,1] }), // bordure
                 radius: 5
             })
         })],
+
         'LineString': [new ol.style.Style({
             stroke: new ol.style.Stroke({
                 color: 'green',
                 width: 5
             })
         })],
+
         'Polygon': [new ol.style.Style({
+            fill: new ol.style.Fill({
+                color : [254,170,1,0.4]
+            }),
             stroke: new ol.style.Stroke({
-                color: 'green',
-                width: 5
+                color: [255,102,0, 1],
+                width: 2
             })
         })],
+
+        //'Circle': [new ol.Style.Style({
+        //    fill: new ol.Style.fill({
+        //        color: [254,170,1,0.4]
+        //    }),
+        //    stroke: new ol.Style.stroke({
+        //        color: [255,102,0, 1],
+        //        width: 3
+        //    })
+        //})]
     };
 
     return styles;

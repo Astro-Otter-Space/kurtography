@@ -124,21 +124,11 @@ ol.control.DrawButtons.prototype.drawOnMap = function(evt)
         geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
     }
 
-    // Couche de dessin
-    //var features = new ol.Collection();
-    //var fo = new ol.layer.Vector({
-    //    source: new ol.source.Vector({
-    //        features: features,
-    //        source : this.layer_test.getSource()
-    //    }),
-    //    style :
-    //});
-    //fo.setMap(this.map);
-
     // Draw new item
     var draw = this.draw = new ol.interaction.Draw({
         //features: features,
         source : layer_test.getSource(),
+        features : new ol.Collection(),
         type: /** @type {ol.geom.GeometryType} */ (typeSelect),
         geometryFunction : geometryFctDraw,
         style : this.editStyle()
@@ -161,7 +151,7 @@ ol.control.DrawButtons.prototype.controlOnMap = function(evt)
     var selectInteraction = new ol.interaction.Select({
         style: this.editStyle(),
         layers: function(layer) {
-            return this.layer_test
+            return layer_test
         }
     });
     this.map.addInteraction(selectInteraction);
@@ -183,10 +173,17 @@ ol.control.DrawButtons.prototype.controlOnMap = function(evt)
 ol.control.DrawButtons.prototype.editStyle = function()
 {
     var styleEdit = new ol.style.Style({
+        fill: new ol.style.Fill({
+            color: [60, 255, 100, 0.4]
+        }),
+        stroke: new ol.style.Stroke({
+            color: [100, 142, 27, 0.75],
+            width: 1.5
+        }),
         image: new ol.style.Circle({
             radius: 7,
             fill: new ol.style.Fill({
-                color: [0, 153, 255, 1]
+                color: [60, 255, 100, 0.4]
             }),
             stroke: new ol.style.Stroke({
                 color: [255, 255, 255, 0.75],
