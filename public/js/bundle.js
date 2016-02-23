@@ -13824,7 +13824,9 @@ ol.control.DrawButtons = function (opt_options) {
 
     var handleControlsClick = function (e)
     {
-
+        e = e || window.event;
+        this_.controlOnMap(e);
+        e.preventDefault();
     }
 
     // Marker
@@ -13868,9 +13870,20 @@ ol.control.DrawButtons = function (opt_options) {
     elementDrawButtons.push(buttonPolygone);
 
     // Edit
+    var buttonEdit = this.buttonEdit = document.createElement('button');
+    buttonEdit.setAttribute('title', 'Edit feature');
+    buttonEdit.id = 'Edit';
+    buttonEdit.className = 'glyphicon glyphicon glyphicon-pencil';
+    buttonEdit.addEventListener('click', handleControlsClick, false);
+    elementDrawButtons.push(buttonEdit);
 
     // Delete
-
+    var buttonDel = this.buttonEdit = document.createElement('button');
+    buttonDel.setAttribute('title', 'Delete feature');
+    buttonDel.id = 'Delite';
+    buttonDel.className = 'glyphicon glyphicon glyphicon-trash';
+    buttonDel.addEventListener('click', handleControlsClick, false);
+    elementDrawButtons.push(buttonDel);
 
     // Container
     var element = document.createElement('div');
@@ -13891,26 +13904,38 @@ ol.inherits(ol.control.DrawButtons, ol.control.Control);
 
 
 // -> http://blog.awesomemap.tools/demo-draw-and-modify-openlayers-3/
-
+// -> http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Control/Geofield/js/geofieldControl.js?id=8c2d83ff0e38ae846e853e2f3599114e40ed0f84
 // Dessinage sur la carte
 ol.control.DrawButtons.prototype.drawOnMap = function(evt)
 {
     this.map = this.getMap();
     var geometryFctDraw;
     var typeSelect = evt.target.draw;
-    console.log(typeSelect);
-    // Specific for square
 
+    // Specific for square
     if (typeSelect == 'Square') {
         typeSelect = 'Circle';
         geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
     }
 
-    // Dessin
+    // Couche de dessin
+    //var features = new ol.Collection();
+    //var fo = new ol.layer.Vector({
+    //    source: new ol.source.Vector({
+    //        features: features,
+    //        source : this.layer_test.getSource()
+    //    }),
+    //    style :
+    //});
+    //fo.setMap(this.map);
+
+    // Draw new item
     var draw = this.draw = new ol.interaction.Draw({
-        source : new ol.source.Vector({wrapX: false}),
+        //features: features,
+        source : layer_test.getSource(),
         type: /** @type {ol.geom.GeometryType} */ (typeSelect),
-        geometryFunction : geometryFctDraw
+        geometryFunction : geometryFctDraw,
+        style : this.editStyle()
     });
 
     // Fin edition
@@ -13918,15 +13943,56 @@ ol.control.DrawButtons.prototype.drawOnMap = function(evt)
     draw.on('drawend', this.drawEnd, this);
 
     this.map.addInteraction(draw);
-
-    // Modification / suppression
-    //var mod = new ol.interaction.Modify({
-    //    deleteCondition: function(event) {
-    //        return ol.events.condition.shiftKeyOnly(event) && ol.events.condition.singleClick(event);
-    //    }
-    //});
-    //this.map.addInteraction(mod);
 };
+
+
+// Modification / suppression
+ol.control.DrawButtons.prototype.controlOnMap = function(evt)
+{
+    this.map = this.getMap();
+
+    // Select Interaction
+    var selectInteraction = new ol.interaction.Select({
+        style: this.editStyle(),
+        layers: function(layer) {
+            return this.layer_test
+        }
+    });
+    this.map.addInteraction(selectInteraction);
+
+    var selectedFeatures = selectInteraction.getFeatures();
+
+    var mod = new ol.interaction.Modify({
+        features: selectedFeatures, // TODO : trouver comment setter la couche selectionné
+        deleteCondition: function(event) {
+            return ol.events.condition.shiftKeyOnly(evt) && ol.events.condition.singleClick(evt);
+        }
+    });
+    this.map.addInteraction(mod);
+};
+
+/**
+ *
+ */
+ol.control.DrawButtons.prototype.editStyle = function()
+{
+    var styleEdit = new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 7,
+            fill: new ol.style.Fill({
+                color: [0, 153, 255, 1]
+            }),
+            stroke: new ol.style.Stroke({
+                color: [255, 255, 255, 0.75],
+                width: 1.5
+            })
+        }),
+        zIndex: 100000
+    });
+
+    return styleEdit;
+}
+
 
 /**
  * @param evt
@@ -14070,7 +14136,7 @@ function addLayersFromKuzzle(mockDatas)
         });
         // TEST
         if (key == "Where is my cat ?") {
-            this.testSource = kuzzleSourceVector;
+            var layer_test = this.layer_test = kuzzleLayerVector;
         }
         // Fin test
         tabKuzzleLayers.push(kuzzleLayerVector);

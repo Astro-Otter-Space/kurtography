@@ -102,7 +102,7 @@ function addLayersFromKuzzle(mockDatas)
         });
         // TEST
         if (key == "Where is my cat ?") {
-            this.testSource = kuzzleSourceVector;
+            var layer_test = this.layer_test = kuzzleLayerVector;
         }
         // Fin test
         tabKuzzleLayers.push(kuzzleLayerVector);
