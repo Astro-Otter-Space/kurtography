@@ -31,7 +31,22 @@ body { padding-top: 50px; }
     color: #FFFFFF;
 }
 
-#toggle-control button {
-    width : 25px;
-    height: 25px;
+.ol-control {
+    color: white;
+}
+
+/*Surcharge de olSwitcherLayer*/
+.layer-switcher {
+    border-radius: 1em;
+}
+
+.layer-switcher button {
+    width : 30px;
+    height: 30px;
+    background-image: none;
+    background-color: rgba(0,60,136,0.5);
+}
+
+.layer-switcher .panel {
+    background-color: rgba(0,60,136,0.5);
 }

@@ -49,6 +49,11 @@ function initMap(mockDatas)
         })
     });
 
+    // Detection de la couche selectionne
+    //kuzzleGroup.getLayers().forEach(function(layer) {
+    //    console.log(layer.getLayer());
+    //});
+
     // Ajout des boutons de dessins
     var buttonsDrawControls = new ol.control.DrawButtons();
     this._map.addControl(buttonsDrawControls);
@@ -57,14 +62,10 @@ function initMap(mockDatas)
     var layerSwitcher = new ol.control.LayerSwitcher({
         tipLabel: 'Légende' // Optional label for button
     });
+
+    // Surcharge classe CSS
+    jQuery('div .layer-switcher').find('button').addClass('glyphicon glyphicon-align-justify');
     this._map.addControl(layerSwitcher);
-
-
-
-    // Detection de la couche selectionne
-    //kuzzleGroup.getLayers().forEach(function(layer) {
-    //    console.log(layer);
-    //});
 
     return this._map;
 }
@@ -156,8 +157,8 @@ function getStylesFeatures()
 
         'LineString': [new ol.style.Style({
             stroke: new ol.style.Stroke({
-                color: 'green',
-                width: 5
+                color: new ol.style.Fill({ color: [254,170,1,1] }),
+                width: 3
             })
         })],
 
@@ -166,20 +167,20 @@ function getStylesFeatures()
                 color : [254,170,1,0.4]
             }),
             stroke: new ol.style.Stroke({
-                color: [255,102,0, 1],
+                color: [255,102,0,1],
                 width: 2
             })
         })],
 
-        //'Circle': [new ol.Style.Style({
-        //    fill: new ol.Style.fill({
-        //        color: [254,170,1,0.4]
-        //    }),
-        //    stroke: new ol.Style.stroke({
-        //        color: [255,102,0, 1],
-        //        width: 3
-        //    })
-        //})]
+        'Circle': [new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: [254,170,1,0.4]
+            }),
+            stroke: new ol.style.Stroke({
+                color: [255,102,0, 1],
+                width: 3
+            })
+        })]
     };
 
     return styles;
