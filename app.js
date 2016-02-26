@@ -26,6 +26,6 @@ app.listen(9966);
  * KUZZLE
  */
 var Kuzzle = require('kuzzle-sdk');
-var kuzzle = new Kuzzle('http://localhost:7515');
+var kuzzle = new Kuzzle('http://localhost:7511');
 
 //https://github.com/kuzzleio/kuzzle/blob/master/docs/filters.md#geospacial

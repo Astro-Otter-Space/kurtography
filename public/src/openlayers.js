@@ -8,8 +8,7 @@
 function initMap(mockDatas)
 {
     var zoom = 13;
-    var lon = getPosition().lon;
-    var lat = getPosition().lat;
+    //var tabPosition = this.tabPosition = {"lat":null,"lon":null,"from":null};
 
     // Recuperation du fond de carte OpenStreetMap
     var osm = new ol.layer.Tile({
@@ -25,6 +24,11 @@ function initMap(mockDatas)
         title: 'Kuzzle layers',
         layers: addLayersFromKuzzle(mockDatas)
     });
+
+    var view = new ol.View({
+        //center: new ol.geom.Point([lon, lat]).transform('EPSG:4326', 'EPSG:3857').getCoordinates(),
+        zoom: zoom
+    })
 
     this._map = new ol.Map({
         layers: [osm, kuzzleGroup],
@@ -43,10 +47,20 @@ function initMap(mockDatas)
                 projection: 'EPSG:4326',
             })
         ]),
-        view: new ol.View({
-            center: new ol.geom.Point([lon, lat]) .transform('EPSG:4326', 'EPSG:3857').getCoordinates(),
-            zoom: zoom
-        })
+        view: view
+    });
+
+    // Centrage sur la carte en recuperant la position
+    var geolocation = new ol.Geolocation({
+        projection: ol.proj.get('EPSG:4326'),
+        tracking: true
+    });
+
+    geolocation.on('change', function() {
+        var lon = geolocation.getPosition()[0];
+        var lat =  geolocation.getPosition()[1];
+        var pointCenter = new ol.geom.Point([lon, lat]).transform('EPSG:4326', 'EPSG:3857').getCoordinates()
+        view.setCenter(pointCenter);
     });
 
     // Detection de la couche selectionne
@@ -64,7 +78,7 @@ function initMap(mockDatas)
     });
 
     // Surcharge classe CSS
-    jQuery('div .layer-switcher').find('button').addClass('glyphicon glyphicon-align-justify');
+
     this._map.addControl(layerSwitcher);
 
     return this._map;
@@ -112,34 +126,6 @@ function addLayersFromKuzzle(mockDatas)
     return tabKuzzleLayers;
 }
 
-/**
- * Retourne la position
- */
-function getPosition()
-{
-    var tabPosition = {"lat" : 48.866667, "lon": 2.333333 };
-    if(navigator.geolocation) {
-        // L'API est disponible
-        positionDatas = navigator.geolocation.getCurrentPosition(getNavigatorCoord, errorNavigatorCoords, {maximumAge:60000, timeout:5000, enableHighAccuracy:true});
-        if (positionDatas === undefined) {
-            tabPosition = {"lat" :43.6109200, "lon": 3.8772300};
-        }
-    }
-    return tabPosition;
-}
-
-
-function getNavigatorCoord (position)
-{
-    var coords = position.coords;
-    //console.log("Lon : " + coords.longitude + " - Lat : " + coords.latitude);
-    return coords;
-}
-
-function errorNavigatorCoords()
-{
-    console.log("Impossible de recuperer les coordonnées depuis navigateur");
-}
 /**
  * Set le style des objets geographiques
  */
