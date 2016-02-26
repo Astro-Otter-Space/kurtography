@@ -26,7 +26,6 @@ function initMap(mockDatas)
     });
 
     var view = new ol.View({
-        //center: new ol.geom.Point([lon, lat]).transform('EPSG:4326', 'EPSG:3857').getCoordinates(),
         zoom: zoom
     })
 
@@ -64,9 +63,7 @@ function initMap(mockDatas)
     });
 
     // Detection de la couche selectionne
-    //kuzzleGroup.getLayers().forEach(function(layer) {
-    //    console.log(layer.getLayer());
-    //});
+
 
     // Ajout des boutons de dessins
     var buttonsDrawControls = new ol.control.DrawButtons();
@@ -76,10 +73,11 @@ function initMap(mockDatas)
     var layerSwitcher = new ol.control.LayerSwitcher({
         tipLabel: 'Légende' // Optional label for button
     });
-
-    // Surcharge classe CSS
-
     this._map.addControl(layerSwitcher);
+
+    //kuzzleGroup.getLayers().forEach(function(layer) {
+    //    console.log(layer.getLayer());
+    //});
 
     return this._map;
 }

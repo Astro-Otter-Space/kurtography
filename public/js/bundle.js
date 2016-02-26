@@ -13827,21 +13827,30 @@ ol.control.DrawButtons = function (opt_options) {
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
             divsChildren.item(i).classList.remove('enable');
+            divsChildren.item(i).disabled = true;
         }
 
         // Disable Draws controls
         var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
             divsChildren.item(i).classList.remove('enable');
+            divsChildren.item(i).disabled = true;
+
+            if (divsChildren.item(i).type_control == 'ending') {
+                divsChildren.item(i).classList.remove('hidden');
+                divsChildren.item(i).disabled = false;
+            }
         }
 
         // Enable the actual button
         e.target.classList.toggle('enable');
+        e.target.disabled = false;
 
         this_.drawOnMap(e);
         e.preventDefault();
     };
 
+    // handling control mode
     var handleControlsClick = function (e)
     {
         e = e || window.event;
@@ -13850,20 +13859,46 @@ ol.control.DrawButtons = function (opt_options) {
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
             divsChildren.item(i).classList.remove('enable');
+            divsChildren.item(i).disabled = true;
+
+            if (divsChildren.item(i).type_control == 'ending') {
+                divsChildren.item(i).classList.remove('hidden');
+                divsChildren.item(i).disabled = false;
+            }
         }
 
         // Disable Draws controls
         var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
             divsChildren.item(i).classList.remove('enable');
+            divsChildren.item(i).disabled = true;
         }
 
         // Enable the actual button
         e.target.classList.toggle('enable');
+        e.target.disabled = false;
 
         this_.controlOnMap(e);
         e.preventDefault();
-    }
+    };
+
+    // Endind draw/control mode
+    var handleGroupEnd = function (e)
+    {
+        var divsChildren = this_.element.querySelectorAll('.div-controls button, .div-draw button');
+        for(var i = 0; i < divsChildren.length; i++) {
+            divsChildren.item(i).disabled = false;
+
+            if (divsChildren.item(i).type_control == 'ending') {
+                divsChildren.item(i).classList.toggle('hidden');
+            }
+        }
+
+        // Removing interaction
+        this_.map.removeInteraction(this_.draw);
+
+        e.preventDefault();
+    };
 
     // Marker
     var buttonPoint = this.buttonPoint = document.createElement('button');
@@ -13910,6 +13945,16 @@ ol.control.DrawButtons = function (opt_options) {
     buttonPolygone.addEventListener('click', handleButtonsClick, false);
     elementDrawButtons.push(buttonPolygone);
 
+    // Record add items
+    var buttonDrawEnd = this.buttonDrawEnd = document.createElement('button');
+    buttonDrawEnd.setAttribute('title', 'Ending draw mode');
+    buttonDrawEnd.id = buttonDrawEnd.draw = 'Ending';
+    buttonDrawEnd.type_control = 'ending';
+    buttonDrawEnd.className = 'glyphicon glyphicon-ok hidden';
+    buttonDrawEnd.addEventListener('click', handleGroupEnd, false);
+    elementDrawButtons.push(buttonDrawEnd);
+
+
     // Edit
     var buttonEdit = this.buttonEdit = document.createElement('button');
     buttonEdit.setAttribute('title', 'Edit feature');
@@ -13928,6 +13973,13 @@ ol.control.DrawButtons = function (opt_options) {
     buttonDel.addEventListener('click', handleControlsClick, false);
     elementDrawControls.push(buttonDel);
 
+    var buttonControlEnd = this.buttonControlEnd = document.createElement('button');
+    buttonControlEnd.setAttribute('title', 'Ending control mode');
+    buttonControlEnd.id = buttonControlEnd.draw = 'Ending';
+    buttonControlEnd.type_control = 'ending';
+    buttonControlEnd.className = 'glyphicon glyphicon-ok hidden';
+    buttonControlEnd.addEventListener('click', handleGroupEnd, false);
+    elementDrawControls.push(buttonControlEnd);
 
     // Containers
     var divDraw = document.createElement('div');
@@ -13982,8 +14034,7 @@ ol.control.DrawButtons.prototype.drawOnMap = function(evt)
         style : this.styleAdd()
     });
 
-    // Fin edition
-    draw.on('drawend', this.drawEnd, this);
+    draw.on('drawend', this.drawEndFeature, this);
 
     this.map.addInteraction(draw);
 };
@@ -14092,30 +14143,19 @@ ol.control.DrawButtons.prototype.styleEdit = function()
     return style;
 };
 
-/**
- * @param evt
- */
+// Start drawing
 ol.control.DrawButtons.prototype.drawStart = function() {
     console.log("Start editing");
 };
 
-/**
- *
- * @param evt
- */
-ol.control.DrawButtons.prototype.drawEnd = function(evt) {
+// Endind drawing feature
+ol.control.DrawButtons.prototype.drawEndFeature = function(evt) {
     var parser = new ol.format.GeoJSON();
     //var features = evt.getFeatures();
     //var featuresGeoJSON = parser.writeFeatures(features);
     //console.log('GeoJSON : ' + featuresGeoJSON);
     console.log("TODO : Envoie des données à Kuzzle");
-
-    this.map.removeInteraction(this.draw);
-
-    // Todoç :: remove disable
 };
-
-
 },{}],19:[function(require,module,exports){
 /**
  * Created by stephane on 19/02/16.
@@ -14145,7 +14185,6 @@ function initMap(mockDatas)
     });
 
     var view = new ol.View({
-        //center: new ol.geom.Point([lon, lat]).transform('EPSG:4326', 'EPSG:3857').getCoordinates(),
         zoom: zoom
     })
 
@@ -14183,9 +14222,7 @@ function initMap(mockDatas)
     });
 
     // Detection de la couche selectionne
-    //kuzzleGroup.getLayers().forEach(function(layer) {
-    //    console.log(layer.getLayer());
-    //});
+
 
     // Ajout des boutons de dessins
     var buttonsDrawControls = new ol.control.DrawButtons();
@@ -14195,10 +14232,11 @@ function initMap(mockDatas)
     var layerSwitcher = new ol.control.LayerSwitcher({
         tipLabel: 'Légende' // Optional label for button
     });
-
-    // Surcharge classe CSS
-
     this._map.addControl(layerSwitcher);
+
+    //kuzzleGroup.getLayers().forEach(function(layer) {
+    //    console.log(layer.getLayer());
+    //});
 
     return this._map;
 }
