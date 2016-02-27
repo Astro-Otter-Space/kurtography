@@ -1,15 +1,15 @@
-//http://makerlog.org/posts/leaflet-basics/
-/**
- * Appel des modules
- * @type {*|exports|module.exports}
- */
-
-
 // Jquery + Bootstrap
 var $ = require('jquery');
 global.jQuery = $;
 require('bootstrap');
 
+// Kuzzle-Sdk
+require('kuzzle-sdk');
+var kuzzle = require('./public/src/kuzzle.js');
+kuzzle.init();
+kuzzle.listCollections();
+
+// Openlayers
 var ol = require('openlayers');
 global.ol = ol;
 require('./node_modules/ol3-layerswitcher/src/ol3-layerswitcher');
@@ -21,7 +21,6 @@ var mockGeoJSONCat = {
         {
             "type": "Feature",
             "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
                 "name": "Lazerboom",
                 "age" : "4",
                 "genre": "male",
@@ -40,7 +39,6 @@ var mockGeoJSONCat = {
         {
             "type": "Feature",
             "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
                 "name": "Bazookat",
                 "age" : "4",
                 "genre": "male",
@@ -59,7 +57,6 @@ var mockGeoJSONCat = {
         {
             "type": "Feature",
             "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
                 "name": "Globule",
                 "age" : "",
                 "genre": "female",
@@ -78,7 +75,6 @@ var mockGeoJSONCat = {
         {
             "type": "Feature",
             "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
                 "name": "Isidore",
                 "age" : "",
                 "genre": "male",
@@ -97,7 +93,6 @@ var mockGeoJSONCat = {
         {
             "type": "Feature",
             "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
                 "name": "Kiwi",
                 "age" : "",
                 "genre": "male",
@@ -116,7 +111,6 @@ var mockGeoJSONCat = {
         {
             "type": "Feature",
             "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
                 "name": "Kafi",
                 "age" : "",
                 "genre": "femelle",
@@ -185,91 +179,8 @@ var mockGeoJSONVelos = {
         },
     ]
 };
-var mockWhereIsArnaud = {
-    "type": "FeatureCollection",
-    "features": [
-        {
-            "type": "Feature",
-            "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                "name": "Arnaud 1"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [436256968, 39108042]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                "name": "Arnaud 2"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [436256944, 39108172]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                "name": "Arnaud 3"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
 
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                "name": "Arnaud 4"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [436256796, 39107696]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                "name": "Arnaud 5"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [436256721, 39107700]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                "name": "Arnaud 6"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [436256853, 39108035]
-            }
-        },{
-            "type": "Feature",
-            "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                "name": "Arnaud 7"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [436256931, 39107571]
-            }
-        }
-    ]
-};
-
-var objMock = {"Where is my cat ?" : mockGeoJSONCat, "Mes balades à vélos" :  mockGeoJSONVelos/*, "Ou a été Arnaud ?" : mockWhereIsArnaud*/};
+var objMock = {"Where is my cat ?" : mockGeoJSONCat, "Mes balades à vélos" :  mockGeoJSONVelos};
 
 // Initalisation de la map Openlayers
 var mapOl = require('./public/src/openlayers');

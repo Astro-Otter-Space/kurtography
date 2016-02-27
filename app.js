@@ -1,4 +1,3 @@
-//http://makerlog.org/posts/leaflet-basics/
 /**
  * Appel des modules
  * @type {*|exports|module.exports}
@@ -14,18 +13,14 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/node_modules'));
 
 app.get('/', function(req, res) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:7511");
     res.render('map', {
         title: 'Kurtography - webmapping application supported by Kuzzle'
     });
+
 });
 
 // Choix du port 9966 pour avoir le même que pour browserfy
 app.listen(9966);
-
-/**
- * KUZZLE
- */
-var Kuzzle = require('kuzzle-sdk');
-var kuzzle = new Kuzzle('http://localhost:7511');
-
+//http://www.lilleweb.fr/js/2015/05/18/mettre-en-production-application-nodejs/
 //https://github.com/kuzzleio/kuzzle/blob/master/docs/filters.md#geospacial

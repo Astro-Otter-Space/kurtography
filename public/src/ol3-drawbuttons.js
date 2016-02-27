@@ -23,6 +23,9 @@ ol.control.DrawButtons = function (opt_options) {
     var elementDrawButtons = new ol.Collection();
     var elementDrawControls = new ol.Collection();
 
+    // Collection of new features
+    this.newFeatures = new ol.Collection();
+
     // Events listeners
     var handleButtonsClick = function (e)
     {
@@ -349,15 +352,21 @@ ol.control.DrawButtons.prototype.styleEdit = function()
 };
 
 // Start drawing
-ol.control.DrawButtons.prototype.drawStart = function() {
+ol.control.DrawButtons.prototype.drawStart = function()
+{
     console.log("Start editing");
 };
 
 // Endind drawing feature
-ol.control.DrawButtons.prototype.drawEndFeature = function(evt) {
+ol.control.DrawButtons.prototype.drawEndFeature = function(evt)
+{
+    var feature = evt.feature;
+
+    //this_.newFeatures.push(feature);
+
+    // Todo : afficher tableau de données de la couche + send to kuzzle
     var parser = new ol.format.GeoJSON();
-    //var features = evt.getFeatures();
-    //var featuresGeoJSON = parser.writeFeatures(features);
-    //console.log('GeoJSON : ' + featuresGeoJSON);
-    console.log("TODO : Envoie des données à Kuzzle");
+    var featureGeoJSON = parser.writeFeatureObject(feature);
+    console.log(feature.getGeometry().getCoordinates());
+    console.log(parser.writeFeature(feature));
 };

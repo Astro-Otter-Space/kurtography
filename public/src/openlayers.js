@@ -69,6 +69,7 @@ function initMap(mockDatas)
     var buttonsDrawControls = new ol.control.DrawButtons();
     this._map.addControl(buttonsDrawControls);
 
+
     // Ajout du LayerSwitcher
     var layerSwitcher = new ol.control.LayerSwitcher({
         tipLabel: 'Légende' // Optional label for button
@@ -122,6 +123,11 @@ function addLayersFromKuzzle(mockDatas)
         tabKuzzleLayers.push(kuzzleLayerVector);
     }
     return tabKuzzleLayers;
+}
+
+function addNewFeatures()
+{
+    jQuery('aside').toggleClass();
 }
 
 /**
