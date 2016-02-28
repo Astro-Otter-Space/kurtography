@@ -16,6 +16,7 @@ kMap.olMap = {
     layerSwitcher: null,
     mockDatas: null,
     layer_test: null,
+    elPopup: null,
 
     initMap: function(mockDatas, zoom)
     {
@@ -27,6 +28,7 @@ kMap.olMap = {
         this.projectionFrom = kMap.olMap.projectionFrom;
         this.projectionTo = kMap.olMap.projectionTo;
         this.layer_test = kMap.olMap.layer_test;
+        this.elPopup = document.getElementById('popup');
 
         // Recuperation du fond de carte OpenStreetMap
         this.osm = new ol.layer.Tile({
@@ -102,6 +104,44 @@ kMap.olMap = {
         });
         this.map.addControl(this.layerSwitcher);
 
+        //var layers = document.getElementsByName('base');
+        //for(var i = 0; i < layers.length; i++) {
+        //    layers[i].addEventListener('change', function(input) {
+        //        console.log("Selectionne : " + input.name);
+        //    }, false);
+        //}
+        //
+        //ol.control.LayerSwitcher.forEachRecursive(this.kuzzleGroup, function(l, idx, a) {
+        //    //console.log("Name : " + l.getName());
+        //    console.log("Visible : " + l.get('visible'));
+        //});
+
+        // Ajout popup + listener
+        this.map.addOverlay(this.addPopup());
+        this.map.on('click', function(evt) {
+            var feature = this_.map.forEachFeatureAtPixel(evt.pixel,
+                function(feature, layer) {
+                    return feature;
+                }
+            );
+
+            if (feature) {
+                var geometry = feature.getGeometry();
+                var coord = geometry.getCoordinates();
+
+                console.log(coord);
+                //this_.addPopup().setPosition(coord);
+                //this_.elPopup.popover({
+                //    'placement': 'top',
+                //    'html': true,
+                //    'content': feature.get('properties.name')
+                //});
+                //this_.elPopup.popover('show');
+            } else {
+                //this_.elPopup.popover('destroy');
+            }
+        });
+
     },
 
     /**
@@ -141,6 +181,17 @@ kMap.olMap = {
             tabKuzzleLayers.push(kuzzleLayerVector);
         }
         return tabKuzzleLayers;
+    },
+
+
+    addPopup: function()
+    {
+        var popup = new ol.Overlay({
+            element: this.elPopup,
+            positioning: 'bottom-center',
+            stopEvent: false
+        });
+        return popup;
     },
 
     /**
