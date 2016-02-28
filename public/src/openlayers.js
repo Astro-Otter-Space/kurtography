@@ -83,10 +83,17 @@ kMap.olMap = {
         });
 
         // Ajout des boutons de dessins
-        var options = {
-            selectedLayer: this.getSelectedLayer()
+        var optionsControlDraw = {
+            "selectedLayer": this.getSelectedLayer(),
+            "draw": {
+                "Point": true,
+                "LineString": true,
+                "Square": true,
+                "Circle": true,
+                "Polygon": true
+            }
         };
-        this.buttonsDrawControls = new ol.control.DrawButtons(options);
+        this.buttonsDrawControls = new ol.control.DrawButtons(optionsControlDraw);
         this.map.addControl(this.buttonsDrawControls);
 
         // Ajout du LayerSwitcher

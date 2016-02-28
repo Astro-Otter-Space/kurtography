@@ -4,6 +4,7 @@
 ol.control.DrawButtons = function (opt_options) {
 
     var options = opt_options || {};
+    options.draw.Ending = true;
     this.selectedLayers = options.selectedLayer;
 
     var this_ = this;
@@ -186,7 +187,7 @@ ol.control.DrawButtons = function (opt_options) {
 
     var buttonControlEnd = this.buttonControlEnd = document.createElement('button');
     buttonControlEnd.setAttribute('title', 'Ending control mode');
-    buttonControlEnd.id = buttonControlEnd.draw = 'Ending';
+    buttonControlEnd.id = 'Ending';
     buttonControlEnd.type_control = 'ending';
     buttonControlEnd.className = 'glyphicon glyphicon-ok hidden';
     buttonControlEnd.addEventListener('click', handleGroupEnd, false);
@@ -196,7 +197,9 @@ ol.control.DrawButtons = function (opt_options) {
     var divDraw = document.createElement('div');
     divDraw.className = 'div-draw ' + this.olGroupClassName;
     elementDrawButtons.forEach(function(button) {
-        divDraw.appendChild(button);
+        if(options.draw[button.draw] == true) {
+            divDraw.appendChild(button);
+        }
     });
 
     var divControls = document.createElement('div');
