@@ -4,10 +4,10 @@ global.jQuery = $;
 require('bootstrap');
 
 // Kuzzle-Sdk
-require('kuzzle-sdk');
-var kuzzle = require('./public/src/kuzzle.js');
-kuzzle.init();
-kuzzle.listCollections();
+//require('kuzzle-sdk');
+//var kuzzle = require('./public/src/kuzzle.js');
+//kuzzle.init();
+//kuzzle.listCollections();
 
 // Openlayers
 var ol = require('openlayers');
@@ -179,10 +179,8 @@ var mockGeoJSONVelos = {
         },
     ]
 };
-
 var objMock = {"Where is my cat ?" : mockGeoJSONCat, "Mes balades à vélos" :  mockGeoJSONVelos};
 
 // Initalisation de la map Openlayers
 var mapOl = require('./public/src/openlayers');
-
-mapOl.initmap(objMock);
+mapOl.map.initMap(objMock, 13);
