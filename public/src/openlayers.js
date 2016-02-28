@@ -2,20 +2,20 @@
  * Initialisation de la map
  * @returns {ol.Map|*}
  */
-var olMap = olMap || {};
+var kMap = kMap || {};
 
-olMap.Map = {
+kMap.olMap = {
 
     map: null,
-    projection: 'EPSG:4326',
+    projectionFrom: 'EPSG:3857',
+    projectionTo: 'EPSG:4326',
     osm: null,
-    kuzzlegroup: null,
     view: null,
     zoom: null,
-    geolocation: null,
     buttonsDrawControls: null,
     layerSwitcher: null,
     mockDatas: null,
+    layer_test: null,
 
     initMap: function(mockDatas, zoom)
     {
@@ -24,7 +24,9 @@ olMap.Map = {
         // Variables
         this.mockDatas = mockDatas;
         this.zoom = zoom;
-        this.projection = olMap.projection;
+        this.projectionFrom = kMap.olMap.projectionFrom;
+        this.projectionTo = kMap.olMap.projectionTo;
+        this.layer_test = kMap.olMap.layer_test;
 
         // Recuperation du fond de carte OpenStreetMap
         this.osm = new ol.layer.Tile({
@@ -61,7 +63,7 @@ olMap.Map = {
                     coordinateFormat:  function(coordinate) {
                         return ol.coordinate.format(coordinate, 'LonLat : {y}, {x}', 4);
                     },
-                    projection: this.projection,
+                    projection: this.projectionTo,
                 })
             ]),
             view: this.view
@@ -69,7 +71,7 @@ olMap.Map = {
 
         // Centrage sur la carte en recuperant la position
         this.geolocation = new ol.Geolocation({
-            projection: ol.proj.get(this.projection),
+            projection: ol.proj.get(this.projectionTo),
             tracking: true
         });
 
@@ -81,7 +83,10 @@ olMap.Map = {
         });
 
         // Ajout des boutons de dessins
-        this.buttonsDrawControls = new ol.control.DrawButtons();
+        var options = {
+            selectedLayer: this.getSelectedLayer()
+        };
+        this.buttonsDrawControls = new ol.control.DrawButtons(options);
         this.map.addControl(this.buttonsDrawControls);
 
         // Ajout du LayerSwitcher
@@ -102,7 +107,7 @@ olMap.Map = {
         for (key in this.mockDatas)
         {
             var kuzzleGeoJSON = new ol.format.GeoJSON().readFeatures(this.mockDatas[key], {
-                featureProjection: 'EPSG:3857'
+                featureProjection: this.projectionFrom
             });
 
             // Recuperation du geoJSON
@@ -123,7 +128,7 @@ olMap.Map = {
             });
             // TEST
             if (key == "Where is my cat ?") {
-                var layer_test = this.layer_test = kuzzleLayerVector;
+                this.layer_test = kuzzleLayerVector;
             }
             // Fin test
             tabKuzzleLayers.push(kuzzleLayerVector);
@@ -175,8 +180,14 @@ olMap.Map = {
         };
 
         return styles;
+    },
+
+    getSelectedLayer: function ()
+    {
+        return this.layer_test;
     }
 };
+
 
 
 /**
@@ -184,4 +195,5 @@ olMap.Map = {
  * @param mockDatas
  * http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Component/GeofieldWidget/js/GeofieldWidget.js
  */
-exports.map = olMap.Map;
+exports.map = kMap.olMap;
+exports.selectedLayer = kMap.olMap.getSelectedLayer;

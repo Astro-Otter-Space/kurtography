@@ -4,6 +4,7 @@
 ol.control.DrawButtons = function (opt_options) {
 
     var options = opt_options || {};
+    this.selectedLayers = options.selectedLayer;
 
     var this_ = this;
 
@@ -98,7 +99,9 @@ ol.control.DrawButtons = function (opt_options) {
             divsChildren.item(i).disabled = false;
 
             if (divsChildren.item(i).type_control == 'ending') {
-                divsChildren.item(i).classList.toggle('hidden');
+                if (!divsChildren.item(i).classList.contains('hidden')) {
+                    divsChildren.item(i).classList.toggle('hidden');
+                }
             }
         }
 
@@ -235,7 +238,7 @@ ol.control.DrawButtons.prototype.drawOnMap = function(evt)
     // Draw new item
     var draw = this.draw = new ol.interaction.Draw({
         //features: features,
-        source : layer_test.getSource(),
+        source : this.selectedLayers.getSource(),
         features : new ol.Collection(),
         type: /** @type {ol.geom.GeometryType} */ (typeSelect),
         geometryFunction : geometryFctDraw,

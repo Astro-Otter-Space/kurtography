@@ -2,49 +2,52 @@
  *
  * @returns {Kuzzle|*}
  */
-function init()
-{
-    // Connexion kuzzle
-    var optConnect = {
-        defaultIndex: 'kurtography',
-        connect: 'auto',
-        autoReconnect: true,
-        headers: {
-            'Access-Control-Allow-Origin' : '*'
-        }
-    };
-    this._kuz = new Kuzzle('http://localhost:7511', optConnect, function (err, res) {
-        if(err) {
-            console.log(err.message)
-        }
-    });
+var kMap = kMap || {};
 
-    // Authentification
-    //this._kuz.login("local", {username: "kurtouser"}, '', function (err, res) {
-    //    if(err) {
-    //        console.log("Err login : " + err.message);
-    //    }
-    //});
+kMap.kuzzleManager = {
 
-    return this._kuz;
-}
+    kuzzle: null,
+    defaultIndex : null,
+    host: 'http://localhost:7512',
 
-/**
- *
- * @returns {Object}
- */
-function listCollections()
-{
-    var listCollections = this._kuz.listCollections('kurtography', {type: 'stored'}, function (err, collections) {
-        if(!err) {
-            return collections;
-        } else {
-            console.log("Erreur liste collections : " + err.message)
-        }
-    });
+    initKuzzle: function (defaultIndex)
+    {
 
-    return listCollections;
-}
+        this.defaultIndex = defaultIndex;
 
-exports.init = init;
-exports.listCollections = listCollections;
+        var optConnect = {
+            defaultIndex: 'kurtography',
+            connect: 'auto',
+            autoReconnect: true,
+            headers: {
+                'Access-Control-Allow-Origin' : '*'
+            }
+        };
+        this.kuzzle = new Kuzzle(kuzzleManager.host, optConnect, function (err, res) {
+            if(err) {
+                console.log(err.message)
+            }
+        });
+        this.kuzzle.connect();
+
+        this.kuzzle.listIndexes(function (err, indexes) {
+            console.log(indexes);
+        });
+    },
+
+
+    listCollections: function ()
+    {
+        var listCollections = this.kuzzle.listCollections(this.defaultIndex, {type: 'all'}, function (err, collections) {
+            if(!err) {
+                return collections;
+            } else {
+                console.log("Erreur liste collections : " + err.message)
+            }
+        });
+
+        return listCollections;
+    }
+};
+
+exports.kuzzle = kMap.kuzzleManager;

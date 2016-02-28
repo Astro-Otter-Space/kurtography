@@ -4,9 +4,9 @@ global.jQuery = $;
 require('bootstrap');
 
 // Kuzzle-Sdk
-//require('kuzzle-sdk');
-//var kuzzle = require('./public/src/kuzzle.js');
-//kuzzle.init();
+require('kuzzle-sdk');
+var kuzzle = require('./public/src/kuzzle.js');
+//kuzzle.kuzzle.initKuzzle('kurtography');
 //kuzzle.listCollections();
 
 // Openlayers
