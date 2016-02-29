@@ -5,8 +5,9 @@ ol.control.DrawButtons = function (opt_options) {
 
     var options = opt_options || {};
     options.draw.Ending = true;
-    this.selectedLayers = options.selectedLayer;
 
+    this.selectedLayers = options.selectedLayer;
+    //this.selectedLayers = kMap.olMap.selectedLayer;
     var this_ = this;
 
     // Default values
@@ -237,7 +238,7 @@ ol.control.DrawButtons.prototype.drawOnMap = function(evt)
         typeSelect = 'Circle';
         geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
     }
-
+    console.log("Dessin sur la couche " + this.selectedLayers.get('title'));
     // Draw new item
     var draw = this.draw = new ol.interaction.Draw({
         //features: features,
