@@ -84,26 +84,16 @@ kMap.olMap = {
             this_.view.setCenter(pointCenter);
         });
 
-
-
         // Ajout du LayerSwitcher
         this.layerSwitcher = new ol.control.LayerSwitcher({
             tipLabel: 'Légende' // Optional label for button
         });
-        ol.control.LayerSwitcher.forEachRecursive(this.kuzzleGroup, function(l, idx, a) {
-            l.on("change:visible", function(e) {
-                var lyr = e.target;
-                if (lyr.getVisible() == true) {
-                    this_.setSelectedLayer(lyr);
-                    console.log("Couche selectionnée : " + this_.getSelectedLayer().get('title'));
-                }
 
-            });
-        });
+        this.map.addControl(this.layerSwitcher);
 
         // Ajout des boutons de dessins
         var optionsControlDraw = {
-            "selectedLayer": this.getSelectedLayer(),
+            "selectedLayer": /*(this.getSelectedLayer() != undefined) ?*/ this.getSelectedLayer() /*: null*/,
             "draw": {
                 "Point": true,
                 "LineString": true,
@@ -114,8 +104,22 @@ kMap.olMap = {
         };
         this.buttonsDrawControls = new ol.control.DrawButtons(optionsControlDraw);
 
-        this.map.addControl(this.layerSwitcher);
-        //this.map.addControl(this.buttonsDrawControls);
+        // Detection of selected layer
+        ol.control.LayerSwitcher.forEachRecursive(this.kuzzleGroup, function(l, idx, a) {
+            l.on("change:visible", function(e) {
+                var lyr = e.target;
+                if (lyr.getVisible() == true) {
+                    // Not sure if correct but it's working :|
+                    this_.setSelectedLayer(lyr);
+                    //ol.control.DrawButtons.setSelectedLayer(lyr);
+                    this_.buttonsDrawControls.setSelectedLayer(lyr);
+                    console.log("Couche selectionnée : " + this_.getSelectedLayer().get('title'));
+                }
+            });
+        });
+
+
+        this.map.addControl(this.buttonsDrawControls);
 
         // Ajout popup + listener
         this.map.addOverlay(this.addPopup());
@@ -148,7 +152,8 @@ kMap.olMap = {
     /**
      * Ajout des layers from Kuzzle
      */
-    addLayersFromKuzzle: function() {
+    addLayersFromKuzzle: function()
+    {
         var tabStyles = this.getStylesFeatures();
         var tabKuzzleLayers = [];
 
@@ -171,7 +176,6 @@ kMap.olMap = {
                 type: 'base',
                 visible: false,
                 style: function(feature, resolution){
-                    console.log(feature.getGeometry().getType());
                     return tabStyles[feature.getGeometry().getType()];
                 }
             });
@@ -210,7 +214,7 @@ kMap.olMap = {
             'LineString': [new ol.style.Style({
                 stroke: new ol.style.Stroke({
                     color: [254,170,1,1],
-                    width: 3
+                    width: 4
                 })
             })],
 

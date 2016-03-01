@@ -45464,8 +45464,8 @@ ol.control.DrawButtons = function (opt_options) {
 
     var options = opt_options || {};
     options.draw.Ending = true;
-    this.selectedLayers = options.selectedLayer;
 
+    this.selectedLayers = options.selectedLayer;
     var this_ = this;
 
     // Default values
@@ -45567,7 +45567,6 @@ ol.control.DrawButtons = function (opt_options) {
 
         // Removing interaction
         this_.map.removeInteraction(this_.draw);
-
         e.preventDefault();
     };
 
@@ -45700,7 +45699,7 @@ ol.control.DrawButtons.prototype.drawOnMap = function(evt)
     // Draw new item
     var draw = this.draw = new ol.interaction.Draw({
         //features: features,
-        source : this.selectedLayers.getSource(),
+        source : this.getSelectedLayer().getSource(),
         features : new ol.Collection(),
         type: /** @type {ol.geom.GeometryType} */ (typeSelect),
         geometryFunction : geometryFctDraw,
@@ -45835,6 +45834,20 @@ ol.control.DrawButtons.prototype.drawEndFeature = function(evt)
     console.log(feature.getGeometry().getCoordinates());
     console.log(parser.writeFeature(feature));
 };
+
+
+// Getters/setters of selected layer :
+// Set your layer according to your need :)
+ol.control.DrawButtons.prototype.setSelectedLayer = function(layer)
+{
+    this.selectedLayers = layer;
+};
+
+ol.control.DrawButtons.prototype.getSelectedLayer = function()
+{
+    return this.selectedLayers;
+};
+
 },{}],297:[function(require,module,exports){
 /**
  * Initialisation de la map
@@ -45853,7 +45866,7 @@ kMap.olMap = {
     buttonsDrawControls: null,
     layerSwitcher: null,
     mockDatas: null,
-    layer_test: null,
+    selectedLayer: null,
     elPopup: null,
 
     initMap: function(mockDatas, zoom)
@@ -45922,9 +45935,16 @@ kMap.olMap = {
             this_.view.setCenter(pointCenter);
         });
 
+        // Ajout du LayerSwitcher
+        this.layerSwitcher = new ol.control.LayerSwitcher({
+            tipLabel: 'Légende' // Optional label for button
+        });
+
+        this.map.addControl(this.layerSwitcher);
+
         // Ajout des boutons de dessins
         var optionsControlDraw = {
-            "selectedLayer": this.getSelectedLayer(),
+            "selectedLayer": /*(this.getSelectedLayer() != undefined) ?*/ this.getSelectedLayer() /*: null*/,
             "draw": {
                 "Point": true,
                 "LineString": true,
@@ -45934,25 +45954,23 @@ kMap.olMap = {
             }
         };
         this.buttonsDrawControls = new ol.control.DrawButtons(optionsControlDraw);
-        this.map.addControl(this.buttonsDrawControls);
 
-        // Ajout du LayerSwitcher
-        this.layerSwitcher = new ol.control.LayerSwitcher({
-            tipLabel: 'Légende' // Optional label for button
+        // Detection of selected layer
+        ol.control.LayerSwitcher.forEachRecursive(this.kuzzleGroup, function(l, idx, a) {
+            l.on("change:visible", function(e) {
+                var lyr = e.target;
+                if (lyr.getVisible() == true) {
+                    // Not sure if correct but it's working :|
+                    this_.setSelectedLayer(lyr);
+                    //ol.control.DrawButtons.setSelectedLayer(lyr);
+                    this_.buttonsDrawControls.setSelectedLayer(lyr);
+                    console.log("Couche selectionnée : " + this_.getSelectedLayer().get('title'));
+                }
+            });
         });
-        this.map.addControl(this.layerSwitcher);
 
-        //var layers = document.getElementsByName('base');
-        //for(var i = 0; i < layers.length; i++) {
-        //    layers[i].addEventListener('change', function(input) {
-        //        console.log("Selectionne : " + input.name);
-        //    }, false);
-        //}
-        //
-        //ol.control.LayerSwitcher.forEachRecursive(this.kuzzleGroup, function(l, idx, a) {
-        //    //console.log("Name : " + l.getName());
-        //    console.log("Visible : " + l.get('visible'));
-        //});
+
+        this.map.addControl(this.buttonsDrawControls);
 
         // Ajout popup + listener
         this.map.addOverlay(this.addPopup());
@@ -45985,7 +46003,8 @@ kMap.olMap = {
     /**
      * Ajout des layers from Kuzzle
      */
-    addLayersFromKuzzle: function() {
+    addLayersFromKuzzle: function()
+    {
         var tabStyles = this.getStylesFeatures();
         var tabKuzzleLayers = [];
 
@@ -46011,11 +46030,7 @@ kMap.olMap = {
                     return tabStyles[feature.getGeometry().getType()];
                 }
             });
-            // TEST
-            if (key == "Where is my cat ?") {
-                this.layer_test = kuzzleLayerVector;
-            }
-            // Fin test
+
             tabKuzzleLayers.push(kuzzleLayerVector);
         }
         return tabKuzzleLayers;
@@ -46049,8 +46064,8 @@ kMap.olMap = {
 
             'LineString': [new ol.style.Style({
                 stroke: new ol.style.Stroke({
-                    color: new ol.style.Fill({ color: [254,170,1,1] }),
-                    width: 3
+                    color: [254,170,1,1],
+                    width: 4
                 })
             })],
 
@@ -46078,9 +46093,16 @@ kMap.olMap = {
         return styles;
     },
 
+    // Retourne la couche selectionnée
     getSelectedLayer: function ()
     {
-        return this.layer_test;
+        return this.selectedLayer;
+    },
+
+    // Set la couche selectionnée
+    setSelectedLayer: function (layer)
+    {
+        this.selectedLayer = layer;
     }
 };
 

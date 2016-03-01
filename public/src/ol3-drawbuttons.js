@@ -7,7 +7,6 @@ ol.control.DrawButtons = function (opt_options) {
     options.draw.Ending = true;
 
     this.selectedLayers = options.selectedLayer;
-    //this.selectedLayers = kMap.olMap.selectedLayer;
     var this_ = this;
 
     // Default values
@@ -109,7 +108,6 @@ ol.control.DrawButtons = function (opt_options) {
 
         // Removing interaction
         this_.map.removeInteraction(this_.draw);
-
         e.preventDefault();
     };
 
@@ -238,11 +236,11 @@ ol.control.DrawButtons.prototype.drawOnMap = function(evt)
         typeSelect = 'Circle';
         geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
     }
-    console.log("Dessin sur la couche " + this.selectedLayers.get('title'));
+
     // Draw new item
     var draw = this.draw = new ol.interaction.Draw({
         //features: features,
-        source : this.selectedLayers.getSource(),
+        source : this.getSelectedLayer().getSource(),
         features : new ol.Collection(),
         type: /** @type {ol.geom.GeometryType} */ (typeSelect),
         geometryFunction : geometryFctDraw,
@@ -376,4 +374,17 @@ ol.control.DrawButtons.prototype.drawEndFeature = function(evt)
     var featureGeoJSON = parser.writeFeatureObject(feature);
     console.log(feature.getGeometry().getCoordinates());
     console.log(parser.writeFeature(feature));
+};
+
+
+// Getters/setters of selected layer :
+// Set your layer according to your need :)
+ol.control.DrawButtons.prototype.setSelectedLayer = function(layer)
+{
+    this.selectedLayers = layer;
+};
+
+ol.control.DrawButtons.prototype.getSelectedLayer = function()
+{
+    return this.selectedLayers;
 };
