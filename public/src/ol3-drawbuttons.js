@@ -56,6 +56,7 @@ ol.control.DrawButtons = function (opt_options) {
         e.target.classList.toggle('enable');
         e.target.disabled = false;
 
+        // TODO : ne pas lancer le draw si pas de getSelectedLayer
         this_.drawOnMap(e);
         e.preventDefault();
     };

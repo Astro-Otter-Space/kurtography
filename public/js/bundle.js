@@ -45515,6 +45515,7 @@ ol.control.DrawButtons = function (opt_options) {
         e.target.classList.toggle('enable');
         e.target.disabled = false;
 
+        // TODO : ne pas lancer le draw si pas de getSelectedLayer
         this_.drawOnMap(e);
         e.preventDefault();
     };
@@ -45867,6 +45868,7 @@ kMap.olMap = {
     layerSwitcher: null,
     mockDatas: null,
     selectedLayer: null,
+    overlay: null,
     elPopup: null,
 
     initMap: function(mockDatas, zoom)
@@ -45879,7 +45881,6 @@ kMap.olMap = {
         this.projectionFrom = kMap.olMap.projectionFrom;
         this.projectionTo = kMap.olMap.projectionTo;
         this.layer_test = kMap.olMap.layer_test;
-        this.elPopup = document.getElementById('popup');
 
         // Recuperation du fond de carte OpenStreetMap
         this.osm = new ol.layer.Tile({
@@ -45901,9 +45902,21 @@ kMap.olMap = {
             layers: this.addLayersFromKuzzle()
         });
 
+        // Definition de l overlay Popup
+        this.overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ ({
+            element: document.getElementById('popup'),
+            autoPan: true,
+            autoPanAnimation: {
+                duration: 250
+            }
+        }));
+
+
+
         // Definition de la map
         this.map = new ol.Map({
             layers: [this.osm, this.kuzzleGroup],
+            overlays: [this.overlay],
             target: 'map',
             controls: ol.control.defaults({
                 attributionOptions: ({
@@ -45962,9 +45975,8 @@ kMap.olMap = {
                 if (lyr.getVisible() == true) {
                     // Not sure if correct but it's working :|
                     this_.setSelectedLayer(lyr);
-                    //ol.control.DrawButtons.setSelectedLayer(lyr);
                     this_.buttonsDrawControls.setSelectedLayer(lyr);
-                    console.log("Couche selectionnée : " + this_.getSelectedLayer().get('title'));
+                    //console.log("Couche selectionnée : " + this_.getSelectedLayer().get('title'));
                 }
             });
         });
@@ -45973,7 +45985,6 @@ kMap.olMap = {
         this.map.addControl(this.buttonsDrawControls);
 
         // Ajout popup + listener
-        this.map.addOverlay(this.addPopup());
         this.map.on('click', function(evt) {
             var feature = this_.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
@@ -45982,17 +45993,14 @@ kMap.olMap = {
             );
 
             if (feature) {
+
                 var geometry = feature.getGeometry();
                 var coord = geometry.getCoordinates();
+                var fProperties = feature.getProperties();
 
-                console.log(coord);
-                //this_.addPopup().setPosition(coord);
-                //this_.elPopup.popover({
-                //    'placement': 'top',
-                //    'html': true,
-                //    'content': feature.get('properties.name')
-                //});
-                //this_.elPopup.popover('show');
+                this_.overlay.setPosition(coord);
+                document.getElementById('popup-content').innerHTML = fProperties.name;
+
             } else {
                 //this_.elPopup.popover('destroy');
             }
@@ -46037,14 +46045,9 @@ kMap.olMap = {
     },
 
 
-    addPopup: function()
+    addPropertiesToPopup: function()
     {
-        var popup = new ol.Overlay({
-            element: this.elPopup,
-            positioning: 'bottom-center',
-            stopEvent: false
-        });
-        return popup;
+
     },
 
     /**
