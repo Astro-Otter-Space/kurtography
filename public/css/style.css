@@ -51,3 +51,8 @@ body { padding-top: 50px; }
 .layer-switcher .panel {
     background-color: rgba(0,60,136,0.5);
 }
+
+/*Popup*/
+.popover-content {
+    min-width: 250px;
+}

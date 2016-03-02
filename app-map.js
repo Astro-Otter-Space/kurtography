@@ -184,3 +184,7 @@ var objMock = {"Where is my cat ?" : mockGeoJSONCat, "Mes balades à vélos" :  
 // Initalisation de la map Openlayers
 var mapOl = require('./public/src/openlayers');
 mapOl.map.initMap(objMock, 13);
+
+String.prototype.capitalizeFirstLetter = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}

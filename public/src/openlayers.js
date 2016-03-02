@@ -51,15 +51,9 @@ kMap.olMap = {
         });
 
         // Definition de l overlay Popup
-        this.overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ ({
-            element: document.getElementById('popup'),
-            autoPan: true,
-            autoPanAnimation: {
-                duration: 250
-            }
-        }));
-
-
+        this.overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ {
+            element: document.getElementById('popup')
+        });
 
         // Definition de la map
         this.map = new ol.Map({
@@ -124,11 +118,9 @@ kMap.olMap = {
                     // Not sure if correct but it's working :|
                     this_.setSelectedLayer(lyr);
                     this_.buttonsDrawControls.setSelectedLayer(lyr);
-                    //console.log("Couche selectionnée : " + this_.getSelectedLayer().get('title'));
                 }
             });
         });
-
 
         this.map.addControl(this.buttonsDrawControls);
 
@@ -140,24 +132,29 @@ kMap.olMap = {
                 }
             );
 
+            var element = this_.overlay.getElement();
+            jQuery(element).popover('destroy');
             if (feature) {
-
-                var geometry = feature.getGeometry();
-                var coord = geometry.getCoordinates();
+                var coord = feature.getGeometry().getCoordinates();
                 var fProperties = feature.getProperties();
 
+                jQuery(element).popover('destroy');
                 this_.overlay.setPosition(coord);
-                document.getElementById('popup-content').innerHTML = fProperties.name;
 
-            } else {
-                //this_.elPopup.popover('destroy');
+                jQuery(element).popover({
+                    'placement': 'top',
+                    'animation': false,
+                    'html': true,
+                    'content': this_.addPropertiesToPopup(fProperties)
+                });
+                jQuery(element).popover('show');
+                this_.view.setCenter(coord);
             }
         });
-
     },
 
     /**
-     * Ajout des layers from Kuzzle
+     * Add layers from kuzzle
      */
     addLayersFromKuzzle: function()
     {
@@ -192,10 +189,39 @@ kMap.olMap = {
         return tabKuzzleLayers;
     },
 
-
-    addPropertiesToPopup: function()
+    /**
+     * Set datas from proporties in the popup
+     * @param properties
+     * @returns {Element}
+     */
+    addPropertiesToPopup: function(properties)
     {
+        var tab = document.createElement('table');
+        tab.className = 'table table-striped';
 
+        // Delete geometry if exist
+        if (properties.geometry) {
+            delete properties.geometry;
+        }
+
+        for (var key in properties) {
+            if (typeof properties[key] != 'object' || properties[key] != undefined) {
+
+                var tr = document.createElement('tr');
+
+                var tdKey = document.createElement('td');
+                tdKey.innerHTML = key.capitalizeFirstLetter();
+
+                var tdValue = document.createElement('td');
+                tdValue.innerHTML = properties[key].capitalizeFirstLetter();
+
+                tr.appendChild(tdKey);
+                tr.appendChild(tdValue);
+                tab.appendChild(tr);
+            }
+        }
+
+        return tab;
     },
 
     /**
@@ -257,12 +283,5 @@ kMap.olMap = {
     }
 };
 
-
-
-/**
- * Ajout des données
- * @param mockDatas
- * http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Component/GeofieldWidget/js/GeofieldWidget.js
- */
 exports.map = kMap.olMap;
 exports.selectedLayer = kMap.olMap.getSelectedLayer;

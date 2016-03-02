@@ -1,5 +1,8 @@
 /**
  * Created by stephane on 21/02/16.
+ * http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Component/GeofieldWidget/js/GeofieldWidget.js
+ * http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Control/Geofield/js/geofieldControl.js
+ * http://blog.awesomemap.tools/demo-draw-and-modify-openlayers-3/
  */
 ol.control.DrawButtons = function (opt_options) {
 
@@ -223,9 +226,10 @@ ol.control.DrawButtons = function (opt_options) {
 ol.inherits(ol.control.DrawButtons, ol.control.Control);
 
 
-// -> http://blog.awesomemap.tools/demo-draw-and-modify-openlayers-3/
-// -> http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Control/Geofield/js/geofieldControl.js?id=8c2d83ff0e38ae846e853e2f3599114e40ed0f84
-// Dessinage sur la carte
+/**
+ * Drawing on map
+ * @param evt
+ */
 ol.control.DrawButtons.prototype.drawOnMap = function(evt)
 {
     this.map = this.getMap();
