@@ -41,6 +41,15 @@ kMap.olMap = {
             }
         );
 
+        this.satellite = new ol.layer.Tile({
+            title: 'Satelite',
+            visible : false,
+            type: 'overlays',
+            source: new ol.source.MapQuest({
+                layer : 'sat'
+            })
+        });
+
         // Definition de la vue
         this.view = new ol.View({
             zoom: this.zoom
@@ -59,7 +68,7 @@ kMap.olMap = {
 
         // Definition de la map
         this.map = new ol.Map({
-            layers: [this.osm, this.kuzzleGroup],
+            layers: [this.satellite, this.osm, this.kuzzleGroup],
             overlays: [this.overlay],
             target: 'map',
             controls: ol.control.defaults({

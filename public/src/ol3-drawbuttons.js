@@ -70,7 +70,6 @@ ol.control.DrawButtons = function (opt_options) {
     var handleControlsClick = function (e)
     {
         e = e || window.event;
-        this_.setFlagDraw(true);
 
         // Disabled Controls buttons
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
@@ -95,9 +94,18 @@ ol.control.DrawButtons = function (opt_options) {
         e.target.classList.toggle('enable');
         e.target.disabled = false;
 
-        this_.controlOnMap(e);
+        switch (e.target.type_control) {
+            case 'edit' :
+                this_.controlEditOnMap(e);
+                break;
+            case 'delete' :
+                this_.controlDelOnMap(e);
+                break;
+        }
+
         e.preventDefault();
     };
+
 
     // Endind draw/control mode
     var handleGroupEnd = function (e)
@@ -118,6 +126,7 @@ ol.control.DrawButtons = function (opt_options) {
         this_.setFlagDraw(false); // Desactivation of drawing flag
         e.preventDefault();
     };
+
 
     // Marker
     var buttonPoint = this.buttonPoint = document.createElement('button');
@@ -275,52 +284,84 @@ ol.control.DrawButtons.prototype.drawOnMap = function(evt)
  * Edit or delete a feature
  * @param evt
  */
-ol.control.DrawButtons.prototype.controlOnMap = function(evt)
-{
-    this.map = this.getMap();
+ol.control.DrawButtons.prototype.controlEditOnMap = function(evt) {
+    if (!this.getSelectedLayer()) {
+        this.setFlagDraw(false)
+    } else {
+        this.setFlagDraw(true);
+    }
 
-    var typeControl = evt.target.type_control; // (draw), edit or delete;
+    if (this.getFlagDraw() == true) {
+        this.map = this.getMap();
 
-    // Select Interaction
-    var selectInteraction = new ol.interaction.Select({
-        layers: function(layer) {
-            return layer_test
-        }
-    });
-    this.map.addInteraction(selectInteraction);
+        // Select Interaction
+        var selectedLayer = this.getSelectedLayer();
+        var selectInteraction = new ol.interaction.Select({
+            condition: ol.events.condition.click,
+        });
+        this.map.addInteraction(selectInteraction);
 
-    // Grab feature selected
-    var selectedFeatures = selectInteraction.getFeatures();
+        // Gestion des event sur la feature
+        selectInteraction.getFeatures().addEventListener('select', function (e) {
+            var feature = e.element;
+            console.log(feature.geometry);
+        });
 
-    // Gestion des event sur la feature
-    selectedFeatures.on('add', function(e, typeControl) {
-        var feature = e.element;
-
-        if (typeControl == 'edit') {
-            console.log("Modication de " + feature);
-        } else if(typeControl == 'delete') {
-            console.log("Suppression de " + feature);
-            // remove from selectInteraction
-            selectedFeatures.remove(feature);
-            // remove from selected Layer
-            layer_test.getSource().removeFeature(feature);
-            // TODO : delete from kuzzle
-        }
-    });
-
-    // Modify interaction
-    var mod = new ol.interaction.Modify({
-        features: selectedFeatures,
-        style: this.styleEdit(),
-        deleteCondition: function(event) {
-            return ol.events.condition.shiftKeyOnly(evt) && ol.events.condition.singleClick(evt);
-        }
-    });
-    this.map.addInteraction(mod);
+        // Modify interaction
+        var mod = new ol.interaction.Modify({
+            features: selectInteraction.getFeatures(),
+            style: this.styleEdit()
+        });
+        this.map.addInteraction(mod);
+    }
 };
 
 /**
- *
+ * Delete a feature from map
+ * @param evt
+ */
+ol.control.DrawButtons.prototype.controlDelOnMap = function (evt)
+{
+    if (!this.getSelectedLayer()) {
+        this.setFlagDraw(false)
+    } else {
+        this.setFlagDraw(true);
+    }
+
+    if (this.getFlagDraw() == true) {
+        this.map = this.getMap();
+
+        // Select Interaction
+        var selectInteraction = new ol.interaction.Select({
+            condition: ol.events.condition.click,
+            source : function(layer) {
+                if (layer == this.getSelectedLayer()) {
+                    return layer
+                }
+            }
+        });
+        var this_ = this;
+        selectInteraction.getFeatures().addEventListener('add', function(e) {
+            var feature = e.element;
+            if(confirm('Are you sure you want to delete this feature ?')) {
+                // remove from selectInteraction
+                selectInteraction.getFeatures().remove(feature);
+                // remove from selected Layer
+                this_.getSelectedLayer().getSource().removeFeature(feature);
+
+                // Here, override for deleting from your database
+            } else {
+                selectInteraction.getFeatures().remove(feature);
+            }
+            e.preventDefault();
+        });
+
+        this.map.addInteraction(selectInteraction);
+    }
+};
+
+/**
+ * Styles of selected layer
  */
 ol.control.DrawButtons.prototype.styleAdd = function()
 {
@@ -399,6 +440,7 @@ ol.control.DrawButtons.prototype.drawEndFeature = function(evt)
 // Set your layer according to your need :)
 ol.control.DrawButtons.prototype.setSelectedLayer = function(layer)
 {
+    console.log("Set of layer " + layer.get('title'));
     this.selectedLayers = layer;
 };
 
