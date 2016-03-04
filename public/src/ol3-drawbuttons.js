@@ -6,11 +6,16 @@
  */
 ol.control.DrawButtons = function (opt_options) {
 
+    // Get options
     var options = opt_options || {};
     options.draw.Ending = true;
 
     this.selectedLayers = options.selectedLayer;
     var this_ = this;
+
+    if (options.popup_form == true) {
+        this.popup = document.getElementById('popup');
+    }
 
     // Default values
     this.typeSelect = 'Point';
@@ -29,9 +34,6 @@ ol.control.DrawButtons = function (opt_options) {
     // Boutons
     var elementDrawButtons = new ol.Collection();
     var elementDrawControls = new ol.Collection();
-
-    // Collection of new features
-    this.newFeatures = new ol.Collection();
 
     // Events listeners
     var handleButtonsClick = function (e)
@@ -302,9 +304,12 @@ ol.control.DrawButtons.prototype.controlEditOnMap = function(evt) {
         this.map.addInteraction(selectInteraction);
 
         // Gestion des event sur la feature
-        selectInteraction.getFeatures().addEventListener('select', function (e) {
+        selectInteraction.getFeatures().addEventListener('add', function (e) {
             var feature = e.element;
-            console.log(feature.geometry);
+            feature.addEventListener('change', function(e) {
+                console.log(feature.getGeometry());
+            });
+            console.log(feature.getGeometry());
         });
 
         // Modify interaction
@@ -344,12 +349,11 @@ ol.control.DrawButtons.prototype.controlDelOnMap = function (evt)
         selectInteraction.getFeatures().addEventListener('add', function(e) {
             var feature = e.element;
             if(confirm('Are you sure you want to delete this feature ?')) {
-                // remove from selectInteraction
-                selectInteraction.getFeatures().remove(feature);
                 // remove from selected Layer
                 this_.getSelectedLayer().getSource().removeFeature(feature);
 
                 // Here, override for deleting from your database
+
             } else {
                 selectInteraction.getFeatures().remove(feature);
             }
@@ -415,24 +419,26 @@ ol.control.DrawButtons.prototype.styleEdit = function()
     return style;
 };
 
-// Start drawing
-ol.control.DrawButtons.prototype.drawStart = function()
-{
-    console.log("Start editing");
-};
-
 // Endind drawing feature
 ol.control.DrawButtons.prototype.drawEndFeature = function(evt)
 {
     var feature = evt.feature;
-
-    //this_.newFeatures.push(feature);
-
-    // Todo : afficher tableau de données de la couche + send to kuzzle
     var parser = new ol.format.GeoJSON();
-    var featureGeoJSON = parser.writeFeatureObject(feature);
-    console.log(feature.getGeometry().getCoordinates());
-    console.log(parser.writeFeature(feature));
+
+    // Problem with recuperation of a circle geometry : https://github.com/openlayers/ol3/pull/3434
+    if ('Circle' == feature.type) {
+        var parserCircle = parser.writeCircleGeometry_()
+    } else {
+        var featureGeoJSON = parser.writeFeatureObject(feature);
+    }
+
+
+
+
+
+
+    //console.log(feature.getGeometry().getCoordinates());
+    console.log(featureGeoJSON);
 };
 
 
@@ -440,7 +446,6 @@ ol.control.DrawButtons.prototype.drawEndFeature = function(evt)
 // Set your layer according to your need :)
 ol.control.DrawButtons.prototype.setSelectedLayer = function(layer)
 {
-    console.log("Set of layer " + layer.get('title'));
     this.selectedLayers = layer;
 };
 
@@ -455,7 +460,6 @@ ol.control.DrawButtons.prototype.getSelectedLayer = function()
  */
 ol.control.DrawButtons.prototype.setFlagDraw = function(/** @type boolean} */flagDraw)
 {
-    console.log("Flag drawing : " + flagDraw);
     this.flagDraw = flagDraw;
 };
 

@@ -110,7 +110,8 @@ kMap.olMap = {
 
         // Ajout des boutons de dessins
         var optionsControlDraw = {
-            "selectedLayer": /*(this.getSelectedLayer() != undefined) ?*/ this.getSelectedLayer() /*: null*/,
+            "selectedLayer": this.getSelectedLayer(),
+            "popup_form" : true,
             "draw": {
                 "Point": true,
                 "LineString": true,
