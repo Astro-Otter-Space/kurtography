@@ -45478,6 +45478,8 @@ ol.control.DrawButtons = function (opt_options) {
     // Default values
     this.typeSelect = 'Point';
     this.map = this.getMap();
+    this.flagDraw = new Boolean(false);
+    this.setFlagDraw(this.flagDraw);
 
     // Classes CSS
     this.olClassName = 'ol-unselectable ol-control';
@@ -45522,8 +45524,8 @@ ol.control.DrawButtons = function (opt_options) {
         e.target.classList.toggle('enable');
         e.target.disabled = false;
 
-        // TODO : ne pas lancer le draw si pas de getSelectedLayer
         this_.drawOnMap(e);
+
         e.preventDefault();
     };
 
@@ -45531,6 +45533,7 @@ ol.control.DrawButtons = function (opt_options) {
     var handleControlsClick = function (e)
     {
         e = e || window.event;
+        this_.setFlagDraw(true);
 
         // Disabled Controls buttons
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
@@ -45575,6 +45578,7 @@ ol.control.DrawButtons = function (opt_options) {
 
         // Removing interaction
         this_.map.removeInteraction(this_.draw);
+        this_.setFlagDraw(false); // Desactivation of drawing flag
         e.preventDefault();
     };
 
@@ -45688,7 +45692,6 @@ ol.control.DrawButtons = function (opt_options) {
 
 ol.inherits(ol.control.DrawButtons, ol.control.Control);
 
-
 /**
  * Drawing on map
  * @param evt
@@ -45696,28 +45699,38 @@ ol.inherits(ol.control.DrawButtons, ol.control.Control);
 ol.control.DrawButtons.prototype.drawOnMap = function(evt)
 {
     this.map = this.getMap();
-    var geometryFctDraw;
-    var typeSelect = evt.target.draw;
 
-    // Specific for square
-    if (typeSelect == 'Square') {
-        typeSelect = 'Circle';
-        geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
+    if (!this.getSelectedLayer()) {
+        this.setFlagDraw(false);
+    } else {
+        this.setFlagDraw(true)
     }
 
-    // Draw new item
-    var draw = this.draw = new ol.interaction.Draw({
-        //features: features,
-        source : this.getSelectedLayer().getSource(),
-        features : new ol.Collection(),
-        type: /** @type {ol.geom.GeometryType} */ (typeSelect),
-        geometryFunction : geometryFctDraw,
-        style : this.styleAdd()
-    });
+    if (this.getFlagDraw() == true) {
+        var geometryFctDraw;
+        var typeSelect = evt.target.draw;
 
-    draw.on('drawend', this.drawEndFeature, this);
+        // Specific for square
+        if (typeSelect == 'Square') {
+            typeSelect = 'Circle';
+            geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
+        }
 
-    this.map.addInteraction(draw);
+        // Draw new item
+        var draw = this.draw = new ol.interaction.Draw({
+            //features: features,
+            source : this.getSelectedLayer().getSource(),
+            features : new ol.Collection(),
+            type: /** @type {ol.geom.GeometryType} */ (typeSelect),
+            geometryFunction : geometryFctDraw,
+            style : this.styleAdd()
+        });
+
+        draw.on('drawend', this.drawEndFeature, this);
+
+        this.map.addInteraction(draw);
+    }
+
 };
 
 
@@ -45857,6 +45870,21 @@ ol.control.DrawButtons.prototype.getSelectedLayer = function()
     return this.selectedLayers;
 };
 
+/**
+ * Add a flag if Mode draw or not
+ * @param flagDraw
+ */
+ol.control.DrawButtons.prototype.setFlagDraw = function(/** @type boolean} */flagDraw)
+{
+    console.log("Flag drawing : " + flagDraw);
+    this.flagDraw = flagDraw;
+};
+
+ol.control.DrawButtons.prototype.getFlagDraw = function()
+{
+    return this.flagDraw;
+};
+
 },{}],297:[function(require,module,exports){
 /**
  * Initialisation de la map
@@ -45878,6 +45906,7 @@ kMap.olMap = {
     selectedLayer: null,
     overlay: null,
     elPopup: null,
+    //flagDraw: new Boolean(false),
 
     initMap: function(mockDatas, zoom)
     {
@@ -45888,7 +45917,8 @@ kMap.olMap = {
         this.zoom = zoom;
         this.projectionFrom = kMap.olMap.projectionFrom;
         this.projectionTo = kMap.olMap.projectionTo;
-        this.layer_test = kMap.olMap.layer_test;
+        //this.layer_test = kMap.olMap.layer_test;
+        //this.flagDraw = kMap.olMap.flagDraw;
 
         // Recuperation du fond de carte OpenStreetMap
         this.osm = new ol.layer.Tile({
@@ -45981,7 +46011,6 @@ kMap.olMap = {
                 }
             });
         });
-
         this.map.addControl(this.buttonsDrawControls);
 
         // Ajout popup + listener
@@ -45994,7 +46023,7 @@ kMap.olMap = {
 
             var element = this_.overlay.getElement();
             jQuery(element).popover('destroy');
-            if (feature) {
+            if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
                 var coord = feature.getGeometry().getCoordinates();
                 var fProperties = feature.getProperties();
 

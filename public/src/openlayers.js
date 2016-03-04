@@ -18,6 +18,7 @@ kMap.olMap = {
     selectedLayer: null,
     overlay: null,
     elPopup: null,
+    //flagDraw: new Boolean(false),
 
     initMap: function(mockDatas, zoom)
     {
@@ -28,7 +29,8 @@ kMap.olMap = {
         this.zoom = zoom;
         this.projectionFrom = kMap.olMap.projectionFrom;
         this.projectionTo = kMap.olMap.projectionTo;
-        this.layer_test = kMap.olMap.layer_test;
+        //this.layer_test = kMap.olMap.layer_test;
+        //this.flagDraw = kMap.olMap.flagDraw;
 
         // Recuperation du fond de carte OpenStreetMap
         this.osm = new ol.layer.Tile({
@@ -121,7 +123,6 @@ kMap.olMap = {
                 }
             });
         });
-
         this.map.addControl(this.buttonsDrawControls);
 
         // Ajout popup + listener
@@ -134,7 +135,7 @@ kMap.olMap = {
 
             var element = this_.overlay.getElement();
             jQuery(element).popover('destroy');
-            if (feature) {
+            if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
                 var coord = feature.getGeometry().getCoordinates();
                 var fProperties = feature.getProperties();
 
