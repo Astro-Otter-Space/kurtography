@@ -296,3 +296,10 @@ kMap.olMap = {
 
 exports.map = kMap.olMap;
 exports.selectedLayer = kMap.olMap.getSelectedLayer;
+
+
+/**
+ * Created by stephane on 21/02/16.
+ * http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Component/GeofieldWidget/js/GeofieldWidget.js
+ * http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Control/Geofield/js/geofieldControl.js
+ */

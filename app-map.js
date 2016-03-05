@@ -13,7 +13,7 @@ var kuzzle = require('./public/src/kuzzle.js');
 var ol = require('openlayers');
 global.ol = ol;
 require('./node_modules/ol3-layerswitcher/src/ol3-layerswitcher');
-require('./public/src/ol3-drawbuttons');
+require('./node_modules/ol3-drawButtons/src/js/ol3-drawbuttons');
 
 var mockGeoJSONCat = {
     "type": "FeatureCollection",
