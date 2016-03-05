@@ -30,8 +30,8 @@
     "kuzzle",
     "openlayers"
   ],
-  "author": "HamHamFonFon <smeaudre@kaliop.com> (S. Meaudre)",
-  "license": "GPL v3",
+  "author": "Stéphane MEAUDRE <smeaudre@kaliop.com> (S. Meaudre)",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/HamHamFonFon/kurtogaphy/issues"
   }
