@@ -4,9 +4,15 @@
 In developement
 
 # Installation
-You need :
+Requirement :
  - nodeJS
  - Kuzzle : https://github.com/kuzzleio/kuzzle
+Install dependencies:
+npm install
+cd node_modules
+git clone https://github.com/HamHamFonFon/ol3-drawButtons.git ol3-drawButtons
+git clone https://github.com/walkermatt/ol3-layerswitcher.git ol3-layerswitcher
+
 
 # Utilisation
 

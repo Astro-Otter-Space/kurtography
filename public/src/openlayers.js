@@ -112,6 +112,7 @@ kMap.olMap = {
         var optionsControlDraw = {
             "selectedLayer": this.getSelectedLayer(),
             "popup_form" : true,
+            "style_buttons" : (undefined !== typeof style_buttons)? "glyphicon" : "default",
             "draw": {
                 "Point": true,
                 "LineString": true,
