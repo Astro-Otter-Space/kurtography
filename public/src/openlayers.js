@@ -112,7 +112,7 @@ kMap.olMap = {
         var optionsControlDraw = {
             "selectedLayer": this.getSelectedLayer(),
             "popup_form" : true,
-            "style_buttons" : (undefined !== typeof style_buttons)? "glyphicon" : "default",
+            "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
             "draw": {
                 "Point": true,
                 "LineString": true,
@@ -150,8 +150,11 @@ kMap.olMap = {
                 var coord = feature.getGeometry().getCoordinates();
                 var fProperties = feature.getProperties();
 
+                var extFeature = feature.getGeometry().getExtent();
+                var centerFeature = ol.extent.getCenter(extFeature);
+
                 jQuery(element).popover('destroy');
-                this_.overlay.setPosition(coord);
+                this_.overlay.setPosition(centerFeature);
 
                 jQuery(element).popover({
                     'placement': 'top',
@@ -160,7 +163,7 @@ kMap.olMap = {
                     'content': this_.addPropertiesToPopup(fProperties)
                 });
                 jQuery(element).popover('show');
-                this_.view.setCenter(coord);
+                this_.view.setCenter(centerFeature);
             }
         });
     },
@@ -222,10 +225,10 @@ kMap.olMap = {
                 var tr = document.createElement('tr');
 
                 var tdKey = document.createElement('td');
-                tdKey.innerHTML = key.capitalizeFirstLetter();
+                tdKey.innerHTML = (typeof key == "string") ? key.capitalizeFirstLetter() : key;
 
                 var tdValue = document.createElement('td');
-                tdValue.innerHTML = properties[key].capitalizeFirstLetter();
+                tdValue.innerHTML = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
 
                 tr.appendChild(tdKey);
                 tr.appendChild(tdValue);

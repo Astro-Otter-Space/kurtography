@@ -134,8 +134,7 @@ var mockGeoJSONVelos = {
         {
             "type": "Feature",
             "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
-                "name": "Ballade à San Francisco"
+                "name": "ballade à San Francisco"
             },
             "geometry": {
                 "type": "LineString",
@@ -167,16 +166,19 @@ var mockGeoJSONVelos = {
         {
             "type": "Feature",
             "properties": {
-                "guid": (new Date()).getTime() * Math.floor(1 + Math.random()*10000),
                 "name": "Ballade Agropolis"
             },
             "geometry": {
                 "type": "LineString",
                 "coordinates": [
-                    [3.8766369223594666, 43.610814638046364]
+                    [3.874070399999937, 43.6393625],
+                    [3.871328830718994, 43.64197616064553],
+                    [3.871328830718994, 43.642162498722],
+                    [3.8712000846862793, 43.64380845996348],
+                    [3.869140148162842, 43.64474011615058]
                 ]
             }
-        },
+        }
     ]
 };
 var objMock = {"Where is my cat ?" : mockGeoJSONCat, "Mes balades à vélos" :  mockGeoJSONVelos};
@@ -187,4 +189,4 @@ mapOl.map.initMap(objMock, 13);
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
-}
+};
