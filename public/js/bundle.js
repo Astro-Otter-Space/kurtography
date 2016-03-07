@@ -1,6 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
 // Jquery + Bootstrap
+//http://geojson.io/#map=13/43.6330/3.8585
 var $ = require('jquery');
 global.jQuery = $;
 require('bootstrap');
@@ -44234,6 +44235,7 @@ ol.control.DrawButtons = function (opt_options) {
         // Removing adding interaction
         this_.map.removeInteraction(this_.drawInteraction);
         // Remove modify interaction
+        //this_.map.removeIn
         this_.map.removeInteraction(this_.editSelectInteraction);
         this_.map.removeInteraction(this_.modifyInteraction);
         // Remove delete interaction
@@ -44392,7 +44394,7 @@ ol.control.DrawButtons.prototype.drawOnMap = function(evt)
         // Specific for square
         if (typeSelect == 'Square') {
             typeSelect = 'Circle';
-            geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
+            geometryFctDraw = this.geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
         }
 
         // Draw new item
@@ -45988,6 +45990,7 @@ kMap.olMap = {
     mockDatas: null,
     selectedLayer: null,
     overlay: null,
+    overlay2: null,
     elPopup: null,
     //flagDraw: new Boolean(false),
 
@@ -46037,10 +46040,18 @@ kMap.olMap = {
             element: document.getElementById('popup')
         });
 
+        this.overlay2 = new ol.Overlay(/** @type {olx.OverlayOptions} */ {
+            element: document.getElementById('popup2'),
+            autoPan: true,
+            autoPanAnimation: {
+                duration: 250
+            }
+        });
+
         // Definition de la map
         this.map = new ol.Map({
             layers: [this.satellite, this.osm, this.kuzzleGroup],
-            overlays: [this.overlay],
+            overlays: [this.overlay2],
             target: 'map',
             controls: ol.control.defaults({
                 attributionOptions: ({
@@ -46107,7 +46118,7 @@ kMap.olMap = {
         });
         this.map.addControl(this.buttonsDrawControls);
 
-        // Ajout popup + listener
+        // Add popup + listener
         this.map.on('click', function(evt) {
             var feature = this_.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
@@ -46115,25 +46126,32 @@ kMap.olMap = {
                 }
             );
 
-            var element = this_.overlay.getElement();
-            jQuery(element).popover('destroy');
+            //var element = this_.overlay.getElement();
+            //jQuery(element).popover('destroy');
             if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
-                var coord = feature.getGeometry().getCoordinates();
-                var fProperties = feature.getProperties();
 
+                var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
 
-                jQuery(element).popover('destroy');
-                this_.overlay.setPosition(centerFeature);
+                // Essaie 1
+                //jQuery(element).popover('destroy');
+                //this_.overlay.setPosition(centerFeature);
+                //
+                //jQuery(element).popover({
+                //    'placement': 'top',
+                //    'animation': false,
+                //    'html': true,
+                //    'content': this_.addPropertiesToPopup(fProperties)
+                //});
+                //jQuery(element).popover('show');
 
-                jQuery(element).popover({
-                    'placement': 'top',
-                    'animation': false,
-                    'html': true,
-                    'content': this_.addPropertiesToPopup(fProperties)
-                });
-                jQuery(element).popover('show');
+
+                // Essaie 2
+                this_.addPropertiesToPopup(fProperties);
+                this_.overlay2.setPosition(centerFeature);
+
+
                 this_.view.setCenter(centerFeature);
             }
         });
@@ -46182,8 +46200,9 @@ kMap.olMap = {
      */
     addPropertiesToPopup: function(properties)
     {
-        var tab = document.createElement('table');
-        tab.className = 'table table-striped';
+
+        var tab1 = document.getElementById('tabProperties');
+        var tab2 = document.getElementById('tabGeometry');
 
         // Delete geometry if exist
         if (properties.geometry) {
@@ -46203,11 +46222,12 @@ kMap.olMap = {
 
                 tr.appendChild(tdKey);
                 tr.appendChild(tdValue);
-                tab.appendChild(tr);
+                tab1.appendChild(tr);
             }
         }
 
-        return tab;
+        //container.appendChild(divTab);
+        //return container;
     },
 
     /**

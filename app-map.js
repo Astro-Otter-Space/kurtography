@@ -1,4 +1,5 @@
 // Jquery + Bootstrap
+//http://geojson.io/#map=13/43.6330/3.8585
 var $ = require('jquery');
 global.jQuery = $;
 require('bootstrap');

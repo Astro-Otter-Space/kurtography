@@ -18,7 +18,6 @@ kMap.olMap = {
     selectedLayer: null,
     overlay: null,
     elPopup: null,
-    //flagDraw: new Boolean(false),
 
     initMap: function(mockDatas, zoom)
     {
@@ -29,7 +28,6 @@ kMap.olMap = {
         this.zoom = zoom;
         this.projectionFrom = kMap.olMap.projectionFrom;
         this.projectionTo = kMap.olMap.projectionTo;
-        //this.layer_test = kMap.olMap.layer_test;
         //this.flagDraw = kMap.olMap.flagDraw;
 
         // Recuperation du fond de carte OpenStreetMap
@@ -136,7 +134,7 @@ kMap.olMap = {
         });
         this.map.addControl(this.buttonsDrawControls);
 
-        // Ajout popup + listener
+        // Add popup + listener
         this.map.on('click', function(evt) {
             var feature = this_.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
@@ -145,11 +143,10 @@ kMap.olMap = {
             );
 
             var element = this_.overlay.getElement();
-            jQuery(element).popover('destroy');
+            //jQuery(element).popover('destroy');
             if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
-                var coord = feature.getGeometry().getCoordinates();
-                var fProperties = feature.getProperties();
 
+                var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
 
@@ -163,6 +160,7 @@ kMap.olMap = {
                     'content': this_.addPropertiesToPopup(fProperties)
                 });
                 jQuery(element).popover('show');
+
                 this_.view.setCenter(centerFeature);
             }
         });
@@ -211,6 +209,7 @@ kMap.olMap = {
      */
     addPropertiesToPopup: function(properties)
     {
+
         var tab = document.createElement('table');
         tab.className = 'table table-striped';
 
@@ -235,7 +234,6 @@ kMap.olMap = {
                 tab.appendChild(tr);
             }
         }
-
         return tab;
     },
 
