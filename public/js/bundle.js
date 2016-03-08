@@ -44233,7 +44233,7 @@ ol.control.DrawButtons = function (opt_options) {
         }
 
         // Removing adding interaction
-        this_.map.removeInteraction(this_.drawInteraction);
+        this_.map.removeInteraction(this_.drawInteraction); //
         // Remove modify interaction
         //this_.map.removeIn
         this_.map.removeInteraction(this_.editSelectInteraction);

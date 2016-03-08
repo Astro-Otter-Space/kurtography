@@ -106,9 +106,8 @@ kMap.olMap = {
 
         this.map.addControl(this.layerSwitcher);
 
-        // Ajout des boutons de dessins
+        // Adding draw controls
         var optionsControlDraw = {
-            "selectedLayer": this.getSelectedLayer(),
             "popup_form" : true,
             "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
             "draw": {
@@ -119,7 +118,7 @@ kMap.olMap = {
                 "Polygon": true
             }
         };
-        this.buttonsDrawControls = new ol.control.DrawButtons(optionsControlDraw);
+        this.buttonsDrawControls = new ol.control.DrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.kuzzleGroup, function(l, idx, a) {
