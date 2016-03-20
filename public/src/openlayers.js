@@ -281,9 +281,25 @@ var olMap = {
                 break;
 
             case 'LineString':
+                var trLong = document.createElement('tr');
+                var tdLongLabelM = document.createElement('td'); tdLongLabelM.innerHTML = 'Length';
+                var tdLongValueM = document.createElement('td'); tdLongValueM.innerHTML = this.formatLength(fGeometry, true);
+
+                trLong.appendChild(tdLongLabelM);
+                trLong.appendChild(tdLongValueM);
+
+                tbody.appendChild(trLong);
                 break;
 
             case 'Polygon':
+                var trSq = document.createElement('tr');
+                var tdSqLabel = document.createElement('td'); tdSqLabel.innerHTML = 'Area';
+                var tdSqValue = document.createElement('td'); tdSqValue.innerHTML = this.formatArea(fGeometry, false);
+
+                trSq.appendChild(tdSqLabel);
+                trSq.appendChild(tdSqValue);
+
+                tbody.appendChild(trSq);
                 break;
         }
 
@@ -292,6 +308,58 @@ var olMap = {
     },
 
     /**
+     * Calcul the lenth of LineString
+     * Source : http://openlayers.org/en/v3.4.0/examples/measure.js
+     * @param line
+     * @param geodesic
+     * @returns {*}
+     */
+    formatLength : function(line, geodesic) {
+        var length;
+        if (geodesic) {
+            var coordinates = line.getCoordinates();
+            length = 0;
+            for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
+                var c1 = ol.proj.transform(coordinates[i], this.projectionFrom, this.projectionTo);
+                var c2 = ol.proj.transform(coordinates[i + 1], this.projectionFrom, this.projectionTo);
+                length += wgs84Sphere.haversineDistance(c1, c2);
+            }
+        } else {
+            length = Math.round(line.getLength() * 100) / 100;
+        }
+        var output;
+        if (length > 100) {
+            output = (Math.round(length / 1000 * 100) / 100) +
+                ' ' + 'km';
+        } else {
+            output = (Math.round(length * 100) / 100) +
+                ' ' + 'm';
+        }
+        return output;
+    },
+
+    formatArea: function(polygon, geodesic) {
+        var area;
+        if (geodesic) {
+            var geom = /** @type {ol.geom.Polygon} */(polygon.clone().transform(
+                this.projectionFrom, this.projectionTo));
+            var coordinates = geom.getLinearRing(0).getCoordinates();
+            area = Math.abs(wgs84Sphere.geodesicArea(coordinates));
+        } else {
+            area = polygon.getArea();
+        }
+        var output;
+        if (area > 10000) {
+            output = (Math.round(area / 1000000 * 100) / 100) +
+                ' ' + 'km<sup>2</sup>';
+        } else {
+            output = (Math.round(area * 100) / 100) +
+                ' ' + 'm<sup>2</sup>';
+        }
+        return output;
+    },
+
+/**
      * Set le style des objets geographiques
      */
     getStylesFeatures: function()
