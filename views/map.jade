@@ -2,21 +2,14 @@ extend layout
 
 block content
     // Content
-    div.container-fluid
-        div.row
-            // Map
-            div.col-xs-12.col-sm-12.col-lg-12.map.no-gutter
-                div#custom-mouse-position
-                div#map
-        div#popup.ol-popup(title="Informations")
-        //div#popup2.ol-popup(title="Informations")
-        //    ul.nav.nav-tabs
-        //        li.active
-        //            a(data-toggle="tab", href="#menu1") Properties
-        //        li
-        //            a(data-toggle="tab" href="#menu2") Geometry
-        //    div.tab-content
-        //        div#menu1.tab-pane.fade.in.active
-        //            table#tabProperties.table.table-striped
-        //        div#menu2.tab-pane.fade
-        //            table#tabGeometry.table.table-striped
+    div#custom-mouse-position
+    div#map
+
+    div.row.main-row
+        div.col-sm-4.col-md-3.sidebar.sidebar-left.pull-left
+            div.panel-group.sidebar-body#accordion-left
+                include switcherlayer
+                include properties
+
+    div.mini-submenu.mini-submenu-left.pull-left
+        i.fa.fa-list-alt

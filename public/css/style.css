@@ -8,6 +8,9 @@ body { overflow: hidden; padding-top: 50px; }
     height:calc(100% - 0px);
 }
 #map .ol-zoom { font-size: 1.2em; }
+.zoom-top-opened-sidebar { margin-top: 5px; }
+.zoom-top-collapsed { margin-top: 45px; }
+
 
 /*!* remove spacing between middle columns *!*/
 /*.row.no-gutter [class*='col-']:not(:first-child):not(:last-child) {*/
@@ -22,9 +25,6 @@ body { overflow: hidden; padding-top: 50px; }
 /*.row.no-gutter [class*='col-']:last-child {*/
     /*padding-left:0;*/
 /*}*/
-
-.zoom-top-opened-sidebar { margin-top: 5px; }
-.zoom-top-collapsed { margin-top: 45px; }
 
 .mini-submenu{
     display:none;
@@ -41,12 +41,6 @@ body { overflow: hidden; padding-top: 50px; }
     position: absolute;
     top: 60px;
     left: .5em;
-    z-index: 40;
-}
-.mini-submenu-right {
-    position: absolute;
-    top: 60px;
-    right: .5em;
     z-index: 40;
 }
 
@@ -68,34 +62,13 @@ body { overflow: hidden; padding-top: 50px; }
     cursor: pointer;
 }
 
-/** ****************************************/
-#add-cat{
-    z-index: 10000;
+#mainProperties{
+    display: none;
 }
 
+/** ****************************************/
 .ol-mouse-position{
     background: rgba(0, 60, 136, 0.5);
     opacity:0.6;
     color: #FFFFFF;
-}
-
-.ol-control {
-    color: white;
-}
-
-/*Surcharge de olSwitcherLayer*/
-.layer-switcher {
-    border-radius: 1em;
-}
-
-.layer-switcher button {
-    width : 30px;
-    height: 30px;
-    background-image: none;
-    background-color: rgba(0,60,136,0.5);
-    background-position: center;
-}
-
-.layer-switcher .panel {
-    background-color: rgba(0,60,136,0.5);
 }

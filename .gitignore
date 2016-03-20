@@ -4,3 +4,4 @@ node_modules/*
 .idea/
 .gitignore
 npm-debug.log
+test.html

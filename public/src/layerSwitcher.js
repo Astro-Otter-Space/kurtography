@@ -15,39 +15,13 @@ ol.control.LayerSwitcher = function(opt_options) {
 
     this.mapListeners = [];
 
-    //this.hiddenClassName = 'ol-unselectable ol-control layer-switcher';
-    //if (ol.control.LayerSwitcher.isTouchDevice_()) {
-    //    this.hiddenClassName += ' touch';
-    //}
-    //this.shownClassName = this.hiddenClassName + ' shown';
-
-
-    var element = document.createElement('div');
-    element.className = "panel-collapse collapse in";
-    element.id = 'layers';
+    var element = document.getElementById("layers");
 
     this.panel = document.createElement('div');
     this.panel.className = 'panel-body list-group'; // 'panel'
     element.appendChild(this.panel);
 
-    // SURCHARGE Bootstrap
-    var divHeaderPanel = document.createElement('div');
-    divHeaderPanel.className = "panel-heading";
-    divHeaderPanel.innerHTML = '<h4 class="panel-title"><a data-toggle="collapse" href="#layers"><i class="fa fa-list-alt"></i>&nbsp;Layers </a><span class="pull-right slide-submenu"><i class="fa fa-chevron-left"></i></span></h4></div>';
-
-    var divPanel = document.createElement('div');
-    divPanel.className = "panel panel-default ";
-
-    divPanel.appendChild(divHeaderPanel);
-    divPanel.appendChild(element);
-
-    var divPanelContainer = document.createElement('div');
-    divPanelContainer.className = "panel-group sidebar-body";
-    divPanelContainer.id = "accordion-left";
-    divPanelContainer.appendChild(divPanel)
-
-    //ol.control.LayerSwitcher.enableTouchScroll_(this.panel);
-
+    ol.control.LayerSwitcher.enableTouchScroll_(this.panel);
     var this_ = this;
 
     //button.onmouseover = function(e) {
@@ -69,7 +43,7 @@ ol.control.LayerSwitcher = function(opt_options) {
     var divTarget = document.getElementById("mainLayer");
 
     ol.control.Control.call(this, {
-        element: divPanelContainer, //element,
+        element: element, //element,
         target: divTarget //options.target
     });
 
@@ -124,9 +98,9 @@ ol.control.LayerSwitcher.prototype.setMap = function(map) {
     ol.control.Control.prototype.setMap.call(this, map);
     if (map) {
         var this_ = this;
-        this.mapListeners.push(map.on('pointerdown', function() {
-            this_.hidePanel();
-        }));
+        //this.mapListeners.push(map.on('pointerdown', function() {
+        //    this_.hidePanel();
+        //}));
         this.renderPanel();
     }
 };

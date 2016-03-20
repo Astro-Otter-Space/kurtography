@@ -4,6 +4,7 @@ var $ = require('jquery');
 global.jQuery = $;
 require('bootstrap');
 require('./public/src/init-bootstrap');
+
 // Kuzzle-Sdk
 require('kuzzle-sdk');
 
@@ -11,6 +12,7 @@ require('kuzzle-sdk');
 var ol = require('openlayers');
 global.ol = ol;
 //require('./node_modules/ol3-layerswitcher/src/ol3-layerswitcher');
+
 require('./public/src/layerSwitcher');
 require('./node_modules/ol3-drawButtons/src/js/ol3-drawbuttons');
 

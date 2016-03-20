@@ -102,7 +102,6 @@ var olMap = {
 
         // Adding draw controls
         var optionsControlDraw = {
-            "popup_form" : true,
             "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
             "draw": {
                 "Point": true,
@@ -135,27 +134,16 @@ var olMap = {
                 }
             );
 
-            //var element = this_.overlay.getElement();
-            //jQuery(element).popover('destroy');
             if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
-
-                console.log("Click feature " + fProperties.get('name'));
-
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
 
-                //jQuery(element).popover('destroy');
+                this_.addPropertiesTab(fProperties);
+                this_.addGeometriesTab(feature.getGeometry());
+                document.getElementById("mainProperties").style.display="block";
+
                 this_.overlay.setPosition(centerFeature);
-
-                //jQuery(element).popover({
-                //    'placement': 'top',
-                //    'animation': false,
-                //    'html': true,
-                //    'content': this_.addPropertiesToPopup(fProperties)
-                //});
-                //jQuery(element).popover('show');
-
                 this_.view.setCenter(centerFeature);
             }
         });
@@ -222,16 +210,19 @@ var olMap = {
      * @param properties
      * @returns {Element}
      */
-    addPropertiesToPopup: function(properties)
+    addPropertiesTab: function(properties)
     {
-
-        var tab = document.createElement('table');
-        tab.className = 'table table-striped';
+        var tabP = document.getElementById('tabFProperties');
+        if (tabP.childElementCount > 0) {
+            while (tabP.firstChild) tabP.removeChild(tabP.firstChild);
+        }
 
         // Delete geometry if exist
         if (properties.geometry) {
             delete properties.geometry;
         }
+
+        var tbody = document.createElement('tbody');
 
         for (var key in properties) {
             if (typeof properties[key] != 'object' || properties[key] != undefined) {
@@ -246,10 +237,58 @@ var olMap = {
 
                 tr.appendChild(tdKey);
                 tr.appendChild(tdValue);
-                tab.appendChild(tr);
+                tbody.appendChild(tr);
             }
         }
-        return tab;
+        tabP.appendChild(tbody);
+        return tabP;
+    },
+
+    /**
+     *
+     * @param fGeometry
+     */
+    addGeometriesTab: function(fGeometry)
+    {
+        var tabG = document.getElementById('tabFGeometry');
+        var tbody = document.createElement('tbody');
+
+        if (tabG.childElementCount > 0) {
+            while (tabG.firstChild) tabG.removeChild(tabG.firstChild);
+        }
+
+        switch (fGeometry.getType()) {
+            case 'Point' :
+
+                var coordinates = ol.proj.transform(fGeometry.getCoordinates(), 'EPSG:3857', 'EPSG:4326');
+
+                var trLon = document.createElement('tr');
+                var tdLonLabel = document.createElement('td'); tdLonLabel.innerHTML = 'Longitude';
+                var tdLonValue = document.createElement('td'); tdLonValue.innerHTML = coordinates[0];
+
+                trLon.appendChild(tdLonLabel);
+                trLon.appendChild(tdLonValue);
+
+                var trLat = document.createElement('tr');
+                var tdLatLabel = document.createElement('td'); tdLatLabel.innerHTML = 'Lattitude';
+                var tdLatValue = document.createElement('td'); tdLatValue.innerHTML = coordinates[1];
+
+                trLat.appendChild(tdLatLabel);
+                trLat.appendChild(tdLatValue);
+
+                tbody.appendChild(trLon);
+                tbody.appendChild(trLat);
+                break;
+
+            case 'LineString':
+                break;
+
+            case 'Polygon':
+                break;
+        }
+
+        tabG.appendChild(tbody);
+        return tabG;
     },
 
     /**
