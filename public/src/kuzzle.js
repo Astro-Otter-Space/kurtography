@@ -2,9 +2,7 @@
  *
  * @returns {Kuzzle|*}
  */
-var kMap = kMap || {};
-
-kMap.kuzzleManager = {
+var kuzzleManager = {
 
     kuzzle: null,
     defaultIndex : null,
@@ -14,40 +12,42 @@ kMap.kuzzleManager = {
     {
 
         this.defaultIndex = defaultIndex;
+        this.host = kuzzleManager.host;
 
         var optConnect = {
-            defaultIndex: 'kurtography',
+            defaultIndex: this.defaultIndex,
             connect: 'auto',
             autoReconnect: true,
             headers: {
                 'Access-Control-Allow-Origin' : '*'
             }
         };
-        this.kuzzle = new Kuzzle(kuzzleManager.host, optConnect, function (err, res) {
+        this.kuzzle = new Kuzzle(this.host, optConnect, function (err, res) {
             if(err) {
                 console.log(err.message)
             }
         });
         this.kuzzle.connect();
 
-        this.kuzzle.listIndexes(function (err, indexes) {
-            console.log(indexes);
-        });
+        return this.kuzzle;
     },
 
-
-    listCollections: function ()
-    {
-        var listCollections = this.kuzzle.listCollections(this.defaultIndex, {type: 'all'}, function (err, collections) {
-            if(!err) {
-                return collections;
-            } else {
-                console.log("Erreur liste collections : " + err.message)
-            }
-        });
-
-        return listCollections;
-    }
+    /**
+     * List collections (layers)
+     * @returns {*|Object}
+     */
+    //listCollections: function ()
+    //{
+    //    this.kuzzle.listCollections(this.defaultIndex, {type: 'stored'}, function (err, listCollections) {
+    //        if(!err) {
+    //            return listCollections;
+    //        } else {
+    //            console.log("Erreur liste collections : " + err.message)
+    //        }
+    //    });
+    //    //console.log("Liste de collections");
+    //    console.log(listCollections);
+    //    return listCollections;
+    //}
 };
-
-exports.kuzzle = kMap.kuzzleManager;
+exports.kuzzleManager = kuzzleManager;

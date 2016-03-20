@@ -3,17 +3,15 @@
 var $ = require('jquery');
 global.jQuery = $;
 require('bootstrap');
-
+require('./public/src/init-bootstrap');
 // Kuzzle-Sdk
 require('kuzzle-sdk');
-var kuzzle = require('./public/src/kuzzle.js');
-//kuzzle.kuzzle.initKuzzle('kurtography');
-//kuzzle.listCollections();
 
 // Openlayers
 var ol = require('openlayers');
 global.ol = ol;
-require('./node_modules/ol3-layerswitcher/src/ol3-layerswitcher');
+//require('./node_modules/ol3-layerswitcher/src/ol3-layerswitcher');
+require('./public/src/layerSwitcher');
 require('./node_modules/ol3-drawButtons/src/js/ol3-drawbuttons');
 
 var mockGeoJSONCat = {
@@ -129,65 +127,13 @@ var mockGeoJSONCat = {
         }
     ]
 };
-var mockGeoJSONVelos = {
-    "type": "FeatureCollection",
-    "features": [
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "ballade à San Francisco"
-            },
-            "geometry": {
-                "type": "LineString",
-                "coordinates": [
-                    [-122.48369693756104, 37.83381888486939],
-                    [-122.48348236083984, 37.83317489144141],
-                    [-122.48339653015138, 37.83270036637107],
-                    [-122.48356819152832, 37.832056363179625],
-                    [-122.48404026031496, 37.83114119107971],
-                    [-122.48404026031496, 37.83049717427869],
-                    [-122.48348236083984, 37.829920943955045],
-                    [-122.48356819152832, 37.82954808664175],
-                    [-122.48507022857666, 37.82944639795659],
-                    [-122.48610019683838, 37.82880236636284],
-                    [-122.48695850372314, 37.82931081282506],
-                    [-122.48700141906738, 37.83080223556934],
-                    [-122.48751640319824, 37.83168351665737],
-                    [-122.48803138732912, 37.832158048267786],
-                    [-122.48888969421387, 37.83297152392784],
-                    [-122.48987674713133, 37.83263257682617],
-                    [-122.49043464660643, 37.832937629287755],
-                    [-122.49125003814696, 37.832429207817725],
-                    [-122.49163627624512, 37.832564787218985],
-                    [-122.49223709106445, 37.83337825839438],
-                    [-122.49378204345702, 37.83368330777276]
-                ]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Ballade Agropolis"
-            },
-            "geometry": {
-                "type": "LineString",
-                "coordinates": [
-                    [3.874070399999937, 43.6393625],
-                    [3.871328830718994, 43.64197616064553],
-                    [3.871328830718994, 43.642162498722],
-                    [3.8712000846862793, 43.64380845996348],
-                    [3.869140148162842, 43.64474011615058]
-                ]
-            }
-        }
-    ]
-};
-var objMock = {"Where is my cat ?" : mockGeoJSONCat, "Mes balades à vélos" :  mockGeoJSONVelos};
+var objMock = {"Where is my cat ?" : mockGeoJSONCat};
 
 // Initalisation de la map Openlayers
-var mapOl = require('./public/src/openlayers');
-mapOl.map.initMap(objMock, 13);
+var olMap = require('./public/src/openlayers');
+olMap.olMap.initMap(objMock, 13);
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
+

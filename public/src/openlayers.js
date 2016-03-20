@@ -2,9 +2,7 @@
  * Initialisation de la map
  * @returns {ol.Map|*}
  */
-var kMap = kMap || {};
-
-kMap.olMap = {
+var olMap = {
 
     map: null,
     projectionFrom: 'EPSG:3857',
@@ -14,6 +12,8 @@ kMap.olMap = {
     zoom: null,
     buttonsDrawControls: null,
     layerSwitcher: null,
+    k:null,
+    kuzzle:null,
     mockDatas: null,
     selectedLayer: null,
     overlay: null,
@@ -23,30 +23,24 @@ kMap.olMap = {
     {
         var this_ = this;
 
+        // Kuzzle
+        this.k = require('./kuzzle');
+        this.kuzzle = this.k.kuzzleManager.initKuzzle("kurtography");
+
         // Variables
         this.mockDatas = mockDatas;
         this.zoom = zoom;
-        this.projectionFrom = kMap.olMap.projectionFrom;
-        this.projectionTo = kMap.olMap.projectionTo;
-        //this.flagDraw = kMap.olMap.flagDraw;
+        this.projectionFrom = olMap.projectionFrom;
+        this.projectionTo = olMap.projectionTo;
 
         // Recuperation du fond de carte OpenStreetMap
         this.osm = new ol.layer.Tile({
-                title : 'OSM',
+                title : 'Open Street Map',
                 visible : true,
                 type: 'overlays',
                 source: new ol.source.OSM()
             }
         );
-
-        this.satellite = new ol.layer.Tile({
-            title: 'Satelite',
-            visible : false,
-            type: 'overlays',
-            source: new ol.source.MapQuest({
-                layer : 'sat'
-            })
-        });
 
         // Definition de la vue
         this.view = new ol.View({
@@ -66,7 +60,7 @@ kMap.olMap = {
 
         // Definition de la map
         this.map = new ol.Map({
-            layers: [this.satellite, this.osm, this.kuzzleGroup],
+            layers: [this.osm, this.kuzzleGroup],
             overlays: [this.overlay],
             target: 'map',
             controls: ol.control.defaults({
@@ -99,7 +93,7 @@ kMap.olMap = {
             this_.view.setCenter(pointCenter);
         });
 
-        // Ajout du LayerSwitcher
+        // Adding LayerSwitcher
         this.layerSwitcher = new ol.control.LayerSwitcher({
             tipLabel: 'Légende' // Optional label for button
         });
@@ -141,24 +135,26 @@ kMap.olMap = {
                 }
             );
 
-            var element = this_.overlay.getElement();
+            //var element = this_.overlay.getElement();
             //jQuery(element).popover('destroy');
             if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
+
+                console.log("Click feature " + fProperties.get('name'));
 
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
 
-                jQuery(element).popover('destroy');
+                //jQuery(element).popover('destroy');
                 this_.overlay.setPosition(centerFeature);
 
-                jQuery(element).popover({
-                    'placement': 'top',
-                    'animation': false,
-                    'html': true,
-                    'content': this_.addPropertiesToPopup(fProperties)
-                });
-                jQuery(element).popover('show');
+                //jQuery(element).popover({
+                //    'placement': 'top',
+                //    'animation': false,
+                //    'html': true,
+                //    'content': this_.addPropertiesToPopup(fProperties)
+                //});
+                //jQuery(element).popover('show');
 
                 this_.view.setCenter(centerFeature);
             }
@@ -171,7 +167,27 @@ kMap.olMap = {
     addLayersFromKuzzle: function()
     {
         var tabStyles = this.getStylesFeatures();
-        var tabKuzzleLayers = [];
+        var tabKuzzleLayers = this.tabKuzzleLayers = [];
+        //var this_ = this;
+
+        //this.kuzzle.listCollections(this.k.kuzzleManager.defaultIndex, { type: "stored" }, function (err, collections) {
+        //    if(!err) {
+        //        collections.stored.forEach(function(i, layer) {
+        //
+        //            var kuzzleLayerVector = new ol.layer.Vector({
+        //                source: new ol.source.Vector(),
+        //                title: i,
+        //                type: 'base',
+        //                visible: false
+        //            });
+        //            this_.tabKuzzleLayers.push(kuzzleLayerVector);
+        //        });
+        //
+        //    } else {
+        //        console.log(err.message);
+        //    }
+        //});
+        //console.log(kuzzleCollections);
 
         for (key in this.mockDatas)
         {
@@ -196,9 +212,9 @@ kMap.olMap = {
                 }
             });
 
-            tabKuzzleLayers.push(kuzzleLayerVector);
+            this.tabKuzzleLayers.push(kuzzleLayerVector);
         }
-        return tabKuzzleLayers;
+        return this.tabKuzzleLayers;
     },
 
     /**
@@ -294,9 +310,9 @@ kMap.olMap = {
         this.selectedLayer = layer;
     }
 };
-
-exports.map = kMap.olMap;
-exports.selectedLayer = kMap.olMap.getSelectedLayer;
+//
+exports.olMap = olMap;
+//exports.selectedLayer = kMap.olMap.getSelectedLayer;
 
 
 /**
