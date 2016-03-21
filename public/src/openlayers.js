@@ -16,8 +16,6 @@ var olMap = {
     kuzzle:null,
     mockDatas: null,
     selectedLayer: null,
-    overlay: null,
-    elPopup: null,
 
     initMap: function(mockDatas, zoom)
     {
@@ -48,20 +46,14 @@ var olMap = {
         });
 
         // Layers from kuzzle
-        this.kuzzleGroup = new ol.layer.Group({
-            title: 'Kuzzle layers',
-            layers: this.addLayersFromKuzzle()
-        });
-
-        // Definition de l overlay Popup
-        this.overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */ {
-            element: document.getElementById('popup')
-        });
+        //this.kuzzleGroup = new ol.layer.Group({
+        //    title: 'Kuzzle layers',
+        //    layers: this.addLayersFromKuzzle()
+        //});
 
         // Definition de la map
         this.map = new ol.Map({
-            layers: [this.osm, this.kuzzleGroup],
-            overlays: [this.overlay],
+            layers: [this.osm]/*, this.kuzzleGroup*/,
             target: 'map',
             controls: ol.control.defaults({
                 attributionOptions: ({
@@ -79,6 +71,7 @@ var olMap = {
             ]),
             view: this.view
         });
+        this.addLayersFromKuzzle();
 
         // Centrage sur la carte en recuperant la position
         this.geolocation = new ol.Geolocation({
@@ -114,7 +107,7 @@ var olMap = {
         this.buttonsDrawControls = new ol.control.DrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
-        ol.control.LayerSwitcher.forEachRecursive(this.kuzzleGroup, function(l, idx, a) {
+        ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
             l.on("change:visible", function(e) {
                 var lyr = e.target;
                 if (lyr.getVisible() == true) {
@@ -155,54 +148,74 @@ var olMap = {
     addLayersFromKuzzle: function()
     {
         var tabStyles = this.getStylesFeatures();
-        var tabKuzzleLayers = this.tabKuzzleLayers = [];
-        //var this_ = this;
+        var this_ = this;
 
-        //this.kuzzle.listCollections(this.k.kuzzleManager.defaultIndex, { type: "stored" }, function (err, collections) {
-        //    if(!err) {
-        //        collections.stored.forEach(function(i, layer) {
+        this.kuzzle.listCollections(this.k.kuzzleManager.defaultIndex, { type: "stored" }, function (err, collections) {
+            if(!err) {
+
+                var olCollection = this_.olCollection = [];
+                collections.stored.forEach(function(i, layer) {
+
+                    // Retrieve data from each layer
+                    this_.kuzzle.dataCollectionFactory(this_.k.kuzzleManager.defaultIndex, i).fetchAllDocuments(function (error, result) {
+                            // result is an object containing the total number of documents
+                            // and an array of KuzzleDocument objects
+                        if (!err && result.total > 0) {
+                            console.log("Nb features : " + result.total);
+                            var kGeoJSON =  new ol.format.GeoJSON().readFeatures(result.documents, { featureProjection: this_.projectionFrom });
+
+                            var kSource = new ol.source.Vector({ features: kGeoJSON, wrapX: false });
+
+                            var kuzzleLayerVector = new ol.layer.Vector({
+                                source: kSource,
+                                title: i,
+                                type: 'base',
+                                visible: true,
+                                style: function(feature, resolution) {
+                                    return tabStyles[feature.getGeometry().getType()];
+                                }
+                            });
+                            this_.olCollection.push(kuzzleLayerVector);
+                        } else {
+                            console.log(err.message);
+                        }
+                    });
+                });
+
+                var grpKuzzleLayers = new ol.layer.Group({ layers: this_.olCollection });
+                this_.map.setLayerGroup([this_.map.getLayers(), grpKuzzleLayers]);
+            } else {
+                console.log(err.message);
+            }
+        });
+
+        //var tabKuzzleLayers = this.tabKuzzleLayers = [];
+        //for (key in this.mockDatas)
+        //{
+        //    var kuzzleGeoJSON = new ol.format.GeoJSON().readFeatures(this.mockDatas[key], {
+        //        featureProjection: this.projectionFrom
+        //    });
         //
-        //            var kuzzleLayerVector = new ol.layer.Vector({
-        //                source: new ol.source.Vector(),
-        //                title: i,
-        //                type: 'base',
-        //                visible: false
-        //            });
-        //            this_.tabKuzzleLayers.push(kuzzleLayerVector);
-        //        });
+        //    // Recuperation du geoJSON
+        //    var kuzzleSourceVector = new ol.source.Vector({
+        //        features: kuzzleGeoJSON,
+        //        wrapX: false
+        //    });
         //
-        //    } else {
-        //        console.log(err.message);
-        //    }
-        //});
-        //console.log(kuzzleCollections);
-
-        for (key in this.mockDatas)
-        {
-            var kuzzleGeoJSON = new ol.format.GeoJSON().readFeatures(this.mockDatas[key], {
-                featureProjection: this.projectionFrom
-            });
-
-            // Recuperation du geoJSON
-            var kuzzleSourceVector = new ol.source.Vector({
-                features: kuzzleGeoJSON,
-                wrapX: false
-            });
-
-            // Creation du layer
-            var kuzzleLayerVector = new ol.layer.Vector({
-                source: kuzzleSourceVector,
-                title: key,
-                type: 'base',
-                visible: false,
-                style: function(feature, resolution){
-                    return tabStyles[feature.getGeometry().getType()];
-                }
-            });
-
-            this.tabKuzzleLayers.push(kuzzleLayerVector);
-        }
-        return this.tabKuzzleLayers;
+        //    // Creation du layer
+        //    var kuzzleLayerVector = new ol.layer.Vector({
+        //        source: kuzzleSourceVector,
+        //        title: key,
+        //        type: 'base',
+        //        visible: false,
+        //        style: function(feature, resolution){
+        //            return tabStyles[feature.getGeometry().getType()];
+        //        }
+        //    });
+        //
+        //    this.tabKuzzleLayers.push(kuzzleLayerVector);
+        //}
+        //return this.tabKuzzleLayers;
     },
 
     /**
