@@ -14,7 +14,7 @@ global.ol = ol;
 //require('./node_modules/ol3-layerswitcher/src/ol3-layerswitcher');
 
 require('./public/src/layerSwitcher');
-require('./node_modules/ol3-drawButtons/src/js/ol3-drawbuttons');
+require('./node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons');
 
 var mockGeoJSONCat = {
     "type": "FeatureCollection",
@@ -134,6 +134,26 @@ var objMock = {"Where is my cat ?" : mockGeoJSONCat};
 // Initalisation de la map Openlayers
 var olMap = require('./public/src/openlayers');
 olMap.olMap.initMap(objMock, 13);
+
+
+
+var k = require('./public/src/kuzzle');
+k.kuzzleManager.initKuzzle("kurtography");
+
+// TEST
+console.log("Ajout données kuzzle");
+var vectorTest = new ol.layer.Vector({
+    source: new ol.source.Vector(),
+    type: 'base',
+    title: 'Test Kuzzle mock'
+});
+var groupLayerTest = new ol.layer.Group({
+    title: 'Kuzzle layers',
+    layers: vectorTest
+});
+olMap.olMap.map.addLayer(vectorTest);
+olMap.olMap.layerSwitcher.renderPanel();
+
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);

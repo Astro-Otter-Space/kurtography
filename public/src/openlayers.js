@@ -21,9 +21,9 @@ var olMap = {
     {
         var this_ = this;
 
-        // Kuzzle
-        this.k = require('./kuzzle');
-        this.kuzzle = this.k.kuzzleManager.initKuzzle("kurtography");
+        //// Kuzzle
+        //this.k = require('./kuzzle');
+        //this.kuzzle = this.k.kuzzleManager.initKuzzle("kurtography");
 
         // Variables
         this.mockDatas = mockDatas;
@@ -45,12 +45,6 @@ var olMap = {
             zoom: this.zoom
         });
 
-        // Layers from kuzzle
-        //this.kuzzleGroup = new ol.layer.Group({
-        //    title: 'Kuzzle layers',
-        //    layers: this.addLayersFromKuzzle()
-        //});
-
         // Definition de la map
         this.map = new ol.Map({
             layers: [this.osm]/*, this.kuzzleGroup*/,
@@ -71,7 +65,8 @@ var olMap = {
             ]),
             view: this.view
         });
-        this.addLayersFromKuzzle();
+
+        //this.addLayersFromKuzzle();
 
         // Centrage sur la carte en recuperant la position
         this.geolocation = new ol.Geolocation({
@@ -86,6 +81,13 @@ var olMap = {
             this_.view.setCenter(pointCenter);
         });
 
+
+        //Layers from kuzzle
+        this.kuzzleGroup = new ol.layer.Group({
+            title: 'Kuzzle layers',
+            layers: this.addLayersFromKuzzle()
+        });
+        this.map.addLayer( this.kuzzleGroup);
         // Adding LayerSwitcher
         this.layerSwitcher = new ol.control.LayerSwitcher({
             tipLabel: 'Légende' // Optional label for button
@@ -100,23 +102,23 @@ var olMap = {
                 "Point": true,
                 "LineString": true,
                 "Square": true,
-                "Circle": true,
+                "Circle": false,
                 "Polygon": true
             }
         };
-        this.buttonsDrawControls = new ol.control.DrawButtons(this.getSelectedLayer(), optionsControlDraw);
+        this.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
-        ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
-            l.on("change:visible", function(e) {
-                var lyr = e.target;
-                if (lyr.getVisible() == true) {
-                    // Not sure if correct but it's working :|
-                    this_.setSelectedLayer(lyr);
-                    this_.buttonsDrawControls.setSelectedLayer(lyr);
-                }
-            });
-        });
+        //ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
+        //    l.on("change:visible", function(e) {
+        //        var lyr = e.target;
+        //        if (lyr.getVisible() == true) {
+        //            // Not sure if correct but it's working :|
+        //            this_.setSelectedLayer(lyr);
+        //            this_.buttonsDrawControls.setSelectedLayer(lyr);
+        //        }
+        //    });
+        //});
         this.map.addControl(this.buttonsDrawControls);
 
         // Add popup + listener
@@ -136,10 +138,12 @@ var olMap = {
                 this_.addGeometriesTab(feature.getGeometry());
                 document.getElementById("mainProperties").style.display="block";
 
-                this_.overlay.setPosition(centerFeature);
                 this_.view.setCenter(centerFeature);
             }
         });
+
+        console.log("Fin initmap");
+
     },
 
     /**
@@ -150,72 +154,72 @@ var olMap = {
         var tabStyles = this.getStylesFeatures();
         var this_ = this;
 
-        this.kuzzle.listCollections(this.k.kuzzleManager.defaultIndex, { type: "stored" }, function (err, collections) {
-            if(!err) {
-
-                var olCollection = this_.olCollection = [];
-                collections.stored.forEach(function(i, layer) {
-
-                    // Retrieve data from each layer
-                    this_.kuzzle.dataCollectionFactory(this_.k.kuzzleManager.defaultIndex, i).fetchAllDocuments(function (error, result) {
-                            // result is an object containing the total number of documents
-                            // and an array of KuzzleDocument objects
-                        if (!err && result.total > 0) {
-                            console.log("Nb features : " + result.total);
-                            var kGeoJSON =  new ol.format.GeoJSON().readFeatures(result.documents, { featureProjection: this_.projectionFrom });
-
-                            var kSource = new ol.source.Vector({ features: kGeoJSON, wrapX: false });
-
-                            var kuzzleLayerVector = new ol.layer.Vector({
-                                source: kSource,
-                                title: i,
-                                type: 'base',
-                                visible: true,
-                                style: function(feature, resolution) {
-                                    return tabStyles[feature.getGeometry().getType()];
-                                }
-                            });
-                            this_.olCollection.push(kuzzleLayerVector);
-                        } else {
-                            console.log(err.message);
-                        }
-                    });
-                });
-
-                var grpKuzzleLayers = new ol.layer.Group({ layers: this_.olCollection });
-                this_.map.setLayerGroup([this_.map.getLayers(), grpKuzzleLayers]);
-            } else {
-                console.log(err.message);
-            }
-        });
-
-        //var tabKuzzleLayers = this.tabKuzzleLayers = [];
-        //for (key in this.mockDatas)
-        //{
-        //    var kuzzleGeoJSON = new ol.format.GeoJSON().readFeatures(this.mockDatas[key], {
-        //        featureProjection: this.projectionFrom
-        //    });
+        //this.kuzzle.listCollections(this.k.kuzzleManager.defaultIndex, { type: "stored" }, function (err, collections) {
+        //    if(!err) {
         //
-        //    // Recuperation du geoJSON
-        //    var kuzzleSourceVector = new ol.source.Vector({
-        //        features: kuzzleGeoJSON,
-        //        wrapX: false
-        //    });
+        //        var olCollection = this_.olCollection = [];
+        //        collections.stored.forEach(function(i, layer) {
         //
-        //    // Creation du layer
-        //    var kuzzleLayerVector = new ol.layer.Vector({
-        //        source: kuzzleSourceVector,
-        //        title: key,
-        //        type: 'base',
-        //        visible: false,
-        //        style: function(feature, resolution){
-        //            return tabStyles[feature.getGeometry().getType()];
-        //        }
-        //    });
+        //            // Retrieve data from each layer
+        //            this_.kuzzle.dataCollectionFactory(this_.k.kuzzleManager.defaultIndex, i).fetchAllDocuments(function (error, result) {
+        //                    // result is an object containing the total number of documents
+        //                    // and an array of KuzzleDocument objects
+        //                if (!err && result.total > 0) {
+        //                    console.log("Nb features : " + result.total);
+        //                    var kGeoJSON =  new ol.format.GeoJSON().readFeatures(result.documents, { featureProjection: this_.projectionFrom });
         //
-        //    this.tabKuzzleLayers.push(kuzzleLayerVector);
-        //}
-        //return this.tabKuzzleLayers;
+        //                    var kSource = new ol.source.Vector({ features: kGeoJSON, wrapX: false });
+        //
+        //                    var kuzzleLayerVector = new ol.layer.Vector({
+        //                        source: kSource,
+        //                        title: i,
+        //                        type: 'base',
+        //                        visible: true,
+        //                        style: function(feature, resolution) {
+        //                            return tabStyles[feature.getGeometry().getType()];
+        //                        }
+        //                    });
+        //                    this_.olCollection.push(kuzzleLayerVector);
+        //                } else {
+        //                    console.log(err.message);
+        //                }
+        //            });
+        //        });
+        //
+        //        var grpKuzzleLayers = new ol.layer.Group({ layers: this_.olCollection });
+        //        this_.map.setLayerGroup([this_.map.getLayers(), grpKuzzleLayers]);
+        //    } else {
+        //        console.log(err.message);
+        //    }
+        //});
+
+        var tabKuzzleLayers = this.tabKuzzleLayers = [];
+        for (key in this.mockDatas)
+        {
+            var kuzzleGeoJSON = new ol.format.GeoJSON().readFeatures(this.mockDatas[key], {
+                featureProjection: this.projectionFrom
+            });
+
+            // Recuperation du geoJSON
+            var kuzzleSourceVector = new ol.source.Vector({
+                features: kuzzleGeoJSON,
+                wrapX: false
+            });
+
+            // Creation du layer
+            var kuzzleLayerVector = new ol.layer.Vector({
+                source: kuzzleSourceVector,
+                title: key,
+                type: 'base',
+                visible: false,
+                style: function(feature, resolution){
+                    return tabStyles[feature.getGeometry().getType()];
+                }
+            });
+
+            this.tabKuzzleLayers.push(kuzzleLayerVector);
+        }
+        return this.tabKuzzleLayers;
     },
 
     /**
@@ -246,7 +250,11 @@ var olMap = {
                 tdKey.innerHTML = (typeof key == "string") ? key.capitalizeFirstLetter() : key;
 
                 var tdValue = document.createElement('td');
-                tdValue.innerHTML = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
+                var inputValue = document.createElement('input')
+                inputValue.type = 'text';
+                inputValue.value = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
+
+                tdValue.appendChild(inputValue);
 
                 tr.appendChild(tdKey);
                 tr.appendChild(tdValue);
@@ -428,11 +436,21 @@ var olMap = {
     setSelectedLayer: function (layer)
     {
         this.selectedLayer = layer;
-    }
+    },
+
+    //
+    //getMap: function()
+    //{
+    //    return this.map;
+    //},
+    //
+    //setMap: function(map)
+    //{
+    //    this.map = map;
+    //}
 };
 //
 exports.olMap = olMap;
-//exports.selectedLayer = kMap.olMap.getSelectedLayer;
 
 
 /**
