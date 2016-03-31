@@ -136,7 +136,10 @@ var olMap = require('./public/src/openlayers');
 olMap.olMap.initMap(objMock, 13);
 
 
-
+/**
+ * Kuzzle
+ * @type {exports|module.exports}
+ */
 var k = require('./public/src/kuzzle');
 k.kuzzleManager.initKuzzle("kurtography");
 
@@ -145,8 +148,10 @@ console.log("Ajout données kuzzle");
 var vectorTest = new ol.layer.Vector({
     source: new ol.source.Vector(),
     type: 'base',
-    title: 'Test Kuzzle mock'
+    title: 'Test Kuzzle mock',
+    visible: false
 });
+
 var groupLayerTest = new ol.layer.Group({
     title: 'Kuzzle layers',
     layers: vectorTest

@@ -138,7 +138,10 @@ var olMap = require('./public/src/openlayers');
 olMap.olMap.initMap(objMock, 13);
 
 
-
+/**
+ * Kuzzle
+ * @type {exports|module.exports}
+ */
 var k = require('./public/src/kuzzle');
 k.kuzzleManager.initKuzzle("kurtography");
 
@@ -147,8 +150,10 @@ console.log("Ajout données kuzzle");
 var vectorTest = new ol.layer.Vector({
     source: new ol.source.Vector(),
     type: 'base',
-    title: 'Test Kuzzle mock'
+    title: 'Test Kuzzle mock',
+    visible: false
 });
+
 var groupLayerTest = new ol.layer.Group({
     title: 'Kuzzle layers',
     layers: vectorTest
@@ -46293,16 +46298,16 @@ var olMap = {
         this.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
-        //ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
-        //    l.on("change:visible", function(e) {
-        //        var lyr = e.target;
-        //        if (lyr.getVisible() == true) {
-        //            // Not sure if correct but it's working :|
-        //            this_.setSelectedLayer(lyr);
-        //            this_.buttonsDrawControls.setSelectedLayer(lyr);
-        //        }
-        //    });
-        //});
+        ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
+            l.on("change:visible", function(e) {
+                var lyr = e.target;
+                if (lyr.getVisible() == true) {
+                    // Not sure if correct but it's working :|
+                    this_.setSelectedLayer(lyr);
+                    this_.buttonsDrawControls.setSelectedLayer(lyr);
+                }
+            });
+        });
         this.map.addControl(this.buttonsDrawControls);
 
         // Add popup + listener
