@@ -135,32 +135,15 @@ var objMock = {"Where is my cat ?" : mockGeoJSONCat};
 
 // Initalisation de la map Openlayers
 var olMap = require('./public/src/openlayers');
-olMap.olMap.initMap(objMock, 13);
-
+olMap.olMap.initMap(13);
 
 /**
  * Kuzzle
  * @type {exports|module.exports}
  */
 var k = require('./public/src/kuzzle');
-k.kuzzleManager.initKuzzle("kurtography");
-
-// TEST
-console.log("Ajout données kuzzle");
-var vectorTest = new ol.layer.Vector({
-    source: new ol.source.Vector(),
-    type: 'base',
-    title: 'Test Kuzzle mock',
-    visible: false
-});
-
-var groupLayerTest = new ol.layer.Group({
-    title: 'Kuzzle layers',
-    layers: vectorTest
-});
-olMap.olMap.map.addLayer(vectorTest);
-olMap.olMap.layerSwitcher.renderPanel();
-
+k.kuzzleManager.initKuzzle("kurtography", olMap.olMap);
+k.kuzzleManager.listCollections();
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
@@ -45852,12 +45835,13 @@ jQuery(function(){
 var kuzzleManager = {
 
     kuzzle: null,
+    olMap: null,
     defaultIndex : null,
     host: 'http://localhost:7512',
 
-    initKuzzle: function (defaultIndex)
+    initKuzzle: function (defaultIndex, olMap)
     {
-
+        this.olMap = olMap;
         this.defaultIndex = defaultIndex;
         this.host = kuzzleManager.host;
 
@@ -45884,41 +45868,49 @@ var kuzzleManager = {
      * @returns {*|Object}
      */
     listCollections: function () {
+        var this_ = this;
+        var tabStyles = this.olMap.getStylesFeatures();
 
-        this.kuzzle.listCollections(this.k.kuzzleManager.defaultIndex, { type: "stored" }, function (err, collections) {
+        this.kuzzle.listCollections(this.defaultIndex, { type: "stored" }, function (err, collections) {
             if(!err) {
 
-                var olCollection = this_.olCollection = [];
                 collections.stored.forEach(function(i, layer) {
 
                     // Retrieve data from each layer
-                    this_.kuzzle.dataCollectionFactory(this_.k.kuzzleManager.defaultIndex, i).fetchAllDocuments(function (error, result) {
+                    this_.kuzzle.dataCollectionFactory(this_.defaultIndex, i).fetchAllDocuments(function (error, result) {
                         // result is an object containing the total number of documents
                         // and an array of KuzzleDocument objects
                         if (!err && result.total > 0) {
-                            console.log("Nb features : " + result.total);
-                            var kGeoJSON =  new ol.format.GeoJSON().readFeatures(result.documents, { featureProjection: this_.projectionFrom });
-
+                            // Retrieve content
+                            var dataGeoJSON = {
+                                "type": "FeatureCollection",
+                                "features": []
+                             };
+                            result.documents.forEach(function(kDoc, n) {
+                                dataGeoJSON.features.push(kDoc.content);
+                            });
+                            console.log(dataGeoJSON);
+                            // Construction of geoDatas from content
+                            var kGeoJSON =  new ol.format.GeoJSON().readFeatures(dataGeoJSON, { featureProjection: 'EPSG:3857' });
                             var kSource = new ol.source.Vector({ features: kGeoJSON, wrapX: false });
 
                             var kuzzleLayerVector = new ol.layer.Vector({
                                 source: kSource,
                                 title: i,
                                 type: 'base',
-                                visible: true,
+                                visible: false,
                                 style: function(feature, resolution) {
                                     return tabStyles[feature.getGeometry().getType()];
                                 }
                             });
-                            this_.olCollection.push(kuzzleLayerVector);
+
+                            this_.olMap.map.addLayer(kuzzleLayerVector);
+                            this_.olMap.layerSwitcher.renderPanel();
                         } else {
                             console.log(err.message);
                         }
                     });
                 });
-
-                var grpKuzzleLayers = new ol.layer.Group({ layers: this_.olCollection });
-                this_.map.setLayerGroup([this_.map.getLayers(), grpKuzzleLayers]);
             } else {
                 console.log(err.message);
             }
@@ -46206,16 +46198,11 @@ var olMap = {
     mockDatas: null,
     selectedLayer: null,
 
-    initMap: function(mockDatas, zoom)
+    initMap: function(zoom)
     {
         var this_ = this;
 
-        //// Kuzzle
-        //this.k = require('./kuzzle');
-        //this.kuzzle = this.k.kuzzleManager.initKuzzle("kurtography");
-
         // Variables
-        this.mockDatas = mockDatas;
         this.zoom = zoom;
         this.projectionFrom = olMap.projectionFrom;
         this.projectionTo = olMap.projectionTo;
@@ -46236,7 +46223,7 @@ var olMap = {
 
         // Definition de la map
         this.map = new ol.Map({
-            layers: [this.osm]/*, this.kuzzleGroup*/,
+            layers: [this.osm],
             target: 'map',
             controls: ol.control.defaults({
                 attributionOptions: ({
@@ -46255,7 +46242,6 @@ var olMap = {
             view: this.view
         });
 
-        //this.addLayersFromKuzzle();
 
         // Centrage sur la carte en recuperant la position
         this.geolocation = new ol.Geolocation({
@@ -46270,13 +46256,6 @@ var olMap = {
             this_.view.setCenter(pointCenter);
         });
 
-
-        //Layers from kuzzle
-        this.kuzzleGroup = new ol.layer.Group({
-            title: 'Kuzzle layers',
-            layers: this.addLayersFromKuzzle()
-        });
-        this.map.addLayer( this.kuzzleGroup);
         // Adding LayerSwitcher
         this.layerSwitcher = new ol.control.LayerSwitcher({
             tipLabel: 'Légende' // Optional label for button
@@ -46302,6 +46281,7 @@ var olMap = {
             l.on("change:visible", function(e) {
                 var lyr = e.target;
                 if (lyr.getVisible() == true) {
+                    console.log("Couche selectionne : " + lyr.get('title'));
                     // Not sure if correct but it's working :|
                     this_.setSelectedLayer(lyr);
                     this_.buttonsDrawControls.setSelectedLayer(lyr);
@@ -46330,85 +46310,6 @@ var olMap = {
                 this_.view.setCenter(centerFeature);
             }
         });
-
-        console.log("Fin initmap");
-
-    },
-
-    /**
-     * Add layers from kuzzle
-     */
-    addLayersFromKuzzle: function()
-    {
-        var tabStyles = this.getStylesFeatures();
-        var this_ = this;
-
-        //this.kuzzle.listCollections(this.k.kuzzleManager.defaultIndex, { type: "stored" }, function (err, collections) {
-        //    if(!err) {
-        //
-        //        var olCollection = this_.olCollection = [];
-        //        collections.stored.forEach(function(i, layer) {
-        //
-        //            // Retrieve data from each layer
-        //            this_.kuzzle.dataCollectionFactory(this_.k.kuzzleManager.defaultIndex, i).fetchAllDocuments(function (error, result) {
-        //                    // result is an object containing the total number of documents
-        //                    // and an array of KuzzleDocument objects
-        //                if (!err && result.total > 0) {
-        //                    console.log("Nb features : " + result.total);
-        //                    var kGeoJSON =  new ol.format.GeoJSON().readFeatures(result.documents, { featureProjection: this_.projectionFrom });
-        //
-        //                    var kSource = new ol.source.Vector({ features: kGeoJSON, wrapX: false });
-        //
-        //                    var kuzzleLayerVector = new ol.layer.Vector({
-        //                        source: kSource,
-        //                        title: i,
-        //                        type: 'base',
-        //                        visible: true,
-        //                        style: function(feature, resolution) {
-        //                            return tabStyles[feature.getGeometry().getType()];
-        //                        }
-        //                    });
-        //                    this_.olCollection.push(kuzzleLayerVector);
-        //                } else {
-        //                    console.log(err.message);
-        //                }
-        //            });
-        //        });
-        //
-        //        var grpKuzzleLayers = new ol.layer.Group({ layers: this_.olCollection });
-        //        this_.map.setLayerGroup([this_.map.getLayers(), grpKuzzleLayers]);
-        //    } else {
-        //        console.log(err.message);
-        //    }
-        //});
-
-        var tabKuzzleLayers = this.tabKuzzleLayers = [];
-        for (key in this.mockDatas)
-        {
-            var kuzzleGeoJSON = new ol.format.GeoJSON().readFeatures(this.mockDatas[key], {
-                featureProjection: this.projectionFrom
-            });
-
-            // Recuperation du geoJSON
-            var kuzzleSourceVector = new ol.source.Vector({
-                features: kuzzleGeoJSON,
-                wrapX: false
-            });
-
-            // Creation du layer
-            var kuzzleLayerVector = new ol.layer.Vector({
-                source: kuzzleSourceVector,
-                title: key,
-                type: 'base',
-                visible: false,
-                style: function(feature, resolution){
-                    return tabStyles[feature.getGeometry().getType()];
-                }
-            });
-
-            this.tabKuzzleLayers.push(kuzzleLayerVector);
-        }
-        return this.tabKuzzleLayers;
     },
 
     /**
@@ -46439,11 +46340,12 @@ var olMap = {
                 tdKey.innerHTML = (typeof key == "string") ? key.capitalizeFirstLetter() : key;
 
                 var tdValue = document.createElement('td');
-                var inputValue = document.createElement('input')
-                inputValue.type = 'text';
-                inputValue.value = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
-
-                tdValue.appendChild(inputValue);
+                tdValue.innerHTML = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
+                //var inputValue = document.createElement('input')
+                //inputValue.type = 'text';
+                //inputValue.value = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
+                //
+                //tdValue.appendChild(inputValue);
 
                 tr.appendChild(tdKey);
                 tr.appendChild(tdValue);

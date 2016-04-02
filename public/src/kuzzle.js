@@ -5,12 +5,13 @@
 var kuzzleManager = {
 
     kuzzle: null,
+    olMap: null,
     defaultIndex : null,
     host: 'http://localhost:7512',
 
-    initKuzzle: function (defaultIndex)
+    initKuzzle: function (defaultIndex, olMap)
     {
-
+        this.olMap = olMap;
         this.defaultIndex = defaultIndex;
         this.host = kuzzleManager.host;
 
@@ -37,41 +38,49 @@ var kuzzleManager = {
      * @returns {*|Object}
      */
     listCollections: function () {
+        var this_ = this;
+        var tabStyles = this.olMap.getStylesFeatures();
 
-        this.kuzzle.listCollections(this.k.kuzzleManager.defaultIndex, { type: "stored" }, function (err, collections) {
+        this.kuzzle.listCollections(this.defaultIndex, { type: "stored" }, function (err, collections) {
             if(!err) {
 
-                var olCollection = this_.olCollection = [];
                 collections.stored.forEach(function(i, layer) {
 
                     // Retrieve data from each layer
-                    this_.kuzzle.dataCollectionFactory(this_.k.kuzzleManager.defaultIndex, i).fetchAllDocuments(function (error, result) {
+                    this_.kuzzle.dataCollectionFactory(this_.defaultIndex, i).fetchAllDocuments(function (error, result) {
                         // result is an object containing the total number of documents
                         // and an array of KuzzleDocument objects
                         if (!err && result.total > 0) {
-                            console.log("Nb features : " + result.total);
-                            var kGeoJSON =  new ol.format.GeoJSON().readFeatures(result.documents, { featureProjection: this_.projectionFrom });
-
+                            // Retrieve content
+                            var dataGeoJSON = {
+                                "type": "FeatureCollection",
+                                "features": []
+                             };
+                            result.documents.forEach(function(kDoc, n) {
+                                dataGeoJSON.features.push(kDoc.content);
+                            });
+                            console.log(dataGeoJSON);
+                            // Construction of geoDatas from content
+                            var kGeoJSON =  new ol.format.GeoJSON().readFeatures(dataGeoJSON, { featureProjection: 'EPSG:3857' });
                             var kSource = new ol.source.Vector({ features: kGeoJSON, wrapX: false });
 
                             var kuzzleLayerVector = new ol.layer.Vector({
                                 source: kSource,
                                 title: i,
                                 type: 'base',
-                                visible: true,
+                                visible: false,
                                 style: function(feature, resolution) {
                                     return tabStyles[feature.getGeometry().getType()];
                                 }
                             });
-                            this_.olCollection.push(kuzzleLayerVector);
+
+                            this_.olMap.map.addLayer(kuzzleLayerVector);
+                            this_.olMap.layerSwitcher.renderPanel();
                         } else {
                             console.log(err.message);
                         }
                     });
                 });
-
-                var grpKuzzleLayers = new ol.layer.Group({ layers: this_.olCollection });
-                this_.map.setLayerGroup([this_.map.getLayers(), grpKuzzleLayers]);
             } else {
                 console.log(err.message);
             }
