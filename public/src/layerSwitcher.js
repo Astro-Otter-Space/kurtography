@@ -150,11 +150,8 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
     var this_ = this;
 
     if (lyr.getLayers) {
-        console.log("Groupe de couche " + lyr.get('title'));
         this.renderLayers_(lyr, this.panel);
-
     } else {
-        console.log("Mono couche : " + lyr.get('title'));
 
         var a = document.createElement('a');
         a.className = "list-group-item";

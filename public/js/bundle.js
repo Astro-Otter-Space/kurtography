@@ -18,121 +18,6 @@ global.ol = ol;
 require('./public/src/layerSwitcher');
 require('./node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons');
 
-var mockGeoJSONCat = {
-    "type": "FeatureCollection",
-    "features": [
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Lazerboom",
-                "age" : "4",
-                "genre": "male",
-                "tattoo": "Non",
-                "puce" : "Non",
-                "race": "Chat de goutiere",
-                "colors": "Gris",
-                "weight": "8.5kg",
-                "other" : "Un peu bête"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [3.8766369223594666, 43.610814638046364]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Bazookat",
-                "age" : "4",
-                "genre": "male",
-                "tattoo": "",
-                "puce" : "",
-                "race": "",
-                "colors": "roux et blanc",
-                "weight": "6",
-                "other" : "Très peureux"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [3.8927556574344635, 43.60116585356501]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Globule",
-                "age" : "",
-                "genre": "female",
-                "tattoo": "",
-                "puce" : "",
-                "race": "",
-                "colors": "Grise et blanche",
-                "weight": "4.2",
-                "other" : "Yeux bleu"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [3.8272064924240112, 43.63473958501086]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Isidore",
-                "age" : "",
-                "genre": "male",
-                "tattoo": "",
-                "puce" : "",
-                "race": "",
-                "colors": "noir et blanc",
-                "weight": "",
-                "other" : "Il mord"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [3.9002135396003723, 43.63078647624538]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Kiwi",
-                "age" : "",
-                "genre": "male",
-                "tattoo": "",
-                "puce" : "",
-                "race": "",
-                "colors": "noir",
-                "weight": "",
-                "other" : "Lunatique"
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [3.8289445638656616, 43.61617052139826]
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Kafi",
-                "age" : "",
-                "genre": "femelle",
-                "tattoo": "",
-                "puce" : "",
-                "race": "",
-                "colors": "",
-                "weight": "",
-                "other" : ""
-            },
-            "geometry": {
-                "type": "Point",
-                "coordinates": [3.8291913270950317, 43.615595728630446]
-            }
-        }
-    ]
-};
-var objMock = {"Where is my cat ?" : mockGeoJSONCat};
-
 // Initalisation de la map Openlayers
 var olMap = require('./public/src/openlayers');
 olMap.olMap.initMap(13);
@@ -45870,7 +45755,7 @@ var kuzzleManager = {
     listCollections: function () {
         var this_ = this;
         var tabStyles = this.olMap.getStylesFeatures();
-
+        var collection = new ol.Collection();
         this.kuzzle.listCollections(this.defaultIndex, { type: "stored" }, function (err, collections) {
             if(!err) {
 
@@ -45889,7 +45774,7 @@ var kuzzleManager = {
                             result.documents.forEach(function(kDoc, n) {
                                 dataGeoJSON.features.push(kDoc.content);
                             });
-                            console.log(dataGeoJSON);
+
                             // Construction of geoDatas from content
                             var kGeoJSON =  new ol.format.GeoJSON().readFeatures(dataGeoJSON, { featureProjection: 'EPSG:3857' });
                             var kSource = new ol.source.Vector({ features: kGeoJSON, wrapX: false });
@@ -45904,7 +45789,9 @@ var kuzzleManager = {
                                 }
                             });
 
-                            this_.olMap.map.addLayer(kuzzleLayerVector);
+                            collection.push(kuzzleLayerVector);
+                            this_.olMap.groupKuzzleLayers.setLayers(collection);
+
                             this_.olMap.layerSwitcher.renderPanel();
                         } else {
                             console.log(err.message);
@@ -46072,11 +45959,8 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
     var this_ = this;
 
     if (lyr.getLayers) {
-        console.log("Groupe de couche " + lyr.get('title'));
         this.renderLayers_(lyr, this.panel);
-
     } else {
-        console.log("Mono couche : " + lyr.get('title'));
 
         var a = document.createElement('a');
         a.className = "list-group-item";
@@ -46194,8 +46078,7 @@ var olMap = {
     buttonsDrawControls: null,
     layerSwitcher: null,
     k:null,
-    kuzzle:null,
-    mockDatas: null,
+    groupKuzzleLayers:null,
     selectedLayer: null,
 
     initMap: function(zoom)
@@ -46221,9 +46104,17 @@ var olMap = {
             zoom: this.zoom
         });
 
+        // Create a group layer for Kuzzle layers
+        this.groupKuzzleLayers = groupKuzzleLayers = new ol.layer.Group({
+            name: "Kuzzle group",
+            title: "Kuzzle group",
+            visible: true,
+            layers: []
+        });
+
         // Definition de la map
         this.map = new ol.Map({
-            layers: [this.osm],
+            layers: [this.osm, this.groupKuzzleLayers],
             target: 'map',
             controls: ol.control.defaults({
                 attributionOptions: ({
@@ -46277,7 +46168,10 @@ var olMap = {
         this.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
-        ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
+        ol.control.LayerSwitcher.forEachRecursive(this.groupKuzzleLayers, function(l, idx, a) {
+            l.on('change', function() {
+                console.log("Changement status");
+            })
             l.on("change:visible", function(e) {
                 var lyr = e.target;
                 if (lyr.getVisible() == true) {

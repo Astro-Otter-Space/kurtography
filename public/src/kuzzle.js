@@ -40,7 +40,7 @@ var kuzzleManager = {
     listCollections: function () {
         var this_ = this;
         var tabStyles = this.olMap.getStylesFeatures();
-
+        var collection = new ol.Collection();
         this.kuzzle.listCollections(this.defaultIndex, { type: "stored" }, function (err, collections) {
             if(!err) {
 
@@ -59,7 +59,7 @@ var kuzzleManager = {
                             result.documents.forEach(function(kDoc, n) {
                                 dataGeoJSON.features.push(kDoc.content);
                             });
-                            console.log(dataGeoJSON);
+
                             // Construction of geoDatas from content
                             var kGeoJSON =  new ol.format.GeoJSON().readFeatures(dataGeoJSON, { featureProjection: 'EPSG:3857' });
                             var kSource = new ol.source.Vector({ features: kGeoJSON, wrapX: false });
@@ -74,7 +74,9 @@ var kuzzleManager = {
                                 }
                             });
 
-                            this_.olMap.map.addLayer(kuzzleLayerVector);
+                            collection.push(kuzzleLayerVector);
+                            this_.olMap.groupKuzzleLayers.setLayers(collection);
+
                             this_.olMap.layerSwitcher.renderPanel();
                         } else {
                             console.log(err.message);

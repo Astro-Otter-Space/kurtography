@@ -13,8 +13,7 @@ var olMap = {
     buttonsDrawControls: null,
     layerSwitcher: null,
     k:null,
-    kuzzle:null,
-    mockDatas: null,
+    groupKuzzleLayers:null,
     selectedLayer: null,
 
     initMap: function(zoom)
@@ -40,9 +39,17 @@ var olMap = {
             zoom: this.zoom
         });
 
+        // Create a group layer for Kuzzle layers
+        this.groupKuzzleLayers = groupKuzzleLayers = new ol.layer.Group({
+            name: "Kuzzle group",
+            title: "Kuzzle group",
+            visible: true,
+            layers: []
+        });
+
         // Definition de la map
         this.map = new ol.Map({
-            layers: [this.osm],
+            layers: [this.osm, this.groupKuzzleLayers],
             target: 'map',
             controls: ol.control.defaults({
                 attributionOptions: ({
@@ -96,7 +103,10 @@ var olMap = {
         this.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
-        ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
+        ol.control.LayerSwitcher.forEachRecursive(this.groupKuzzleLayers, function(l, idx, a) {
+            l.on('change', function() {
+                console.log("Changement status");
+            })
             l.on("change:visible", function(e) {
                 var lyr = e.target;
                 if (lyr.getVisible() == true) {
