@@ -13,12 +13,18 @@ var olMap = {
     buttonsDrawControls: null,
     layerSwitcher: null,
     k:null,
+    tabLayersKuzzle: null,
     groupKuzzleLayers:null,
     selectedLayer: null,
 
-    initMap: function(zoom)
+    initMap: function(zoom, k)
     {
         var this_ = this;
+        this.tabLayersKuzzle = []; // new ol.Collection();
+
+        // Kuzzle
+        k.initKuzzle("kurtography", this);
+        k.listCollections();
 
         // Variables
         this.zoom = zoom;
@@ -39,13 +45,13 @@ var olMap = {
             zoom: this.zoom
         });
 
+        console.log(this.tabLayersKuzzle);
         // Create a group layer for Kuzzle layers
-        this.groupKuzzleLayers = groupKuzzleLayers = new ol.layer.Group({
-            name: "Kuzzle group",
+        this.groupKuzzleLayers = new ol.layer.Group({
             title: "Kuzzle group",
-            visible: true,
-            layers: []
+            layers: this.olKuzzleCollection
         });
+
 
         // Definition de la map
         this.map = new ol.Map({
@@ -82,42 +88,6 @@ var olMap = {
             this_.view.setCenter(pointCenter);
         });
 
-        // Adding LayerSwitcher
-        this.layerSwitcher = new ol.control.LayerSwitcher({
-            tipLabel: 'Légende' // Optional label for button
-        });
-
-        this.map.addControl(this.layerSwitcher);
-
-        // Adding draw controls
-        var optionsControlDraw = {
-            "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
-            "draw": {
-                "Point": true,
-                "LineString": true,
-                "Square": true,
-                "Circle": false,
-                "Polygon": true
-            }
-        };
-        this.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
-
-        // Detection of selected layer
-        ol.control.LayerSwitcher.forEachRecursive(this.groupKuzzleLayers, function(l, idx, a) {
-            l.on('change', function() {
-                console.log("Changement status");
-            })
-            l.on("change:visible", function(e) {
-                var lyr = e.target;
-                if (lyr.getVisible() == true) {
-                    console.log("Couche selectionne : " + lyr.get('title'));
-                    // Not sure if correct but it's working :|
-                    this_.setSelectedLayer(lyr);
-                    this_.buttonsDrawControls.setSelectedLayer(lyr);
-                }
-            });
-        });
-        this.map.addControl(this.buttonsDrawControls);
 
         // Add popup + listener
         this.map.on('click', function(evt) {
@@ -139,6 +109,46 @@ var olMap = {
                 this_.view.setCenter(centerFeature);
             }
         });
+
+        //this.initControls();
+    },
+
+    initControls: function()
+    {
+        var this_ = this;
+
+        // Adding Layer switcher
+        this.layerSwitcher = new ol.control.LayerSwitcher();
+        this.map.addControl(this.layerSwitcher);
+
+        // Adding draw controls
+        var optionsControlDraw = {
+            "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
+            "draw": {
+                "Point": true,
+                "LineString": true,
+                "Square": true,
+                "Circle": false,
+                "Polygon": true
+            }
+        };
+        this.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
+
+        // Detection of selected layer
+        ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
+            //console.log(l.get('title'));
+            l.on("change:visible", function(e) {
+                var lyr = e.target;
+                if (lyr.getVisible() == true) {
+                    console.log("Couche selectionne : " + lyr.get('title'));
+                    // Not sure if correct but it's working :|
+                    this_.setSelectedLayer(lyr);
+                    this_.buttonsDrawControls.setSelectedLayer(lyr);
+                }
+            });
+        });
+        console.log(this.map.getLayerGroup().getLayers());
+        this.map.addControl(this.buttonsDrawControls);
     },
 
     /**
@@ -355,6 +365,7 @@ var olMap = {
     // Set la couche selectionnée
     setSelectedLayer: function (layer)
     {
+        console.log("setSelectedLayer : " + layer.get('title'));
         this.selectedLayer = layer;
     },
 

@@ -169,7 +169,10 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
             input.id = lyrId;
             input.checked = lyr.get('visible');
             input.onchange = function(e) {
+
                 this_.setVisible_(lyr, e.target.checked);
+                //console.log("set de la couche " + lyr.get('title'));
+                //olMap.setSelectedLayer(lyr);
             };
 
             a.appendChild(input);
@@ -214,7 +217,9 @@ ol.control.LayerSwitcher.prototype.renderLayers_ = function(lyr, elm) {
  * found under `lyr`. The signature for `fn` is the same as `ol.Collection#forEach`
  */
 ol.control.LayerSwitcher.forEachRecursive = function(lyr, fn) {
+
     lyr.getLayers().forEach(function(lyr, idx, a) {
+        console.log(lyr.get('title'));
         fn(lyr, idx, a);
         if (lyr.getLayers) {
             ol.control.LayerSwitcher.forEachRecursive(lyr, fn);

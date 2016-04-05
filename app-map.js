@@ -18,15 +18,18 @@ require('./node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons');
 
 // Initalisation de la map Openlayers
 var olMap = require('./public/src/openlayers');
-olMap.olMap.initMap(13);
+var k = require('./public/src/kuzzle');
 
+
+olMap.olMap.initMap(13, k.kuzzleManager);
+olMap.olMap.initControls();
 /**
  * Kuzzle
  * @type {exports|module.exports}
  */
-var k = require('./public/src/kuzzle');
-k.kuzzleManager.initKuzzle("kurtography", olMap.olMap);
-k.kuzzleManager.listCollections();
+
+//k.kuzzleManager.initKuzzle("kurtography", olMap.olMap);
+//k.kuzzleManager.listCollections();
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);

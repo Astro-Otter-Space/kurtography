@@ -20,15 +20,18 @@ require('./node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons');
 
 // Initalisation de la map Openlayers
 var olMap = require('./public/src/openlayers');
-olMap.olMap.initMap(13);
+var k = require('./public/src/kuzzle');
 
+
+olMap.olMap.initMap(13, k.kuzzleManager);
+olMap.olMap.initControls();
 /**
  * Kuzzle
  * @type {exports|module.exports}
  */
-var k = require('./public/src/kuzzle');
-k.kuzzleManager.initKuzzle("kurtography", olMap.olMap);
-k.kuzzleManager.listCollections();
+
+//k.kuzzleManager.initKuzzle("kurtography", olMap.olMap);
+//k.kuzzleManager.listCollections();
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
@@ -45722,10 +45725,12 @@ var kuzzleManager = {
     kuzzle: null,
     olMap: null,
     defaultIndex : null,
+    olCollection: null,
     host: 'http://localhost:7512',
 
     initKuzzle: function (defaultIndex, olMap)
     {
+        console.log("Initialisation Kuzzle");
         this.olMap = olMap;
         this.defaultIndex = defaultIndex;
         this.host = kuzzleManager.host;
@@ -45754,15 +45759,16 @@ var kuzzleManager = {
      */
     listCollections: function () {
         var this_ = this;
+
         var tabStyles = this.olMap.getStylesFeatures();
-        var collection = new ol.Collection();
+
+        // Ex avec Mock : https://github.com/HamHamFonFon/kurtogaphy/blob/827b82fdfda3dc2d918fd44cbfd0fca3223a8ef5/public/src/openlayers.js
         this.kuzzle.listCollections(this.defaultIndex, { type: "stored" }, function (err, collections) {
             if(!err) {
-
                 collections.stored.forEach(function(i, layer) {
 
                     // Retrieve data from each layer
-                    this_.kuzzle.dataCollectionFactory(this_.defaultIndex, i).fetchAllDocuments(function (error, result) {
+                    this_.kuzzle.dataCollectionFactory(this_.defaultIndex, i).fetchAllDocuments(function (err, result) {
                         // result is an object containing the total number of documents
                         // and an array of KuzzleDocument objects
                         if (!err && result.total > 0) {
@@ -45788,16 +45794,17 @@ var kuzzleManager = {
                                     return tabStyles[feature.getGeometry().getType()];
                                 }
                             });
-
-                            collection.push(kuzzleLayerVector);
-                            this_.olMap.groupKuzzleLayers.setLayers(collection);
-
-                            this_.olMap.layerSwitcher.renderPanel();
-                        } else {
+                            console.log("Push de " + kuzzleLayerVector.get('title') + " dans tabLayersKuzzle[]");
+                            this_.olMap.tabLayersKuzzle.push(kuzzleLayerVector);
+                        } else if(err) {
                             console.log(err.message);
                         }
                     });
                 });
+
+                //this_.olMap.groupKuzzleLayers.setLayers(this.olCollection);
+                //this_.olMap.layerSwitcher.renderPanel();
+
             } else {
                 console.log(err.message);
             }
@@ -45978,7 +45985,10 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
             input.id = lyrId;
             input.checked = lyr.get('visible');
             input.onchange = function(e) {
+
                 this_.setVisible_(lyr, e.target.checked);
+                //console.log("set de la couche " + lyr.get('title'));
+                //olMap.setSelectedLayer(lyr);
             };
 
             a.appendChild(input);
@@ -46023,7 +46033,9 @@ ol.control.LayerSwitcher.prototype.renderLayers_ = function(lyr, elm) {
  * found under `lyr`. The signature for `fn` is the same as `ol.Collection#forEach`
  */
 ol.control.LayerSwitcher.forEachRecursive = function(lyr, fn) {
+
     lyr.getLayers().forEach(function(lyr, idx, a) {
+        console.log(lyr.get('title'));
         fn(lyr, idx, a);
         if (lyr.getLayers) {
             ol.control.LayerSwitcher.forEachRecursive(lyr, fn);
@@ -46078,12 +46090,18 @@ var olMap = {
     buttonsDrawControls: null,
     layerSwitcher: null,
     k:null,
+    tabLayersKuzzle: null,
     groupKuzzleLayers:null,
     selectedLayer: null,
 
-    initMap: function(zoom)
+    initMap: function(zoom, k)
     {
         var this_ = this;
+        this.tabLayersKuzzle = []; // new ol.Collection();
+
+        // Kuzzle
+        k.initKuzzle("kurtography", this);
+        k.listCollections();
 
         // Variables
         this.zoom = zoom;
@@ -46104,13 +46122,13 @@ var olMap = {
             zoom: this.zoom
         });
 
+        console.log(this.tabLayersKuzzle);
         // Create a group layer for Kuzzle layers
-        this.groupKuzzleLayers = groupKuzzleLayers = new ol.layer.Group({
-            name: "Kuzzle group",
+        this.groupKuzzleLayers = new ol.layer.Group({
             title: "Kuzzle group",
-            visible: true,
-            layers: []
+            layers: this.olKuzzleCollection
         });
+
 
         // Definition de la map
         this.map = new ol.Map({
@@ -46147,42 +46165,6 @@ var olMap = {
             this_.view.setCenter(pointCenter);
         });
 
-        // Adding LayerSwitcher
-        this.layerSwitcher = new ol.control.LayerSwitcher({
-            tipLabel: 'Légende' // Optional label for button
-        });
-
-        this.map.addControl(this.layerSwitcher);
-
-        // Adding draw controls
-        var optionsControlDraw = {
-            "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
-            "draw": {
-                "Point": true,
-                "LineString": true,
-                "Square": true,
-                "Circle": false,
-                "Polygon": true
-            }
-        };
-        this.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
-
-        // Detection of selected layer
-        ol.control.LayerSwitcher.forEachRecursive(this.groupKuzzleLayers, function(l, idx, a) {
-            l.on('change', function() {
-                console.log("Changement status");
-            })
-            l.on("change:visible", function(e) {
-                var lyr = e.target;
-                if (lyr.getVisible() == true) {
-                    console.log("Couche selectionne : " + lyr.get('title'));
-                    // Not sure if correct but it's working :|
-                    this_.setSelectedLayer(lyr);
-                    this_.buttonsDrawControls.setSelectedLayer(lyr);
-                }
-            });
-        });
-        this.map.addControl(this.buttonsDrawControls);
 
         // Add popup + listener
         this.map.on('click', function(evt) {
@@ -46204,6 +46186,46 @@ var olMap = {
                 this_.view.setCenter(centerFeature);
             }
         });
+
+        //this.initControls();
+    },
+
+    initControls: function()
+    {
+        var this_ = this;
+
+        // Adding Layer switcher
+        this.layerSwitcher = new ol.control.LayerSwitcher();
+        this.map.addControl(this.layerSwitcher);
+
+        // Adding draw controls
+        var optionsControlDraw = {
+            "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
+            "draw": {
+                "Point": true,
+                "LineString": true,
+                "Square": true,
+                "Circle": false,
+                "Polygon": true
+            }
+        };
+        this.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
+
+        // Detection of selected layer
+        ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
+            //console.log(l.get('title'));
+            l.on("change:visible", function(e) {
+                var lyr = e.target;
+                if (lyr.getVisible() == true) {
+                    console.log("Couche selectionne : " + lyr.get('title'));
+                    // Not sure if correct but it's working :|
+                    this_.setSelectedLayer(lyr);
+                    this_.buttonsDrawControls.setSelectedLayer(lyr);
+                }
+            });
+        });
+        console.log(this.map.getLayerGroup().getLayers());
+        this.map.addControl(this.buttonsDrawControls);
     },
 
     /**
@@ -46420,6 +46442,7 @@ var olMap = {
     // Set la couche selectionnée
     setSelectedLayer: function (layer)
     {
+        console.log("setSelectedLayer : " + layer.get('title'));
         this.selectedLayer = layer;
     },
 

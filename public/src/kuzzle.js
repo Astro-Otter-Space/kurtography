@@ -7,10 +7,12 @@ var kuzzleManager = {
     kuzzle: null,
     olMap: null,
     defaultIndex : null,
+    olCollection: null,
     host: 'http://localhost:7512',
 
     initKuzzle: function (defaultIndex, olMap)
     {
+        console.log("Initialisation Kuzzle");
         this.olMap = olMap;
         this.defaultIndex = defaultIndex;
         this.host = kuzzleManager.host;
@@ -39,15 +41,16 @@ var kuzzleManager = {
      */
     listCollections: function () {
         var this_ = this;
+
         var tabStyles = this.olMap.getStylesFeatures();
-        var collection = new ol.Collection();
+
+        // Ex avec Mock : https://github.com/HamHamFonFon/kurtogaphy/blob/827b82fdfda3dc2d918fd44cbfd0fca3223a8ef5/public/src/openlayers.js
         this.kuzzle.listCollections(this.defaultIndex, { type: "stored" }, function (err, collections) {
             if(!err) {
-
                 collections.stored.forEach(function(i, layer) {
 
                     // Retrieve data from each layer
-                    this_.kuzzle.dataCollectionFactory(this_.defaultIndex, i).fetchAllDocuments(function (error, result) {
+                    this_.kuzzle.dataCollectionFactory(this_.defaultIndex, i).fetchAllDocuments(function (err, result) {
                         // result is an object containing the total number of documents
                         // and an array of KuzzleDocument objects
                         if (!err && result.total > 0) {
@@ -73,16 +76,17 @@ var kuzzleManager = {
                                     return tabStyles[feature.getGeometry().getType()];
                                 }
                             });
-
-                            collection.push(kuzzleLayerVector);
-                            this_.olMap.groupKuzzleLayers.setLayers(collection);
-
-                            this_.olMap.layerSwitcher.renderPanel();
-                        } else {
+                            console.log("Push de " + kuzzleLayerVector.get('title') + " dans tabLayersKuzzle[]");
+                            this_.olMap.tabLayersKuzzle.push(kuzzleLayerVector);
+                        } else if(err) {
                             console.log(err.message);
                         }
                     });
                 });
+
+                //this_.olMap.groupKuzzleLayers.setLayers(this.olCollection);
+                //this_.olMap.layerSwitcher.renderPanel();
+
             } else {
                 console.log(err.message);
             }
