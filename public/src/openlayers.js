@@ -1,3 +1,6 @@
+import dataLayers from 'dataLayers'
+import ol from 'openlayers'
+
 /**
  * Initialisation de la map
  * @returns {ol.Map|*}
@@ -17,14 +20,13 @@ var olMap = {
     groupKuzzleLayers:null,
     selectedLayer: null,
 
-    initMap: function(zoom, k)
+    initMap: function(zoom)
     {
         var this_ = this;
         this.tabLayersKuzzle = []; // new ol.Collection();
 
         // Kuzzle
-        k.initKuzzle("kurtography", this);
-        k.listCollections();
+        //dataLayers.listCollections();
 
         // Variables
         this.zoom = zoom;
@@ -380,12 +382,5 @@ var olMap = {
     //    this.map = map;
     //}
 };
-//
+
 exports.olMap = olMap;
-
-
-/**
- * Created by stephane on 21/02/16.
- * http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Component/GeofieldWidget/js/GeofieldWidget.js
- * http://cgit.drupalcode.org/openlayers/tree/modules/openlayers_geofield/src/Plugin/Control/Geofield/js/geofieldControl.js
- */
