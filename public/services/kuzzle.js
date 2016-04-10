@@ -1,5 +1,5 @@
 import Kuzzle from 'kuzzle-sdk'
-import Config from 'config'
+import Config from './config'
 
 var optConnect = {
     defaultIndex: Config.defaultIndex,
@@ -18,5 +18,5 @@ var kuzzle = new Kuzzle(Config.kuzzleUrl, optConnect, function (err, res) {
         }
     }
 );
-
+kuzzle.connect();
 export default kuzzle

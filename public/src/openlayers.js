@@ -1,40 +1,49 @@
-import dataLayers from 'dataLayers'
-import ol from 'openlayers'
+import dataLayers from './dataLayers';
+import ol from 'openlayers';
+import LayerSwitcher from './layerSwitcher'
+import ControlDrawButtons from './../../node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons'
 
 /**
  * Initialisation de la map
  * @returns {ol.Map|*}
  */
-var olMap = {
+export default {
 
-    map: null,
-    projectionFrom: 'EPSG:3857',
-    projectionTo: 'EPSG:4326',
-    osm: null,
-    view: null,
-    zoom: null,
-    buttonsDrawControls: null,
-    layerSwitcher: null,
-    k:null,
-    tabLayersKuzzle: null,
-    groupKuzzleLayers:null,
-    selectedLayer: null,
+    state: {
+        map: null,
+        tabLayersKuzzle: [],
+        projectionFrom: 'EPSG:3857',
+        projectionTo: 'EPSG:4326',
+        osm: null,
+        view: null,
+        zoom: null,
+        buttonsDrawControls: null,
+        layerSwitcher: null,
+        k:null,
+        groupKuzzleLayers:null,
+        selectedLayer: null
+    },
 
-    initMap: function(zoom)
+    /**
+     *
+     * @param zoom
+     */
+    initMap(zoom, kListCollections)
     {
+        console.log("Liste collections : " + kListCollections);
+
+        this.state.tabLayersKuzzle = [];
         var this_ = this;
-        this.tabLayersKuzzle = []; // new ol.Collection();
+        this.state.zoom = zoom;
 
-        // Kuzzle
-        //dataLayers.listCollections();
-
-        // Variables
-        this.zoom = zoom;
-        this.projectionFrom = olMap.projectionFrom;
-        this.projectionTo = olMap.projectionTo;
+        // Create a group layer for Kuzzle layers
+        this.state.groupKuzzleLayers = new ol.layer.Group({
+            title: "Kuzzle group"
+            //layers: kListCollections
+        });
 
         // Recuperation du fond de carte OpenStreetMap
-        this.osm = new ol.layer.Tile({
+        this.state.osm = new ol.layer.Tile({
                 title : 'Open Street Map',
                 visible : true,
                 type: 'overlays',
@@ -43,21 +52,13 @@ var olMap = {
         );
 
         // Definition de la vue
-        this.view = new ol.View({
-            zoom: this.zoom
+        this.state.view = new ol.View({
+            zoom: this.state.zoom
         });
-
-        console.log(this.tabLayersKuzzle);
-        // Create a group layer for Kuzzle layers
-        this.groupKuzzleLayers = new ol.layer.Group({
-            title: "Kuzzle group",
-            layers: this.olKuzzleCollection
-        });
-
 
         // Definition de la map
-        this.map = new ol.Map({
-            layers: [this.osm, this.groupKuzzleLayers],
+        this.state.map = new ol.Map({
+            layers: [this.state.osm, this.state.groupKuzzleLayers],
             target: 'map',
             controls: ol.control.defaults({
                 attributionOptions: ({
@@ -70,16 +71,16 @@ var olMap = {
                     coordinateFormat:  function(coordinate) {
                         return ol.coordinate.format(coordinate, 'LonLat : {y}, {x}', 4);
                     },
-                    projection: this.projectionTo,
+                    projection: this.state.projectionTo,
                 })
             ]),
-            view: this.view
+            view: this.state.view
         });
 
 
         // Centrage sur la carte en recuperant la position
         this.geolocation = new ol.Geolocation({
-            projection: ol.proj.get(this.projectionTo),
+            projection: ol.proj.get(this.state.projectionTo),
             tracking: true
         });
 
@@ -87,41 +88,39 @@ var olMap = {
             var lon = this_.geolocation.getPosition()[0];
             var lat =  this_.geolocation.getPosition()[1];
             var pointCenter = new ol.geom.Point([lon, lat]).transform('EPSG:4326', 'EPSG:3857').getCoordinates();
-            this_.view.setCenter(pointCenter);
+            this_.state.view.setCenter(pointCenter);
         });
 
 
         // Add popup + listener
-        this.map.on('click', function(evt) {
-            var feature = this_.map.forEachFeatureAtPixel(evt.pixel,
-                function(feature, layer) {
-                    return feature;
-                }
-            );
-
-            if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
-                var fProperties = feature.getProperties();
-                var extFeature = feature.getGeometry().getExtent();
-                var centerFeature = ol.extent.getCenter(extFeature);
-
-                this_.addPropertiesTab(fProperties);
-                this_.addGeometriesTab(feature.getGeometry());
-                document.getElementById("mainProperties").style.display="block";
-
-                this_.view.setCenter(centerFeature);
-            }
-        });
-
-        //this.initControls();
+        //this.state.map.on('click', function(evt) {
+        //    var feature = this_.map.forEachFeatureAtPixel(evt.pixel,
+        //        function(feature, layer) {
+        //            return feature;
+        //        }
+        //    );
+        //
+        //    if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
+        //        var fProperties = feature.getProperties();
+        //        var extFeature = feature.getGeometry().getExtent();
+        //        var centerFeature = ol.extent.getCenter(extFeature);
+        //
+        //        this_.addPropertiesTab(fProperties);
+        //        this_.addGeometriesTab(feature.getGeometry());
+        //        document.getElementById("mainProperties").style.display="block";
+        //
+        //        this_.state.view.setCenter(centerFeature);
+        //    }
+        //});
     },
 
-    initControls: function()
+    initControls()
     {
         var this_ = this;
 
         // Adding Layer switcher
-        this.layerSwitcher = new ol.control.LayerSwitcher();
-        this.map.addControl(this.layerSwitcher);
+        this.state.layerSwitcher = new ol.control.LayerSwitcher();
+        this.state.map.addControl(this.state.layerSwitcher);
 
         // Adding draw controls
         var optionsControlDraw = {
@@ -134,7 +133,7 @@ var olMap = {
                 "Polygon": true
             }
         };
-        this.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
+        this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
@@ -149,8 +148,8 @@ var olMap = {
                 }
             });
         });
-        console.log(this.map.getLayerGroup().getLayers());
-        this.map.addControl(this.buttonsDrawControls);
+        //console.log(this.map.getLayerGroup().getLayers());
+        //this.state.map.addControl(this.state.buttonsDrawControls);
     },
 
     /**
@@ -158,7 +157,7 @@ var olMap = {
      * @param properties
      * @returns {Element}
      */
-    addPropertiesTab: function(properties)
+    addPropertiesTab(properties)
     {
         var tabP = document.getElementById('tabFProperties');
         if (tabP.childElementCount > 0) {
@@ -201,7 +200,7 @@ var olMap = {
      *
      * @param fGeometry
      */
-    addGeometriesTab: function(fGeometry)
+    addGeometriesTab(fGeometry)
     {
         var tabG = document.getElementById('tabFGeometry');
         var tbody = document.createElement('tbody');
@@ -267,7 +266,7 @@ var olMap = {
      * @param geodesic
      * @returns {*}
      */
-    formatLength : function(line, geodesic) {
+    formatLength(line, geodesic) {
         var length;
         if (geodesic) {
             var coordinates = line.getCoordinates();
@@ -291,7 +290,7 @@ var olMap = {
         return output;
     },
 
-    formatArea: function(polygon, geodesic) {
+    formatArea(polygon, geodesic) {
         var area;
         if (geodesic) {
             var geom = /** @type {ol.geom.Polygon} */(polygon.clone().transform(
@@ -312,10 +311,10 @@ var olMap = {
         return output;
     },
 
-/**
+    /**
      * Set le style des objets geographiques
      */
-    getStylesFeatures: function()
+    getStylesFeatures()
     {
         var styles = {
 
@@ -359,28 +358,15 @@ var olMap = {
     },
 
     // Retourne la couche selectionnée
-    getSelectedLayer: function ()
+    getSelectedLayer()
     {
-        return this.selectedLayer;
+        return this.state.selectedLayer;
     },
 
     // Set la couche selectionnée
-    setSelectedLayer: function (layer)
+    setSelectedLayer(layer)
     {
         console.log("setSelectedLayer : " + layer.get('title'));
-        this.selectedLayer = layer;
-    },
-
-    //
-    //getMap: function()
-    //{
-    //    return this.map;
-    //},
-    //
-    //setMap: function(map)
-    //{
-    //    this.map = map;
-    //}
+        this.state.selectedLayer = layer;
+    }
 };
-
-exports.olMap = olMap;

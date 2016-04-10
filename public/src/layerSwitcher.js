@@ -1,3 +1,5 @@
+import ol from 'openlayers';
+
 /**
  * OpenLayers 3 Layer Switcher Control.
  * See [the examples](./examples) for usage.

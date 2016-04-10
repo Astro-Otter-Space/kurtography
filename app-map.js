@@ -1,19 +1,17 @@
-// Jquery + Bootstrap
-//http://geojson.io/#map=13/43.6330/3.8585
-var $ = require('jquery');
-global.jQuery = $;
-require('bootstrap');
-require('./public/src/init-bootstrap');
+import dataLayers from './public/src/dataLayers';
+dataLayers.listCollections();
 
-//require('./node_modules/ol3-layerswitcher/src/ol3-layerswitcher');
+import {jQuery as $} from 'jquery'
 
-require('./public/src/layerSwitcher');
-require('./node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons');
+//import Bootstrap from 'bootstrap';
+//Bootstrap.$ = $;
+//Bootstrap.jQuery = jQuery;
+//require('./public/src/init-bootstrap');
 
 // Initalisation de la map Openlayers
-var olMap = require('./public/src/openlayers');
-olMap.olMap.initMap(13);
-olMap.olMap.initControls();
+//import olMap from './public/src/openlayers'
+//olMap.initMap(13);
+//olMap.initControls();
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);

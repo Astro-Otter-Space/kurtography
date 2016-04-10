@@ -21,18 +21,18 @@ app.get('/', function(req, res) {
 });
 
 // browserfify
-browserify({
-    debug: true,
-    //extensions: ['es6'],
-    //entries: ['src/test.es6']
-    entries: ['src/test.js']
-})
-    .transform(babelify.configure({
-        //extensions: ['es6'],
-        sourceMapRelative: path.resolve(__dirname, 'src')
-    }))
-    .bundle()
-    .pipe(fs.createWriteStream("public/js/bundle.js"));
+//browserify({
+//    debug: true,
+//    //extensions: ['es6'],
+//    //entries: ['src/test.es6']
+//    entries: ['src/test.js']
+//})
+//    .transform(babelify.configure({
+//        //extensions: ['es6'],
+//        sourceMapRelative: path.resolve(__dirname, 'src')
+//    }))
+//    .bundle()
+//    .pipe(fs.createWriteStream("public/js/bundle.js"));
 
 
 // Choix du port 9966 pour avoir le même que pour browserfy
