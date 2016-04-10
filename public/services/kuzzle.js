@@ -18,5 +18,5 @@ var kuzzle = new Kuzzle(Config.kuzzleUrl, optConnect, function (err, res) {
         }
     }
 );
-kuzzle.connect();
+//kuzzle.connect();
 export default kuzzle

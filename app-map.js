@@ -1,17 +1,33 @@
 import dataLayers from './public/src/dataLayers';
 dataLayers.listCollections();
 
-import {jQuery as $} from 'jquery'
 
 //import Bootstrap from 'bootstrap';
 //Bootstrap.$ = $;
 //Bootstrap.jQuery = jQuery;
-//require('./public/src/init-bootstrap');
+import initBootstrap from './public/src/init-bootstrap'
 
-// Initalisation de la map Openlayers
-//import olMap from './public/src/openlayers'
-//olMap.initMap(13);
-//olMap.initControls();
+jQuery(function(){
+    jQuery('.sidebar-left .slide-submenu').on('click',function() {
+        var thisEl = jQuery(this);
+        thisEl.closest('.sidebar-body').fadeOut('slide',function(){
+            jQuery('.mini-submenu-left').fadeIn();
+            initBootstrap.applyMargins();
+        });
+    });
+
+    jQuery('.mini-submenu-left').on('click',function() {
+        var thisEl = jQuery(this);
+        jQuery('.sidebar-left .sidebar-body').toggle('slide');
+        thisEl.hide();
+        initBootstrap.applyMargins();
+    });
+
+    jQuery(window).on("resize", initBootstrap.applyMargins);
+
+    initBootstrap.applyInitialUIState();
+    initBootstrap.applyMargins();
+});
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);

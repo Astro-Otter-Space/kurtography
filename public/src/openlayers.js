@@ -32,14 +32,14 @@ export default {
     {
         console.log("Liste collections : " + kListCollections);
 
-        this.state.tabLayersKuzzle = [];
         var this_ = this;
+        this.state.tabLayersKuzzle = kListCollections;
         this.state.zoom = zoom;
 
         // Create a group layer for Kuzzle layers
         this.state.groupKuzzleLayers = new ol.layer.Group({
-            title: "Kuzzle group"
-            //layers: kListCollections
+            title: "Kuzzle group",
+            layers: this.state.tabLayersKuzzle
         });
 
         // Recuperation du fond de carte OpenStreetMap
@@ -71,7 +71,7 @@ export default {
                     coordinateFormat:  function(coordinate) {
                         return ol.coordinate.format(coordinate, 'LonLat : {y}, {x}', 4);
                     },
-                    projection: this.state.projectionTo,
+                    projection: this.state.projectionTo
                 })
             ]),
             view: this.state.view
@@ -85,33 +85,37 @@ export default {
         });
 
         this.geolocation.on('change', function() {
+            console.log("Changement de geolocalisation");
             var lon = this_.geolocation.getPosition()[0];
             var lat =  this_.geolocation.getPosition()[1];
-            var pointCenter = new ol.geom.Point([lon, lat]).transform('EPSG:4326', 'EPSG:3857').getCoordinates();
+            var pointCenter = new ol.geom.Point([lon, lat]).transform(this_.state.projectionTo, this_.state.projectionFrom).getCoordinates();
+            console.log("Centrage sur " + lon + " / " + lat);
             this_.state.view.setCenter(pointCenter);
         });
 
 
         // Add popup + listener
-        //this.state.map.on('click', function(evt) {
-        //    var feature = this_.map.forEachFeatureAtPixel(evt.pixel,
-        //        function(feature, layer) {
-        //            return feature;
-        //        }
-        //    );
-        //
-        //    if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
-        //        var fProperties = feature.getProperties();
-        //        var extFeature = feature.getGeometry().getExtent();
-        //        var centerFeature = ol.extent.getCenter(extFeature);
-        //
-        //        this_.addPropertiesTab(fProperties);
-        //        this_.addGeometriesTab(feature.getGeometry());
-        //        document.getElementById("mainProperties").style.display="block";
-        //
-        //        this_.state.view.setCenter(centerFeature);
-        //    }
-        //});
+        this.state.map.on('click', function(evt) {
+            var feature = this_.map.forEachFeatureAtPixel(evt.pixel,
+                function(feature, layer) {
+                    return feature;
+                }
+            );
+
+            if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
+                var fProperties = feature.getProperties();
+                var extFeature = feature.getGeometry().getExtent();
+                var centerFeature = ol.extent.getCenter(extFeature);
+
+                this_.addPropertiesTab(fProperties);
+                this_.addGeometriesTab(feature.getGeometry());
+                document.getElementById("mainProperties").style.display="block";
+
+                this_.state.view.setCenter(centerFeature);
+            }
+        });
+
+        this.initControls();
     },
 
     initControls()
@@ -120,6 +124,7 @@ export default {
 
         // Adding Layer switcher
         this.state.layerSwitcher = new ol.control.LayerSwitcher();
+        console.log("Adding LayerSwitcher");
         this.state.map.addControl(this.state.layerSwitcher);
 
         // Adding draw controls
@@ -133,10 +138,10 @@ export default {
                 "Polygon": true
             }
         };
-        this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
+        //this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
-        ol.control.LayerSwitcher.forEachRecursive(this.map.getLayerGroup(), function(l, idx, a) {
+        ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
             //console.log(l.get('title'));
             l.on("change:visible", function(e) {
                 var lyr = e.target;
