@@ -36,7 +36,7 @@ export default {
                 });
 
                 console.log(this_.state.tabLayersKuzzle);
-                //olMap.initMap(13, this_.state.tabLayersKuzzle);
+                olMap.initMap(13, this_.state.tabLayersKuzzle);
 
             } else {
                 console.error(err);
