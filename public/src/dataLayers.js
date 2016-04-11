@@ -30,14 +30,11 @@ export default {
                     }
                 );
 
-                // Retrieve datas from collections
                 this_.state.collections.map(layer => {
                     this_.loadDatasFromCollection(layer);
                 });
 
-                console.log(this_.state.tabLayersKuzzle);
-                olMap.initMap(13, this_.state.tabLayersKuzzle);
-
+                olMap.initMap(13);
             } else {
                 console.error(err);
             }
@@ -55,12 +52,11 @@ export default {
             if (!err) {
                 if(res.total > 0) {
 
-                    var dataGeoJSON = {
-                        "type": "FeatureCollection",
-                        "features": []
-                    };
-                    res.documents.forEach(function (kDoc, n) {
-                        dataGeoJSON.features.push(kDoc.content);
+                    var dataGeoJSON = res.documents.map(kDoc => {
+                        return {
+                            "type": "FeatureCollection",
+                            "features": kDoc.content
+                        };
                     });
 
                     // Construction of geoDatas from content
@@ -77,6 +73,7 @@ export default {
                         }
                     });
 
+                    console.log(kuzzleLayerVector);
                     this_.state.tabLayersKuzzle.push(kuzzleLayerVector);
                 }
             } else {

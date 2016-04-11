@@ -21,6 +21,7 @@ export default {
         layerSwitcher: null,
         k:null,
         groupKuzzleLayers:null,
+        tabLayersKuzzle: null,
         selectedLayer: null
     },
 
@@ -28,19 +29,10 @@ export default {
      *
      * @param zoom
      */
-    initMap(zoom, kListCollections)
+    initMap(zoom)
     {
-        console.log("Liste collections : " + kListCollections);
-
         var this_ = this;
-        this.state.tabLayersKuzzle = kListCollections;
         this.state.zoom = zoom;
-
-        // Create a group layer for Kuzzle layers
-        this.state.groupKuzzleLayers = new ol.layer.Group({
-            title: "Kuzzle group",
-            layers: this.state.tabLayersKuzzle
-        });
 
         // Recuperation du fond de carte OpenStreetMap
         this.state.osm = new ol.layer.Tile({
@@ -54,6 +46,12 @@ export default {
         // Definition de la vue
         this.state.view = new ol.View({
             zoom: this.state.zoom
+        });
+
+        // Create a group layer for Kuzzle layers
+        this.state.groupKuzzleLayers = new ol.layer.Group({
+            title: "Kuzzle group",
+            layers: [] //dataLayers.state.tabLayersKuzzle
         });
 
         // Definition de la map
@@ -85,11 +83,9 @@ export default {
         });
 
         this.geolocation.on('change', function() {
-            console.log("Changement de geolocalisation");
             var lon = this_.geolocation.getPosition()[0];
             var lat =  this_.geolocation.getPosition()[1];
             var pointCenter = new ol.geom.Point([lon, lat]).transform(this_.state.projectionTo, this_.state.projectionFrom).getCoordinates();
-            console.log("Centrage sur " + lon + " / " + lat);
             this_.state.view.setCenter(pointCenter);
         });
 
@@ -118,41 +114,44 @@ export default {
         this.initControls();
     },
 
+    addLayerToKuzzleGroup(){
+
+    },
+
     initControls()
     {
         var this_ = this;
 
         // Adding Layer switcher
         this.state.layerSwitcher = new ol.control.LayerSwitcher();
-        console.log("Adding LayerSwitcher");
         this.state.map.addControl(this.state.layerSwitcher);
 
         // Adding draw controls
-        var optionsControlDraw = {
-            "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
-            "draw": {
-                "Point": true,
-                "LineString": true,
-                "Square": true,
-                "Circle": false,
-                "Polygon": true
-            }
-        };
+        //var optionsControlDraw = {
+        //    "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
+        //    "draw": {
+        //        "Point": true,
+        //        "LineString": true,
+        //        "Square": true,
+        //        "Circle": false,
+        //        "Polygon": true
+        //    }
+        //};
         //this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
-        ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
-            //console.log(l.get('title'));
-            l.on("change:visible", function(e) {
-                var lyr = e.target;
-                if (lyr.getVisible() == true) {
-                    console.log("Couche selectionne : " + lyr.get('title'));
-                    // Not sure if correct but it's working :|
-                    this_.setSelectedLayer(lyr);
-                    this_.buttonsDrawControls.setSelectedLayer(lyr);
-                }
-            });
-        });
+        //ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
+        //    //console.log(l.get('title'));
+        //    l.on("change:visible", function(e) {
+        //        var lyr = e.target;
+        //        if (lyr.getVisible() == true) {
+        //            console.log("Couche selectionne : " + lyr.get('title'));
+        //            // Not sure if correct but it's working :|
+        //            this_.setSelectedLayer(lyr);
+        //            this_.buttonsDrawControls.setSelectedLayer(lyr);
+        //        }
+        //    });
+        //});
         //console.log(this.map.getLayerGroup().getLayers());
         //this.state.map.addControl(this.state.buttonsDrawControls);
     },
