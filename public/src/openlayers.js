@@ -21,8 +21,8 @@ export default {
         layerSwitcher: null,
         k:null,
         groupKuzzleLayers:null,
-        tabLayersKuzzle: null,
-        selectedLayer: null
+        selectedLayer: null,
+        tabStyles: null
     },
 
     /**
@@ -33,6 +33,7 @@ export default {
     {
         var this_ = this;
         this.state.zoom = zoom;
+        this.state.tabStyles = this.getStylesFeatures();
 
         // Recuperation du fond de carte OpenStreetMap
         this.state.osm = new ol.layer.Tile({
@@ -48,11 +49,27 @@ export default {
             zoom: this.state.zoom
         });
 
-        // Create a group layer for Kuzzle layers
-        this.state.groupKuzzleLayers = new ol.layer.Group({
-            title: "Kuzzle group",
-            layers: [] //dataLayers.state.tabLayersKuzzle
-        });
+        // Put layers in ol.layer.Group
+        if (dataLayers.state.collections.length > 0) {
+            this.state.tabLayersKuzzle = dataLayers.state.collections.map(layer => {
+
+                return new ol.layer.Vector({
+                    title: layer,
+                    type: 'base',
+                    visible: false,
+                    style: function (feature, resolution) {
+                        return this_.state.tabStyles[feature.getGeometry().getType()];
+                    }
+                });
+            });
+
+            // Create a group layer for Kuzzle layers
+            this.state.groupKuzzleLayers = new ol.layer.Group({
+                title: "Kuzzle group",
+                layers: this.state.tabLayersKuzzle
+            });
+        }
+
 
         // Definition de la map
         this.state.map = new ol.Map({

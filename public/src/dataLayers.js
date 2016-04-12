@@ -30,13 +30,13 @@ export default {
                     }
                 );
 
-                this_.state.collections.map(layer => {
-                    this_.loadDatasFromCollection(layer);
-                });
+                //this_.state.collections.map(layer => {
+                //    this_.loadDatasFromCollection(layer);
+                //});
 
                 olMap.initMap(13);
             } else {
-                console.error(err);
+                console.error(err.message);
             }
         });
     },
@@ -63,18 +63,18 @@ export default {
                     var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: olMap.state.projectionFrom});
                     var kSource = new ol.source.Vector({features: kGeoJSON, wrapX: false});
 
-                    var kuzzleLayerVector = new ol.layer.Vector({
-                        source: kSource,
-                        title: collection,
-                        type: 'base',
-                        visible: false,
-                        style: function (feature, resolution) {
-                            return this_.state.tabStyles[feature.getGeometry().getType()];
-                        }
-                    });
+                    //var kuzzleLayerVector = new ol.layer.Vector({
+                    //    source: kSource,
+                    //    title: collection,
+                    //    type: 'base',
+                    //    visible: false,
+                    //    style: function (feature, resolution) {
+                    //        return this_.state.tabStyles[feature.getGeometry().getType()];
+                    //    }
+                    //});
 
-                    console.log(kuzzleLayerVector);
-                    this_.state.tabLayersKuzzle.push(kuzzleLayerVector);
+                    //console.log(kuzzleLayerVector);
+                    //this_.state.tabLayersKuzzle.push(kuzzleLayerVector);
                 }
             } else {
                 console.error(err);
