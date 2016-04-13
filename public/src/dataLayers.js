@@ -60,21 +60,14 @@ export default {
                     });
 
                     // Construction of geoDatas from content
-                    var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: olMap.state.projectionFrom});
-                    var kSource = new ol.source.Vector({features: kGeoJSON, wrapX: false});
-
-                    //var kuzzleLayerVector = new ol.layer.Vector({
-                    //    source: kSource,
-                    //    title: collection,
-                    //    type: 'base',
-                    //    visible: false,
-                    //    style: function (feature, resolution) {
-                    //        return this_.state.tabStyles[feature.getGeometry().getType()];
-                    //    }
-                    //});
-
-                    //console.log(kuzzleLayerVector);
-                    //this_.state.tabLayersKuzzle.push(kuzzleLayerVector);
+                    console.log(JSON.stringify(dataGeoJSON));
+                    var kGeoJSON = new ol.format.GeoJSON().readFeatures(JSON.stringify(dataGeoJSON)/*, {featureProjection: olMap.state.projectionFrom}*/);
+                    var kSource = new ol.source.Vector({
+                        features: kGeoJSON
+                    });
+                    olMap.getSelectedLayer().setSource(kSource);
+                } else {
+                    console.log("No datas from " + collection);
                 }
             } else {
                 console.error(err);

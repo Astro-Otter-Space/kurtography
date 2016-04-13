@@ -120,6 +120,7 @@ export default {
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
 
+
                 this_.addPropertiesTab(fProperties);
                 this_.addGeometriesTab(feature.getGeometry());
                 document.getElementById("mainProperties").style.display="block";
@@ -144,33 +145,33 @@ export default {
         this.state.map.addControl(this.state.layerSwitcher);
 
         // Adding draw controls
-        //var optionsControlDraw = {
-        //    "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
-        //    "draw": {
-        //        "Point": true,
-        //        "LineString": true,
-        //        "Square": true,
-        //        "Circle": false,
-        //        "Polygon": true
-        //    }
-        //};
-        //this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
+        var optionsControlDraw = {
+            "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
+            "draw": {
+                "Point": true,
+                "LineString": true,
+                "Square": true,
+                "Circle": false,
+                "Polygon": true
+            }
+        };
+        this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
-        //ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
-        //    //console.log(l.get('title'));
-        //    l.on("change:visible", function(e) {
-        //        var lyr = e.target;
-        //        if (lyr.getVisible() == true) {
-        //            console.log("Couche selectionne : " + lyr.get('title'));
-        //            // Not sure if correct but it's working :|
-        //            this_.setSelectedLayer(lyr);
-        //            this_.buttonsDrawControls.setSelectedLayer(lyr);
-        //        }
-        //    });
-        //});
-        //console.log(this.map.getLayerGroup().getLayers());
-        //this.state.map.addControl(this.state.buttonsDrawControls);
+        ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
+            l.on("change:visible", function(e) {
+                var lyr = e.target;
+                if (lyr.getVisible() == true) {
+                    this_.setSelectedLayer(lyr);
+                    // Retrieve datas
+                    dataLayers.loadDatasFromCollection(lyr.get('title'));
+
+                    // Not sure if correct but it's working :|
+                    this_.buttonsDrawControls.setSelectedLayer(lyr);
+                }
+            });
+        });
+        this.state.map.addControl(this.state.buttonsDrawControls);
     },
 
     /**
@@ -387,7 +388,6 @@ export default {
     // Set la couche selectionnée
     setSelectedLayer(layer)
     {
-        console.log("setSelectedLayer : " + layer.get('title'));
         this.state.selectedLayer = layer;
     }
 };

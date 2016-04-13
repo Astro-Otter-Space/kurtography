@@ -221,7 +221,6 @@ ol.control.LayerSwitcher.prototype.renderLayers_ = function(lyr, elm) {
 ol.control.LayerSwitcher.forEachRecursive = function(lyr, fn) {
 
     lyr.getLayers().forEach(function(lyr, idx, a) {
-        console.log(lyr.get('title'));
         fn(lyr, idx, a);
         if (lyr.getLayers) {
             ol.control.LayerSwitcher.forEachRecursive(lyr, fn);

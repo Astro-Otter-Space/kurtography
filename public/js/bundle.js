@@ -32511,13 +32511,9 @@ var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _openlayers = require('openlayers');
-
-var _openlayers2 = _interopRequireDefault(_openlayers);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_openlayers2.default.control.ControlDrawButtons = function (selected_layer, opt_options) {
+ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
     var options = opt_options || {};
     options.draw.Ending = true;
 
@@ -32542,9 +32538,10 @@ _openlayers2.default.control.ControlDrawButtons = function (selected_layer, opt_
 
         this.setFlagLocStor(true);
         if (localStorage.getItem('features') !== null) {
-            var featuresLS = new _openlayers2.default.format.GeoJSON().readFeatures(JSON.parse(localStorage.getItem('features')));
+            console.log(localStorage.getItem('features'));
+            var featuresLS = new ol.format.GeoJSON().readFeatures(JSON.parse(localStorage.getItem('features')));
 
-            var sourceLS = new _openlayers2.default.source.Vector({
+            var sourceLS = new ol.source.Vector({
                 features: featuresLS
             });
             this.selectedLayers.setSource(sourceLS);
@@ -32674,15 +32671,15 @@ _openlayers2.default.control.ControlDrawButtons = function (selected_layer, opt_
 
     var buttonsContainer = new ol3buttons.init(opt_options, handleButtonsClick, handleControlsClick, handleGroupEnd);
 
-    _openlayers2.default.control.Control.call(this, {
+    ol.control.Control.call(this, {
         element: buttonsContainer,
         target: options.target
     });
 };
 
-_openlayers2.default.inherits(_openlayers2.default.control.ControlDrawButtons, _openlayers2.default.control.Control);
+ol.inherits(ol.control.ControlDrawButtons, ol.control.Control);
 
-_openlayers2.default.control.ControlDrawButtons.prototype.drawOnMap = function (evt) {
+ol.control.ControlDrawButtons.prototype.drawOnMap = function (evt) {
     this.map = this.getMap();
 
     if (!this.getSelectedLayer()) {
@@ -32697,12 +32694,12 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawOnMap = function (
 
         if (typeSelect == 'Square') {
             typeSelect = 'Circle';
-            geometryFctDraw = this.geometryFctDraw = _openlayers2.default.interaction.Draw.createRegularPolygon(4);
+            geometryFctDraw = this.geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
         }
 
-        var draw = this.drawInteraction = new _openlayers2.default.interaction.Draw({
+        var draw = this.drawInteraction = new ol.interaction.Draw({
             source: this.getSelectedLayer().getSource(),
-            features: new _openlayers2.default.Collection(),
+            features: new ol.Collection(),
             type: typeSelect,
             geometryFunction: geometryFctDraw,
             style: this.styleAdd()
@@ -32714,9 +32711,9 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawOnMap = function (
     }
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = function (evt) {
+ol.control.ControlDrawButtons.prototype.drawEndFeature = function (evt) {
     var feature = evt.feature;
-    var parser = new _openlayers2.default.format.GeoJSON();
+    var parser = new ol.format.GeoJSON();
 
     if ('Circle' == feature.getGeometry().getType()) {} else {
             console.log("Add feature : " + feature.getGeometry().getCoordinates());
@@ -32729,9 +32726,9 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = funct
         }
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.setFeaturesInLocalStorage = function () {
+ol.control.ControlDrawButtons.prototype.setFeaturesInLocalStorage = function () {
     var features = this.getSelectedLayer().getSource().getFeatures();
-    var parser = new _openlayers2.default.format.GeoJSON();
+    var parser = new ol.format.GeoJSON();
 
     if (features.length > 0) {
         var featuresGeoJson = parser.writeFeatures(features);
@@ -32742,7 +32739,7 @@ _openlayers2.default.control.ControlDrawButtons.prototype.setFeaturesInLocalStor
     }
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.controlEditOnMap = function (evt) {
+ol.control.ControlDrawButtons.prototype.controlEditOnMap = function (evt) {
     if (!this.getSelectedLayer()) {
         this.setFlagDraw(false);
     } else {
@@ -32753,8 +32750,8 @@ _openlayers2.default.control.ControlDrawButtons.prototype.controlEditOnMap = fun
         this.map = this.getMap();
 
         var selectedLayer = this.getSelectedLayer();
-        var editSelectInteraction = this.editSelectInteraction = new _openlayers2.default.interaction.Select({
-            condition: _openlayers2.default.events.condition.click
+        var editSelectInteraction = this.editSelectInteraction = new ol.interaction.Select({
+            condition: ol.events.condition.click
         });
         this.map.addInteraction(editSelectInteraction);
 
@@ -32766,7 +32763,7 @@ _openlayers2.default.control.ControlDrawButtons.prototype.controlEditOnMap = fun
             console.log(feature.getGeometry());
         });
 
-        var mod = this.modifyInteraction = new _openlayers2.default.interaction.Modify({
+        var mod = this.modifyInteraction = new ol.interaction.Modify({
             features: editSelectInteraction.getFeatures(),
             style: this.styleEdit()
         });
@@ -32774,7 +32771,7 @@ _openlayers2.default.control.ControlDrawButtons.prototype.controlEditOnMap = fun
     }
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt) {
+ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt) {
     if (!this.getSelectedLayer()) {
         this.setFlagDraw(false);
     } else {
@@ -32784,8 +32781,8 @@ _openlayers2.default.control.ControlDrawButtons.prototype.controlDelOnMap = func
     if (this.getFlagDraw() == true) {
         this.map = this.getMap();
 
-        var selectDelInteraction = this.selectDelInteraction = new _openlayers2.default.interaction.Select({
-            condition: _openlayers2.default.events.condition.click,
+        var selectDelInteraction = this.selectDelInteraction = new ol.interaction.Select({
+            condition: ol.events.condition.click,
             source: function source(layer) {
                 if (layer == this.getSelectedLayer()) {
                     return layer;
@@ -32809,11 +32806,11 @@ _openlayers2.default.control.ControlDrawButtons.prototype.controlDelOnMap = func
             e.preventDefault();
         });
 
-        var delInteraction = this.delInteraction = new _openlayers2.default.interaction.Modify({
+        var delInteraction = this.delInteraction = new ol.interaction.Modify({
             style: this.styleEdit(),
             features: selectDelInteraction.getFeatures(),
             deleteCondition: function deleteCondition(event) {
-                return _openlayers2.default.events.condition.singleClick(event);
+                return ol.events.condition.singleClick(event);
             }
         });
 
@@ -32821,26 +32818,26 @@ _openlayers2.default.control.ControlDrawButtons.prototype.controlDelOnMap = func
     }
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.formulary = function (properties) {
+ol.control.ControlDrawButtons.prototype.formulary = function (properties) {
     var form = document.createElement('form');
 
     return form;
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.styleAdd = function () {
-    var style = new _openlayers2.default.style.Style({
-        fill: new _openlayers2.default.style.Fill({
+ol.control.ControlDrawButtons.prototype.styleAdd = function () {
+    var style = new ol.style.Style({
+        fill: new ol.style.Fill({
             color: [69, 175, 157, 0.4] }),
-        stroke: new _openlayers2.default.style.Stroke({
+        stroke: new ol.style.Stroke({
             color: [0, 75, 82, 0.75],
             width: 1.5
         }),
-        image: new _openlayers2.default.style.Circle({
+        image: new ol.style.Circle({
             radius: 7,
-            fill: new _openlayers2.default.style.Fill({
+            fill: new ol.style.Fill({
                 color: [60, 255, 100, 0.4]
             }),
-            stroke: new _openlayers2.default.style.Stroke({
+            stroke: new ol.style.Stroke({
                 color: [255, 255, 255, 0.75],
                 width: 1.5
             })
@@ -32851,20 +32848,20 @@ _openlayers2.default.control.ControlDrawButtons.prototype.styleAdd = function ()
     return style;
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.styleEdit = function () {
-    var style = new _openlayers2.default.style.Style({
-        fill: new _openlayers2.default.style.Fill({
+ol.control.ControlDrawButtons.prototype.styleEdit = function () {
+    var style = new ol.style.Style({
+        fill: new ol.style.Fill({
             color: [4, 100, 128, 0.4] }),
-        stroke: new _openlayers2.default.style.Stroke({
+        stroke: new ol.style.Stroke({
             color: [0, 64, 28, 0.75],
             width: 1.5
         }),
-        image: new _openlayers2.default.style.Circle({
+        image: new ol.style.Circle({
             radius: 7,
-            fill: new _openlayers2.default.style.Fill({
+            fill: new ol.style.Fill({
                 color: [4, 100, 128, 0.4]
             }),
-            stroke: new _openlayers2.default.style.Stroke({
+            stroke: new ol.style.Stroke({
                 color: [0, 64, 28, 0.75],
                 width: 1.5
             })
@@ -32874,27 +32871,27 @@ _openlayers2.default.control.ControlDrawButtons.prototype.styleEdit = function (
     return style;
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.setSelectedLayer = function (layer) {
+ol.control.ControlDrawButtons.prototype.setSelectedLayer = function (layer) {
     this.selectedLayers = layer;
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.getSelectedLayer = function () {
+ol.control.ControlDrawButtons.prototype.getSelectedLayer = function () {
     return this.selectedLayers;
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.setFlagDraw = function (flagDraw) {
+ol.control.ControlDrawButtons.prototype.setFlagDraw = function (flagDraw) {
     this.flagDraw = flagDraw;
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.getFlagDraw = function () {
+ol.control.ControlDrawButtons.prototype.getFlagDraw = function () {
     return this.flagDraw;
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.setFlagLocStor = function (locStor) {
+ol.control.ControlDrawButtons.prototype.setFlagLocStor = function (locStor) {
     this.flagLocStor = locStor;
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.getFlagLocStor = function () {
+ol.control.ControlDrawButtons.prototype.getFlagLocStor = function () {
     return this.flagLocStor;
 };
 
@@ -32956,7 +32953,7 @@ var ol3buttons = {
     },
 
     drawButtons: function drawButtons() {
-        var elementDrawButtons = new _openlayers2.default.Collection();
+        var elementDrawButtons = new ol.Collection();
 
         var buttonPoint = this.buttonPoint = document.createElement('button');
         buttonPoint.setAttribute('title', 'Draw point');
@@ -33021,7 +33018,7 @@ var ol3buttons = {
     },
 
     drawControls: function drawControls() {
-        var elementDrawControls = new _openlayers2.default.Collection();
+        var elementDrawControls = new ol.Collection();
 
         var buttonEdit = this.buttonEdit = document.createElement('button');
         buttonEdit.setAttribute('title', 'Edit feature');
@@ -33059,7 +33056,7 @@ var ol3buttons = {
     }
 };
 
-},{"babel-runtime/core-js/json/stringify":2,"openlayers":314}],314:[function(require,module,exports){
+},{"babel-runtime/core-js/json/stringify":2}],314:[function(require,module,exports){
 (function (global){
 // OpenLayers 3. See http://openlayers.org/
 // License: https://raw.githubusercontent.com/openlayers/ol3/master/LICENSE.md
@@ -34102,7 +34099,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.default = {
-    kuzzleUrl: 'http://localhost:7512',
+    kuzzleUrl: 'http://kurtography.challenge.kuzzle.io:7512',
     defaultIndex: 'kurtography'
 };
 
@@ -34147,6 +34144,10 @@ exports.default = kuzzle;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
 
 var _kuzzle = require('../services/kuzzle');
 
@@ -34204,12 +34205,18 @@ exports.default = {
                         };
                     });
 
-                    var kGeoJSON = new _openlayers2.default.format.GeoJSON().readFeatures(dataGeoJSON, { featureProjection: _openlayers4.default.state.projectionFrom });
-                    var kSource = new _openlayers2.default.source.Vector({ features: kGeoJSON, wrapX: false });
+                    console.log((0, _stringify2.default)(dataGeoJSON));
+                    var kGeoJSON = new _openlayers2.default.format.GeoJSON().readFeatures((0, _stringify2.default)(dataGeoJSON));
+                    var kSource = new _openlayers2.default.source.Vector({
+                        features: kGeoJSON
+                    });
+                    _openlayers4.default.getSelectedLayer().setSource(kSource);
+                } else {
+                    console.log("No datas from " + collection);
                 }
             } else {
-                    console.error(err);
-                }
+                console.error(err);
+            }
         });
     },
     addDocument: function addDocument(datas, layer) {
@@ -34272,7 +34279,7 @@ exports.default = {
     searchDocument: function searchDocument(search, layer) {}
 };
 
-},{"../services/config":315,"../services/kuzzle":316,"./openlayers":320,"openlayers":314}],318:[function(require,module,exports){
+},{"../services/config":315,"../services/kuzzle":316,"./openlayers":320,"babel-runtime/core-js/json/stringify":2,"openlayers":314}],318:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34439,7 +34446,6 @@ _openlayers2.default.control.LayerSwitcher.prototype.renderLayers_ = function (l
 _openlayers2.default.control.LayerSwitcher.forEachRecursive = function (lyr, fn) {
 
     lyr.getLayers().forEach(function (lyr, idx, a) {
-        console.log(lyr.get('title'));
         fn(lyr, idx, a);
         if (lyr.getLayers) {
             _openlayers2.default.control.LayerSwitcher.forEachRecursive(lyr, fn);
@@ -34604,6 +34610,32 @@ exports.default = {
 
         this.state.layerSwitcher = new _openlayers2.default.control.LayerSwitcher();
         this.state.map.addControl(this.state.layerSwitcher);
+
+        var optionsControlDraw = {
+            "style_buttons": "default",
+            "draw": {
+                "Point": true,
+                "LineString": true,
+                "Square": true,
+                "Circle": false,
+                "Polygon": true
+            }
+        };
+        this.state.buttonsDrawControls = new _openlayers2.default.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
+
+        _openlayers2.default.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function (l, idx, a) {
+            l.on("change:visible", function (e) {
+                var lyr = e.target;
+                if (lyr.getVisible() == true) {
+                    this_.setSelectedLayer(lyr);
+
+                    _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
+
+                    this_.buttonsDrawControls.setSelectedLayer(lyr);
+                }
+            });
+        });
+        this.state.map.addControl(this.state.buttonsDrawControls);
     },
     addPropertiesTab: function addPropertiesTab(properties) {
         var tabP = document.getElementById('tabFProperties');
@@ -34781,7 +34813,6 @@ exports.default = {
         return this.state.selectedLayer;
     },
     setSelectedLayer: function setSelectedLayer(layer) {
-        console.log("setSelectedLayer : " + layer.get('title'));
         this.state.selectedLayer = layer;
     }
 };
