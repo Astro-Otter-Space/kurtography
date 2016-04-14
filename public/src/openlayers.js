@@ -116,10 +116,12 @@ export default {
             );
 
             if (feature /*&& this_.buttonsDrawControls.getFlagDraw() == false*/) {
+
+                console.log(feature);
+
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
-
 
                 this_.addPropertiesTab(fProperties);
                 this_.addGeometriesTab(feature.getGeometry());
@@ -132,10 +134,6 @@ export default {
         this.initControls();
     },
 
-
-    addLayerToKuzzleGroup(){
-
-    },
 
     /**
      *
@@ -171,7 +169,7 @@ export default {
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
 
                     // Subscription of datas
-                    dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), '1000m');
+                    //dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), '1000m');
 
                     // Not sure if correct but it's working :|
                     //this_.buttonsDrawControls.setSelectedLayer(lyr);

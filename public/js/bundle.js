@@ -33634,12 +33634,14 @@ exports.default = {
         _kuzzle2.default.dataCollectionFactory(collection).fetchAllDocuments(function (err, res) {
             if (!err) {
                 if (res.total > 0) {
+
                     var result = [];
                     res.documents.forEach(function (kDoc, index) {
                         result.push(kDoc.content);
                     });
 
                     var dataGeoJSON = {
+                        "id": res.documents.id,
                         "type": "FeatureCollection",
                         "features": result
                     };
@@ -34049,6 +34051,9 @@ exports.default = {
             });
 
             if (feature) {
+
+                    console.log(feature);
+
                     var fProperties = feature.getProperties();
                     var extFeature = feature.getGeometry().getExtent();
                     var centerFeature = _openlayers2.default.extent.getCenter(extFeature);
@@ -34063,7 +34068,6 @@ exports.default = {
 
         this.initControls();
     },
-    addLayerToKuzzleGroup: function addLayerToKuzzleGroup() {},
     initControls: function initControls() {
         var this_ = this;
 
@@ -34088,8 +34092,6 @@ exports.default = {
                     this_.setSelectedLayer(lyr);
 
                     _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
-
-                    _dataLayers2.default.subscribeCollection(lyr, this_.geolocation.getPosition(), '1000m');
                 }
             });
         });

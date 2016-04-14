@@ -51,24 +51,17 @@ export default {
         kuzzle.dataCollectionFactory(collection).fetchAllDocuments(function(err, res) {
             if (!err) {
                 if(res.total > 0) {
-
-                    /**
-                     * SOLUCE 1
-                     */
                      /*var result = res.documents.map(kDoc => {
                         return kDoc.content;
                     });*/
 
-                    /**
-                     * SOLUCE 2
-                     * @type {Array}
-                     */
                     var result = [];
                     res.documents.forEach(function(kDoc, index) {
                         result.push(kDoc.content);
                     });
 
                     var dataGeoJSON = {
+                        "id" : res.documents.id,
                         "type": "FeatureCollection",
                         "features": result
                     };
