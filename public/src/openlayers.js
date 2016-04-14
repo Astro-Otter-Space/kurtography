@@ -170,6 +170,9 @@ export default {
                     // Retrieve datas
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
 
+                    // Subscription of datas
+                    dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), '1000m');
+
                     // Not sure if correct but it's working :|
                     //this_.buttonsDrawControls.setSelectedLayer(lyr);
                 }

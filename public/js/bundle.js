@@ -33639,14 +33639,10 @@ exports.default = {
                         result.push(kDoc.content);
                     });
 
-                    console.log(result);
-
                     var dataGeoJSON = {
                         "type": "FeatureCollection",
                         "features": result
                     };
-
-                    console.log(dataGeoJSON);
 
                     var kGeoJSON = new _openlayers2.default.format.GeoJSON().readFeatures(dataGeoJSON, { featureProjection: _openlayers4.default.state.projectionFrom });
                     var kSource = new _openlayers2.default.source.Vector({
@@ -33688,17 +33684,18 @@ exports.default = {
     },
     updateDocument: function updateDocument() {},
     subscribeCollection: function subscribeCollection(layer, currentPosition, distance) {
-        var _this = this;
-
         if (subscription) {
             subscription.unsubscribe();
         }
 
+        console.log("Longitude : " + currentPosition[0]);
+        console.log("Lattitude : " + currentPosition[1]);
+
         var filter = {
             geoDistance: {
                 location: {
-                    lat: currentPosition.lat,
-                    lon: currentPosition.lon
+                    lat: currentPosition[1],
+                    lon: currentPosition[0]
                 },
                 distance: distance
             }
@@ -33712,13 +33709,37 @@ exports.default = {
             state: 'done'
         };
 
-        subscription = _kuzzle2.default.dataCollectionFactory(layer).subscribe(filter, options, function (err, resp) {
-            if (resp.scope == 'in') {
-                _this.state.tabLayersKuzzle.push();
-            } else if (resp.scope == 'out') {}
+        var subscription = _kuzzle2.default.dataCollectionFactory(layer).subscribe(filter, options, function (err, resp) {
+            if (!err) {
+                console.log(resp);
+
+                if (resp.scope == 'in') {
+                    console.log("Notification : ajout document");
+                } else if (resp.scope == 'out') {
+                        console.log("Notification : suppression document");
+                    }
+            } else {
+                console.error(err.message);
+            }
         });
     },
-    searchDocument: function searchDocument(search, layer) {}
+    searchDocument: function searchDocument(search, layer) {
+        var filter = {
+            term: {}
+        };
+
+        var search = _kuzzle2.default.dataCollectionFactory(layer).advancedSearch(filter, function (err, resp) {
+            res.document.forEach(function (kDoc) {
+
+                console.log("Recherche : " + kDoc.content);
+
+                var extFeature = kDoc.content.getGeometry().getExtent();
+                var centerFeature = _openlayers2.default.extent.getCenter(extFeature);
+
+                _openlayers4.default.state.view.setCenter(centerFeature);
+            });
+        });
+    }
 };
 
 },{"../services/config":312,"../services/kuzzle":313,"./openlayers":317,"openlayers":311}],315:[function(require,module,exports){
@@ -34067,6 +34088,8 @@ exports.default = {
                     this_.setSelectedLayer(lyr);
 
                     _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
+
+                    _dataLayers2.default.subscribeCollection(lyr, this_.geolocation.getPosition(), '1000m');
                 }
             });
         });

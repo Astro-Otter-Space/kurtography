@@ -140,6 +140,7 @@ export default {
 
     /**
      * Subscribe to item from currentPosition with a radius specified by distance
+     * Source : https://github.com/kuzzleio/kuzzle/blob/develop/docs/filters.md#geospacial
      * @param layer
      * @param currentPosition
      * @param distance
@@ -150,12 +151,14 @@ export default {
             subscription.unsubscribe();
         }
 
+        console.log("Longitude : " + currentPosition[0]);
+        console.log("Lattitude : " + currentPosition[1]);
 
         var filter = {
             geoDistance: {
                 location: {
-                    lat: currentPosition.lat,
-                    lon: currentPosition.lon
+                    lat: currentPosition[1],
+                    lon: currentPosition[0]
                 },
                 distance: distance
             }
@@ -170,11 +173,19 @@ export default {
             state: 'done'
         };
 
-        subscription = kuzzle.dataCollectionFactory(layer).subscribe(filter, options, (err, resp) => {
-            if (resp.scope == 'in') {
-                this.state.tabLayersKuzzle.push();
-            } else if (resp.scope == 'out') {
+        // index.js:25 Uncaught RangeError: Maximum call stack size exceeded
+        var subscription = kuzzle.dataCollectionFactory(layer).subscribe(filter, options, (err, resp) => {
+            if (!err) {
+                console.log(resp);
 
+                if (resp.scope == 'in') {
+                    console.log("Notification : ajout document");
+                    //this.state.tabLayersKuzzle.push();
+                } else if (resp.scope == 'out') {
+                    console.log("Notification : suppression document");
+                }
+            } else {
+                console.error(err.message);
             }
         });
     },
@@ -186,6 +197,22 @@ export default {
      */
     searchDocument(search, layer)
     {
+        var filter = {
+            term: {
 
+            }
+        };
+
+        var search = kuzzle.dataCollectionFactory(layer).advancedSearch(filter, (err, resp) => {
+            res.document.forEach(kDoc => {
+
+                console.log("Recherche : " + kDoc.content);
+
+                var extFeature =  kDoc.content.getGeometry().getExtent();
+                var centerFeature = ol.extent.getCenter(extFeature);
+
+                olMap.state.view.setCenter(centerFeature);
+            })
+        });
     }
 };
