@@ -1,7 +1,7 @@
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
-import ControlDrawButtons from './../../node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons'
+//import ControlDrawButtons from './../../node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons'
 
 /**
  * Initialisation de la map
@@ -109,13 +109,13 @@ export default {
 
         // Add popup + listener
         this.state.map.on('click', function(evt) {
-            var feature = this_.map.forEachFeatureAtPixel(evt.pixel,
+            var feature = this_.state.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
                     return feature;
                 }
             );
 
-            if (feature && this_.buttonsDrawControls.getFlagDraw() == false) {
+            if (feature /*&& this_.buttonsDrawControls.getFlagDraw() == false*/) {
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
@@ -132,10 +132,14 @@ export default {
         this.initControls();
     },
 
+
     addLayerToKuzzleGroup(){
 
     },
 
+    /**
+     *
+     */
     initControls()
     {
         var this_ = this;
@@ -146,7 +150,7 @@ export default {
 
         // Adding draw controls
         var optionsControlDraw = {
-            "style_buttons" : "default", // (undefined !== typeof style_buttons)? "glyphicon" : "default",
+            "style_buttons" : "default",
             "draw": {
                 "Point": true,
                 "LineString": true,
@@ -155,7 +159,7 @@ export default {
                 "Polygon": true
             }
         };
-        this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
+        //this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
@@ -167,11 +171,11 @@ export default {
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
 
                     // Not sure if correct but it's working :|
-                    this_.buttonsDrawControls.setSelectedLayer(lyr);
+                    //this_.buttonsDrawControls.setSelectedLayer(lyr);
                 }
             });
         });
-        this.state.map.addControl(this.state.buttonsDrawControls);
+        //this.state.map.addControl(this.state.buttonsDrawControls);
     },
 
     /**

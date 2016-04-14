@@ -52,16 +52,29 @@ export default {
             if (!err) {
                 if(res.total > 0) {
 
-                    var dataGeoJSON = res.documents.map(kDoc => {
-                        return {
-                            "type": "FeatureCollection",
-                            "features": kDoc.content
-                        };
+                    /**
+                     * SOLUCE 1
+                     */
+                     /*var result = res.documents.map(kDoc => {
+                        return kDoc.content;
+                    });*/
+
+                    /**
+                     * SOLUCE 2
+                     * @type {Array}
+                     */
+                    var result = [];
+                    res.documents.forEach(function(kDoc, index) {
+                        result.push(kDoc.content);
                     });
 
+                    var dataGeoJSON = {
+                        "type": "FeatureCollection",
+                        "features": result
+                    };
+
                     // Construction of geoDatas from content
-                    console.log(JSON.stringify(dataGeoJSON));
-                    var kGeoJSON = new ol.format.GeoJSON().readFeatures(JSON.stringify(dataGeoJSON)/*, {featureProjection: olMap.state.projectionFrom}*/);
+                    var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: olMap.state.projectionFrom});
                     var kSource = new ol.source.Vector({
                         features: kGeoJSON
                     });
