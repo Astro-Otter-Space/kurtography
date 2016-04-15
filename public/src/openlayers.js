@@ -15,11 +15,11 @@ export default {
         projectionFrom: 'EPSG:3857',
         projectionTo: 'EPSG:4326',
         osm: null,
+        zoneSubscriptionLayer: null,
         view: null,
         zoom: null,
         buttonsDrawControls: null,
         layerSwitcher: null,
-        k:null,
         groupKuzzleLayers:null,
         selectedLayer: null,
         tabStyles: null
@@ -115,7 +115,7 @@ export default {
                 }
             );
 
-            if (feature /*&& this_.buttonsDrawControls.getFlagDraw() == false*/) {
+            if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
 
                 console.log(feature);
 
@@ -148,7 +148,7 @@ export default {
 
         // Adding draw controls
         var optionsControlDraw = {
-            "style_buttons" : "default",
+            "style_buttons" : null,
             "draw": {
                 "Point": true,
                 "LineString": true,
@@ -169,7 +169,11 @@ export default {
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
 
                     // Subscription of datas
-                    dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), '1000m');
+                    if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
+                        this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
+                    }
+
+                    dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), 10000, 'm');
 
                     // Not sure if correct but it's working :|
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);
@@ -177,6 +181,43 @@ export default {
             });
         });
         this.state.map.addControl(this.state.buttonsDrawControls);
+    },
+
+
+    /**
+     * Create a zone where kuzzle subscription is active
+     * @param distance
+     */
+    createZoneSubscription(distance)
+    {
+        var coordonatesWGS84 = this.geolocation.getPosition()
+
+        var features = [];
+        var coordinatesTr = ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
+        var circle = new ol.geom.Circle([coordinatesTr[0], coordinatesTr[1]], distance);
+
+        features.push(new ol.Feature({
+            geometry: circle
+        }));
+        var vectorSource = new ol.source.Vector({
+            features: features
+        });
+
+        var color = '#' + '0123456789abcdef'.split('').map(function(v,i,a){
+            return i>5 ? null : a[Math.floor(Math.random()*16)] }).join('');
+        this.state.zoneSubscriptionLayer = new ol.layer.Vector({
+            source: vectorSource,
+            title: "Subscribe zone",
+            visible: true,
+            style: [
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: color,
+                        width: 2
+                    })
+                })]
+        });
+        this.state.map.addLayer(this.state.zoneSubscriptionLayer);
     },
 
     /**
@@ -299,8 +340,8 @@ export default {
             var coordinates = line.getCoordinates();
             length = 0;
             for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
-                var c1 = ol.proj.transform(coordinates[i], this.projectionFrom, this.projectionTo);
-                var c2 = ol.proj.transform(coordinates[i + 1], this.projectionFrom, this.projectionTo);
+                var c1 = ol.proj.transform(coordinates[i], this.state.projectionFrom, this.state.projectionTo);
+                var c2 = ol.proj.transform(coordinates[i + 1], this.state.projectionFrom, this.state.projectionTo);
                 length += wgs84Sphere.haversineDistance(c1, c2);
             }
         } else {
@@ -321,7 +362,7 @@ export default {
         var area;
         if (geodesic) {
             var geom = /** @type {ol.geom.Polygon} */(polygon.clone().transform(
-                this.projectionFrom, this.projectionTo));
+                this.state.projectionFrom, this.state.projectionTo));
             var coordinates = geom.getLinearRing(0).getCoordinates();
             area = Math.abs(wgs84Sphere.geodesicArea(coordinates));
         } else {

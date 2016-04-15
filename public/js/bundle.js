@@ -32905,6 +32905,7 @@ var ol3buttons = {
     olClassName: 'ol-unselectable ol-control',
     drawContainer: 'toggle-control',
     olGroupClassName: 'ol-control-group',
+    olButtonClassName: 'ol3-drawButtons',
     handleButtonsClick: null,
     handleControlsClick: null,
     handleGroupEnd: null,
@@ -32935,7 +32936,7 @@ var ol3buttons = {
         divDraw.className = 'div-draw ' + this.olGroupClassName;
 
         elementDrawButtons.forEach(function (button) {
-            button.removeEventListener("dblclick", this.handleButtonsClick);
+            button.removeEventListener("dblclick", this_.handleButtonsClick);
             if (this_.tabOptions.draw[button.draw] == true) {
                 divDraw.appendChild(button);
             }
@@ -32945,7 +32946,7 @@ var ol3buttons = {
         var divControls = document.createElement('div');
         divControls.className = 'div-controls ' + this.olGroupClassName;
         elementDrawControls.forEach(function (button) {
-            button.removeEventListener("dblclick", this.handleControlsClick);
+            button.removeEventListener("dblclick", this_.handleControlsClick);
             divControls.appendChild(button);
         });
 
@@ -33003,19 +33004,19 @@ var ol3buttons = {
         elementDrawButtons.push(buttonDrawEnd);
 
         if (this.tabOptions.style_buttons == "glyphicon") {
-            buttonPoint.className = 'glyphicon glyphicon-map-marker';
-            buttonLine.className = 'glyphicon icon-large icon-vector-path-line';
-            buttonSquare.className = 'glyphicon icon-vector-path-square';
-            buttonCircle.className = 'glyphicon icon-vector-path-circle';
-            buttonPolygone.className = 'glyphicon icon-vector-path-polygon';
-            buttonDrawEnd.className = 'glyphicon glyphicon-ok hidden';
+            buttonPoint.className = this.olButtonClassName + ' glyphicon glyphicon-map-marker';
+            buttonLine.className = this.olButtonClassName + ' glyphicon icon-large icon-vector-path-line';
+            buttonSquare.className = this.olButtonClassName + ' glyphicon icon-vector-path-square';
+            buttonCircle.className = this.olButtonClassName + ' glyphicon icon-vector-path-circle';
+            buttonPolygone.className = this.olButtonClassName + ' glyphicon icon-vector-path-polygon';
+            buttonDrawEnd.className = this.olButtonClassName + ' glyphicon glyphicon-ok hidden';
         } else {
-            buttonPoint.className = 'glyphicon-vector-path-point';
-            buttonLine.className = 'glyphicon-vector-path-line';
-            buttonSquare.className = 'glyphicon-vector-path-square';
-            buttonCircle.className = 'glyphicon-vector-path-circle';
-            buttonPolygone.className = 'glyphicon-vector-path-polygon';
-            buttonDrawEnd.className = 'glyphicon-vector-path-ok hidden';
+            buttonPoint.className = this.olButtonClassName + ' glyphicon-vector-path-point';
+            buttonLine.className = this.olButtonClassName + ' glyphicon-vector-path-line';
+            buttonSquare.className = this.olButtonClassName + ' glyphicon-vector-path-square';
+            buttonCircle.className = this.olButtonClassName + ' glyphicon-vector-path-circle';
+            buttonPolygone.className = this.olButtonClassName + ' glyphicon-vector-path-polygon';
+            buttonDrawEnd.className = this.olButtonClassName + ' glyphicon-vector-path-ok hidden';
         }
 
         return elementDrawButtons;
@@ -33047,13 +33048,13 @@ var ol3buttons = {
         elementDrawControls.push(buttonControlEnd);
 
         if (this.tabOptions.style_buttons == "glyphicon") {
-            buttonEdit.className = 'glyphicon glyphicon-pencil';
-            buttonDel.className = 'glyphicon glyphicon-trash';
-            buttonControlEnd.className = 'glyphicon glyphicon-ok hidden';
+            buttonEdit.className = this.olButtonClassName + ' glyphicon glyphicon-pencil';
+            buttonDel.className = this.olButtonClassName + ' glyphicon glyphicon-trash';
+            buttonControlEnd.className = this.olButtonClassName + ' glyphicon glyphicon-ok hidden';
         } else {
-            buttonEdit.className = 'glyphicon-vector-path-pencil';
-            buttonDel.className = 'glyphicon-vector-path-trash';
-            buttonControlEnd.className = 'glyphicon-vector-path-ok hidden';
+            buttonEdit.className = this.olButtonClassName + ' glyphicon-vector-path-pencil';
+            buttonDel.className = this.olButtonClassName + ' glyphicon-vector-path-trash';
+            buttonControlEnd.className = this.olButtonClassName + ' glyphicon-vector-path-ok hidden';
         }
 
         return elementDrawControls;
@@ -34197,7 +34198,6 @@ exports.default = {
         _kuzzle2.default.dataCollectionFactory(collection).fetchAllDocuments(function (err, res) {
             if (!err) {
                 if (res.total > 0) {
-
                     var result = [];
                     res.documents.forEach(function (kDoc, index) {
                         result.push(kDoc.content);
@@ -34248,21 +34248,21 @@ exports.default = {
         });
     },
     updateDocument: function updateDocument() {},
-    subscribeCollection: function subscribeCollection(layer, currentPosition, distance) {
+    subscribeCollection: function subscribeCollection(layer, coordonatesWGS84, distance, unite) {
         if (subscription) {
             subscription.unsubscribe();
         }
 
-        console.log("Longitude : " + currentPosition[0]);
-        console.log("Lattitude : " + currentPosition[1]);
+        _openlayers4.default.createZoneSubscription(distance);
+        console.log("Longitude : " + coordonatesWGS84[0] + " / Lattitude : " + coordonatesWGS84[1]);
 
         var filter = {
             geoDistance: {
                 location: {
-                    lat: currentPosition[1],
-                    lon: currentPosition[0]
+                    lat: coordonatesWGS84[1],
+                    lon: coordonatesWGS84[0]
                 },
-                distance: distance
+                distance: distance + unite
             }
         };
 
@@ -34539,11 +34539,11 @@ exports.default = {
         projectionFrom: 'EPSG:3857',
         projectionTo: 'EPSG:4326',
         osm: null,
+        zoneSubscriptionLayer: null,
         view: null,
         zoom: null,
         buttonsDrawControls: null,
         layerSwitcher: null,
-        k: null,
         groupKuzzleLayers: null,
         selectedLayer: null,
         tabStyles: null
@@ -34617,20 +34617,20 @@ exports.default = {
                 return feature;
             });
 
-            if (feature) {
+            if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
 
-                    console.log(feature);
+                console.log(feature);
 
-                    var fProperties = feature.getProperties();
-                    var extFeature = feature.getGeometry().getExtent();
-                    var centerFeature = _openlayers2.default.extent.getCenter(extFeature);
+                var fProperties = feature.getProperties();
+                var extFeature = feature.getGeometry().getExtent();
+                var centerFeature = _openlayers2.default.extent.getCenter(extFeature);
 
-                    this_.addPropertiesTab(fProperties);
-                    this_.addGeometriesTab(feature.getGeometry());
-                    document.getElementById("mainProperties").style.display = "block";
+                this_.addPropertiesTab(fProperties);
+                this_.addGeometriesTab(feature.getGeometry());
+                document.getElementById("mainProperties").style.display = "block";
 
-                    this_.state.view.setCenter(centerFeature);
-                }
+                this_.state.view.setCenter(centerFeature);
+            }
         });
 
         this.initControls();
@@ -34642,7 +34642,7 @@ exports.default = {
         this.state.map.addControl(this.state.layerSwitcher);
 
         var optionsControlDraw = {
-            "style_buttons": "default",
+            "style_buttons": null,
             "draw": {
                 "Point": true,
                 "LineString": true,
@@ -34661,10 +34661,47 @@ exports.default = {
 
                     _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
 
-                    _dataLayers2.default.subscribeCollection(lyr, this_.geolocation.getPosition(), '1000m');
+                    if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
+                        this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
+                    }
+
+                    _dataLayers2.default.subscribeCollection(lyr, this_.geolocation.getPosition(), 10000, 'm');
+
+                    this_.state.buttonsDrawControls.setSelectedLayer(lyr);
                 }
             });
         });
+        this.state.map.addControl(this.state.buttonsDrawControls);
+    },
+    createZoneSubscription: function createZoneSubscription(distance) {
+        var coordonatesWGS84 = this.geolocation.getPosition();
+
+        var features = [];
+        var coordinatesTr = _openlayers2.default.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
+        var circle = new _openlayers2.default.geom.Circle([coordinatesTr[0], coordinatesTr[1]], distance);
+
+        features.push(new _openlayers2.default.Feature({
+            geometry: circle
+        }));
+        var vectorSource = new _openlayers2.default.source.Vector({
+            features: features
+        });
+
+        var color = '#' + '0123456789abcdef'.split('').map(function (v, i, a) {
+            return i > 5 ? null : a[Math.floor(Math.random() * 16)];
+        }).join('');
+        this.state.zoneSubscriptionLayer = new _openlayers2.default.layer.Vector({
+            source: vectorSource,
+            title: "Subscribe zone",
+            visible: true,
+            style: [new _openlayers2.default.style.Style({
+                stroke: new _openlayers2.default.style.Stroke({
+                    color: color,
+                    width: 2
+                })
+            })]
+        });
+        this.state.map.addLayer(this.state.zoneSubscriptionLayer);
     },
     addPropertiesTab: function addPropertiesTab(properties) {
         var tabP = document.getElementById('tabFProperties');
@@ -34765,8 +34802,8 @@ exports.default = {
             var coordinates = line.getCoordinates();
             length = 0;
             for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
-                var c1 = _openlayers2.default.proj.transform(coordinates[i], this.projectionFrom, this.projectionTo);
-                var c2 = _openlayers2.default.proj.transform(coordinates[i + 1], this.projectionFrom, this.projectionTo);
+                var c1 = _openlayers2.default.proj.transform(coordinates[i], this.state.projectionFrom, this.state.projectionTo);
+                var c2 = _openlayers2.default.proj.transform(coordinates[i + 1], this.state.projectionFrom, this.state.projectionTo);
                 length += wgs84Sphere.haversineDistance(c1, c2);
             }
         } else {
@@ -34783,7 +34820,7 @@ exports.default = {
     formatArea: function formatArea(polygon, geodesic) {
         var area;
         if (geodesic) {
-            var geom = polygon.clone().transform(this.projectionFrom, this.projectionTo);
+            var geom = polygon.clone().transform(this.state.projectionFrom, this.state.projectionTo);
             var coordinates = geom.getLinearRing(0).getCoordinates();
             area = Math.abs(wgs84Sphere.geodesicArea(coordinates));
         } else {

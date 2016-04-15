@@ -103,3 +103,28 @@ body { overflow: hidden; padding-top: 50px; }
     opacity:0.6;
     color: #FFFFFF;
 }
+/** ****************************************/
+/* == Surcharge de ol3-drawcontrols.css == */
+/** ****************************************/
+#map .toggle-control {
+    background-color: rgba(255, 255, 255, 0.46);
+    border: 1px solid rgba(0, 0, 0, 0.9);
+    border-radius: 4px;
+    padding: 0px;
+    /*position: relative;*/
+    text-align: center;
+}
+
+.toggle-control button.ol3-drawButtons {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.toggle-control button.ol3-drawButtons.progress:disabled {
+    text-decoration: none;
+    background-color: rgba(44, 128, 27, 0.75);
+}
+
+.toggle-control button.ol3-drawButtons:disabled {
+    text-decoration: none;
+    background-color: rgba(244, 35, 36, 0.75);
+}

@@ -30,10 +30,6 @@ export default {
                     }
                 );
 
-                //this_.state.collections.map(layer => {
-                //    this_.loadDatasFromCollection(layer);
-                //});
-
                 olMap.initMap(13);
             } else {
                 console.error(err.message);
@@ -51,10 +47,6 @@ export default {
         kuzzle.dataCollectionFactory(collection).fetchAllDocuments(function(err, res) {
             if (!err) {
                 if(res.total > 0) {
-                     /*var result = res.documents.map(kDoc => {
-                        return kDoc.content;
-                    });*/
-
                     var result = [];
                     res.documents.forEach(function(kDoc, index) {
                         result.push(kDoc.content);
@@ -138,22 +130,23 @@ export default {
      * @param currentPosition
      * @param distance
      */
-    subscribeCollection(layer, currentPosition, distance)
+    subscribeCollection(layer, coordonatesWGS84, distance, unite)
     {
         if (subscription) {
             subscription.unsubscribe();
         }
 
-        console.log("Longitude : " + currentPosition[0]);
-        console.log("Lattitude : " + currentPosition[1]);
+        // Creation couche zone subscribe
+        olMap.createZoneSubscription(distance);
+        console.log("Longitude : " + coordonatesWGS84[0] + " / Lattitude : " + coordonatesWGS84[1]);
 
         var filter = {
             geoDistance: {
                 location: {
-                    lat: currentPosition[1],
-                    lon: currentPosition[0]
+                    lat: coordonatesWGS84[1],
+                    lon: coordonatesWGS84[0]
                 },
-                distance: distance
+                distance: distance + unite
             }
         };
 
