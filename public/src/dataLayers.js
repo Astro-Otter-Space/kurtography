@@ -167,7 +167,7 @@ export default {
         };
 
         // index.js:25 Uncaught RangeError: Maximum call stack size exceeded
-        var subscription = kuzzle.dataCollectionFactory(layer).subscribe(filter, options, (err, resp) => {
+        var subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 console.log(resp);
 

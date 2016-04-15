@@ -1,7 +1,7 @@
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
-//import ControlDrawButtons from './../../node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons'
+import ControlDrawButtons from './../../node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons'
 
 /**
  * Initialisation de la map
@@ -136,7 +136,7 @@ export default {
 
 
     /**
-     *
+     * Add controls to map
      */
     initControls()
     {
@@ -157,7 +157,7 @@ export default {
                 "Polygon": true
             }
         };
-        //this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
+        this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
@@ -169,7 +169,7 @@ export default {
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
 
                     // Subscription of datas
-                    //dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), '1000m');
+                    dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), '1000m');
 
                     // Not sure if correct but it's working :|
                     //this_.buttonsDrawControls.setSelectedLayer(lyr);
