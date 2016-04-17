@@ -80,8 +80,11 @@ export default {
                     collapsible: false
                 })
             }).extend([
-                new ol.control.Rotate(),
-                new ol.control.ScaleLine(),
+                new ol.control.ScaleLine(), // Scale
+                new ol.control.Zoom(), // Zoom
+                //new ol.control.ZoomSlider(), // Zoom slide
+                //new ol.control.OverviewMap(), // Overviewmap
+                // get coordinates of mouse position
                 new ol.control.MousePosition({
                     coordinateFormat:  function(coordinate) {
                         return ol.coordinate.format(coordinate, 'LonLat : {y}, {x}', 4);
@@ -99,6 +102,7 @@ export default {
             tracking: true
         });
 
+        // Get change on geolocation (mobile use only)
         this.geolocation.on('change', function() {
             var lon = this_.geolocation.getPosition()[0];
             var lat =  this_.geolocation.getPosition()[1];
@@ -107,7 +111,7 @@ export default {
         });
 
 
-        // Add popup + listener
+        // Show feature data + listener
         this.state.map.on('click', function(evt) {
             var feature = this_.state.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
@@ -217,6 +221,7 @@ export default {
                     })
                 })]
         });
+        this.state.zoneSubscriptionLayer.setZIndex(10);
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
     },
 

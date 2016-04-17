@@ -42,7 +42,7 @@ String.prototype.capitalizeFirstLetter = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
-},{"./public/src/dataLayers":317,"./public/src/init-bootstrap":318}],2:[function(require,module,exports){
+},{"./public/src/dataLayers":316,"./public/src/init-bootstrap":317}],2:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/json/stringify"), __esModule: true };
 },{"core-js/library/fn/json/stringify":5}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/symbol"), __esModule: true };
@@ -32505,563 +32505,6 @@ KuzzleUser.prototype.getProfiles = function () {
 module.exports = KuzzleUser;
 
 },{"./kuzzleProfile":308,"./kuzzleSecurityDocument":311}],313:[function(require,module,exports){
-'use strict';
-
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-var _openlayers = require('openlayers');
-
-var _openlayers2 = _interopRequireDefault(_openlayers);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_openlayers2.default.control.ControlDrawButtons = function (selected_layer, opt_options) {
-    var options = opt_options || {};
-    options.draw.Ending = true;
-
-    this.selectedLayers = selected_layer;
-
-    this.typeSelect = 'Point';
-    this.map = this.getMap();
-    this.flagDraw = new Boolean(false);
-    this.flagLocStor = new Boolean(false);
-
-    if (undefined != options.properties) {
-        this.element = options.properties.element;
-    }
-
-    this.setFlagDraw(this.flagDraw);
-    this.setFlagLocStor(this.flagLocStor);
-
-    var this_ = this;
-
-    this.setFlagLocStor(false);
-    if (options.local_storage == true) {
-
-        this.setFlagLocStor(true);
-        if (localStorage.getItem('features') !== null) {
-            console.log(localStorage.getItem('features'));
-            var featuresLS = new _openlayers2.default.format.GeoJSON().readFeatures(JSON.parse(localStorage.getItem('features')));
-
-            var sourceLS = new _openlayers2.default.source.Vector({
-                features: featuresLS
-            });
-            this.selectedLayers.setSource(sourceLS);
-        }
-    }
-
-    this.setSelectedLayer(this.selectedLayers);
-
-    if (options.style_buttons == undefined) {
-        options.style_buttons = "default";
-    }
-
-    if (options.popup_form == true) {
-        this.popup = document.getElementById('popup');
-    }
-
-    var handleButtonsClick = function handleButtonsClick(e) {
-        e = e || window.event;
-
-        var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
-        for (var i = 0; i < divsChildren.length; i++) {
-            divsChildren.item(i).classList.remove('enable');
-            divsChildren.item(i).classList.remove('progress');
-            divsChildren.item(i).disabled = true;
-        }
-
-        var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
-        for (var i = 0; i < divsChildren.length; i++) {
-            divsChildren.item(i).classList.remove('enable');
-            divsChildren.item(i).classList.remove('progress');
-            divsChildren.item(i).disabled = true;
-
-            if (divsChildren.item(i).type_control == 'ending') {
-                divsChildren.item(i).classList.remove('hidden');
-                divsChildren.item(i).disabled = false;
-            }
-        }
-
-        e.target.classList.toggle('progress');
-
-        this_.drawOnMap(e);
-        e.preventDefault();
-    };
-
-    var handleControlsClick = function handleControlsClick(e) {
-        e = e || window.event;
-
-        var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
-        for (var i = 0; i < divsChildren.length; i++) {
-            divsChildren.item(i).classList.remove('enable');
-            divsChildren.item(i).classList.remove('progress');
-            divsChildren.item(i).disabled = true;
-
-            if (divsChildren.item(i).type_control == 'ending') {
-                divsChildren.item(i).classList.remove('hidden');
-                divsChildren.item(i).disabled = false;
-            }
-        }
-
-        var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
-        for (var i = 0; i < divsChildren.length; i++) {
-            divsChildren.item(i).classList.remove('enable');
-            divsChildren.item(i).classList.remove('progress');
-            divsChildren.item(i).disabled = true;
-        }
-
-        e.target.classList.toggle('progress');
-
-        switch (e.target.type_control) {
-            case 'edit':
-                this_.controlEditOnMap(e);
-                break;
-            case 'delete':
-                this_.controlDelOnMap(e);
-                break;
-        }
-
-        e.preventDefault();
-    };
-
-    var handleGroupEnd = function handleGroupEnd(e) {
-        var divsChildren = this_.element.querySelectorAll('.div-controls button, .div-draw button');
-        for (var i = 0; i < divsChildren.length; i++) {
-            divsChildren.item(i).disabled = false;
-
-            if (divsChildren.item(i).type_control == 'ending') {
-                if (!divsChildren.item(i).classList.contains('hidden')) {
-                    divsChildren.item(i).classList.toggle('hidden');
-                }
-            }
-        }
-
-        if (undefined != this_.drawInteraction && this_.drawInteraction.getActive() == true) {
-            this_.drawInteraction.setActive(false);
-            this_.map.removeInteraction(this_.drawInteraction);
-        }
-
-        if (undefined != this_.editSelectInteraction && this_.editSelectInteraction.getActive() == true) {
-            this_.editSelectInteraction.setActive(false);
-            this_.map.removeInteraction(this_.editSelectInteraction);
-        }
-        if (undefined != this_.delInteraction && this_.delInteraction.getActive()) {
-            this_.delInteraction.setActive(false);
-            this_.map.removeInteraction(this_.delInteraction);
-        }
-        if (undefined != this_.modifyInteraction && this_.modifyInteraction.getActive() == true) {
-            this_.modifyInteraction.setActive(false);
-            this_.map.removeInteraction(this_.modifyInteraction);
-        }
-
-        if (undefined != this_.selectDelInteraction && this_.selectDelInteraction.getActive()) {
-            this_.selectDelInteraction.setActive(false);
-            this_.map.removeInteraction(this_.selectDelInteraction);
-        }
-        if (undefined != this_.delInteraction && this_.delInteraction.getActive()) {
-            this_.delInteraction.setActive(false);
-            this_.map.removeInteraction(this_.delInteraction);
-        }
-
-        if (true == this_.getFlagLocStor()) {
-            this_.setFeaturesInLocalStorage();
-        }
-
-        this_.setFlagDraw(false);
-        e.preventDefault();
-    };
-
-    var buttonsContainer = new ol3buttons.init(opt_options, handleButtonsClick, handleControlsClick, handleGroupEnd);
-
-    _openlayers2.default.control.Control.call(this, {
-        element: buttonsContainer,
-        target: options.target
-    });
-};
-
-_openlayers2.default.inherits(_openlayers2.default.control.ControlDrawButtons, _openlayers2.default.control.Control);
-
-_openlayers2.default.control.ControlDrawButtons.prototype.drawOnMap = function (evt) {
-    this.map = this.getMap();
-
-    if (!this.getSelectedLayer()) {
-        this.setFlagDraw(false);
-    } else {
-        this.setFlagDraw(true);
-    }
-
-    if (this.getFlagDraw() == true) {
-        var geometryFctDraw;
-        var typeSelect = evt.target.draw;
-
-        if (typeSelect == 'Square') {
-            typeSelect = 'Circle';
-            geometryFctDraw = this.geometryFctDraw = _openlayers2.default.interaction.Draw.createRegularPolygon(4);
-        }
-
-        var draw = this.drawInteraction = new _openlayers2.default.interaction.Draw({
-            source: this.getSelectedLayer().getSource(),
-            features: new _openlayers2.default.Collection(),
-            type: typeSelect,
-            geometryFunction: geometryFctDraw,
-            style: this.styleAdd()
-        });
-
-        draw.on('drawend', this.drawEndFeature, this);
-
-        this.map.addInteraction(draw);
-    }
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = function (evt) {
-    var feature = evt.feature;
-    var parser = new _openlayers2.default.format.GeoJSON();
-
-    if ('Circle' == feature.getGeometry().getType()) {} else {
-            console.log("Add feature : " + feature.getGeometry().getCoordinates());
-            var featureGeoJSON = parser.writeFeatureObject(feature);
-
-            if (undefined != this.element) {
-                var properties = feature.getProperties();
-                this.element.appendChild(this.formulary(properties));
-            }
-        }
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.setFeaturesInLocalStorage = function () {
-    var features = this.getSelectedLayer().getSource().getFeatures();
-    var parser = new _openlayers2.default.format.GeoJSON();
-
-    if (features.length > 0) {
-        var featuresGeoJson = parser.writeFeatures(features);
-        localStorage.clear();
-        console.log('Number of feature : ' + features.length);
-        console.log(featuresGeoJson);
-        localStorage.setItem('features', (0, _stringify2.default)(featuresGeoJson));
-    }
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.controlEditOnMap = function (evt) {
-    if (!this.getSelectedLayer()) {
-        this.setFlagDraw(false);
-    } else {
-        this.setFlagDraw(true);
-    }
-
-    if (this.getFlagDraw() == true) {
-        this.map = this.getMap();
-
-        var selectedLayer = this.getSelectedLayer();
-        var editSelectInteraction = this.editSelectInteraction = new _openlayers2.default.interaction.Select({
-            condition: _openlayers2.default.events.condition.click
-        });
-        this.map.addInteraction(editSelectInteraction);
-
-        editSelectInteraction.getFeatures().addEventListener('add', function (e) {
-            var feature = e.element;
-            feature.addEventListener('change', function (e) {
-                console.log(feature.getGeometry());
-            });
-            console.log(feature.getGeometry());
-        });
-
-        var mod = this.modifyInteraction = new _openlayers2.default.interaction.Modify({
-            features: editSelectInteraction.getFeatures(),
-            style: this.styleEdit()
-        });
-        this.map.addInteraction(mod);
-    }
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt) {
-    if (!this.getSelectedLayer()) {
-        this.setFlagDraw(false);
-    } else {
-        this.setFlagDraw(true);
-    }
-
-    if (this.getFlagDraw() == true) {
-        this.map = this.getMap();
-
-        var selectDelInteraction = this.selectDelInteraction = new _openlayers2.default.interaction.Select({
-            condition: _openlayers2.default.events.condition.click,
-            source: function source(layer) {
-                if (layer == this.getSelectedLayer()) {
-                    return layer;
-                }
-            }
-        });
-        this.map.addInteraction(selectDelInteraction);
-
-        var this_ = this;
-        selectDelInteraction.getFeatures().addEventListener('add', function (e) {
-            var feature = e.element;
-            if (confirm('Are you sure you want to delete this feature ?')) {
-                try {
-                    selectDelInteraction.getFeatures().remove(feature);
-
-                    this_.getSelectedLayer().getSource().removeFeature(feature);
-                } catch (e) {
-                    console.log(e.message);
-                }
-            }
-            e.preventDefault();
-        });
-
-        var delInteraction = this.delInteraction = new _openlayers2.default.interaction.Modify({
-            style: this.styleEdit(),
-            features: selectDelInteraction.getFeatures(),
-            deleteCondition: function deleteCondition(event) {
-                return _openlayers2.default.events.condition.singleClick(event);
-            }
-        });
-
-        this.map.addInteraction(delInteraction);
-    }
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.formulary = function (properties) {
-    var form = document.createElement('form');
-
-    return form;
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.styleAdd = function () {
-    var style = new _openlayers2.default.style.Style({
-        fill: new _openlayers2.default.style.Fill({
-            color: [69, 175, 157, 0.4] }),
-        stroke: new _openlayers2.default.style.Stroke({
-            color: [0, 75, 82, 0.75],
-            width: 1.5
-        }),
-        image: new _openlayers2.default.style.Circle({
-            radius: 7,
-            fill: new _openlayers2.default.style.Fill({
-                color: [60, 255, 100, 0.4]
-            }),
-            stroke: new _openlayers2.default.style.Stroke({
-                color: [255, 255, 255, 0.75],
-                width: 1.5
-            })
-        }),
-        zIndex: 100000
-    });
-
-    return style;
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.styleEdit = function () {
-    var style = new _openlayers2.default.style.Style({
-        fill: new _openlayers2.default.style.Fill({
-            color: [4, 100, 128, 0.4] }),
-        stroke: new _openlayers2.default.style.Stroke({
-            color: [0, 64, 28, 0.75],
-            width: 1.5
-        }),
-        image: new _openlayers2.default.style.Circle({
-            radius: 7,
-            fill: new _openlayers2.default.style.Fill({
-                color: [4, 100, 128, 0.4]
-            }),
-            stroke: new _openlayers2.default.style.Stroke({
-                color: [0, 64, 28, 0.75],
-                width: 1.5
-            })
-        }),
-        zIndex: 100000
-    });
-    return style;
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.setSelectedLayer = function (layer) {
-    this.selectedLayers = layer;
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.getSelectedLayer = function () {
-    return this.selectedLayers;
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.setFlagDraw = function (flagDraw) {
-    this.flagDraw = flagDraw;
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.getFlagDraw = function () {
-    return this.flagDraw;
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.setFlagLocStor = function (locStor) {
-    this.flagLocStor = locStor;
-};
-
-_openlayers2.default.control.ControlDrawButtons.prototype.getFlagLocStor = function () {
-    return this.flagLocStor;
-};
-
-var ol3buttons = {
-
-    tabOptions: {},
-    olClassName: 'ol-unselectable ol-control',
-    drawContainer: 'toggle-control',
-    olGroupClassName: 'ol-control-group',
-    olButtonClassName: 'ol3-drawButtons',
-    handleButtonsClick: null,
-    handleControlsClick: null,
-    handleGroupEnd: null,
-
-    init: function init(tabOptions, handleButtonsClick, handleControlsClick, handleGroupEnd) {
-        var this_ = this;
-        this.tabOptions = ol3buttons.tabOptions = tabOptions;
-
-        this.olClassName = ol3buttons.olClassName;
-        this.drawContainer = ol3buttons.drawContainer;
-        this.olGroupClassName = ol3buttons.olGroupClassName;
-        this.drawClassName = this.olClassName + ' ' + this.drawContainer;
-
-        this.handleButtonsClick = ol3buttons.handleButtonsClick = handleButtonsClick;
-        this.handleControlsClick = ol3buttons.handleControlsClick = handleControlsClick;
-        this.handleGroupEnd = ol3buttons.handleGroupEnd = handleGroupEnd;
-
-        var container = ol3buttons.elContainer();
-        container.className = this.drawClassName;
-        return container;
-    },
-
-    elContainer: function elContainer() {
-        var this_ = this;
-
-        var elementDrawButtons = this.drawButtons();
-        var divDraw = document.createElement('div');
-        divDraw.className = 'div-draw ' + this.olGroupClassName;
-
-        elementDrawButtons.forEach(function (button) {
-            button.removeEventListener("dblclick", this_.handleButtonsClick);
-            if (this_.tabOptions.draw[button.draw] == true) {
-                divDraw.appendChild(button);
-            }
-        });
-
-        var elementDrawControls = this.drawControls();
-        var divControls = document.createElement('div');
-        divControls.className = 'div-controls ' + this.olGroupClassName;
-        elementDrawControls.forEach(function (button) {
-            button.removeEventListener("dblclick", this_.handleControlsClick);
-            divControls.appendChild(button);
-        });
-
-        var elementContainer = document.createElement('div');
-        elementContainer.appendChild(divDraw);
-        elementContainer.appendChild(divControls);
-
-        return elementContainer;
-    },
-
-    drawButtons: function drawButtons() {
-        var elementDrawButtons = new _openlayers2.default.Collection();
-
-        var buttonPoint = this.buttonPoint = document.createElement('button');
-        buttonPoint.setAttribute('title', 'Draw point');
-        buttonPoint.id = buttonPoint.draw = 'Point';
-        buttonPoint.type_control = 'draw';
-        buttonPoint.addEventListener('click', this.handleButtonsClick, false);
-        elementDrawButtons.push(buttonPoint);
-
-        var buttonLine = this.buttonLine = document.createElement('button');
-        buttonLine.setAttribute('title', 'Draw line');
-        buttonLine.id = buttonLine.draw = 'LineString';
-        buttonLine.type_control = 'draw';
-        buttonLine.addEventListener('click', this.handleButtonsClick, false);
-        elementDrawButtons.push(buttonLine);
-
-        var buttonSquare = this.buttonCircle = document.createElement('button');
-        buttonSquare.setAttribute('title', 'Draw square');
-        buttonSquare.id = buttonSquare.draw = 'Square';
-        buttonSquare.type_control = 'draw';
-        buttonSquare.addEventListener('click', this.handleButtonsClick, false);
-        elementDrawButtons.push(buttonSquare);
-
-        var buttonCircle = this.buttonCircle = document.createElement('button');
-        buttonCircle.setAttribute('title', 'Draw circle');
-        buttonCircle.id = buttonCircle.draw = 'Circle';
-        buttonCircle.type_control = 'draw';
-        buttonCircle.addEventListener('click', this.handleButtonsClick, false);
-        elementDrawButtons.push(buttonCircle);
-
-        var buttonPolygone = this.buttonPolygone = document.createElement('button');
-        buttonPolygone.setAttribute('title', 'Draw polygone');
-        buttonPolygone.id = buttonPolygone.draw = 'Polygon';
-        buttonPolygone.type_control = 'draw';
-        buttonPolygone.addEventListener('click', this.handleButtonsClick, false);
-        elementDrawButtons.push(buttonPolygone);
-
-        var buttonDrawEnd = this.buttonDrawEnd = document.createElement('button');
-        buttonDrawEnd.setAttribute('title', 'Ending draw mode');
-        buttonDrawEnd.id = buttonDrawEnd.draw = 'Ending';
-        buttonDrawEnd.type_control = 'ending';
-        buttonDrawEnd.addEventListener('click', this.handleGroupEnd, false);
-        buttonDrawEnd.removeEventListener('dblclick', this.handleGroupEnd);
-        elementDrawButtons.push(buttonDrawEnd);
-
-        if (this.tabOptions.style_buttons == "glyphicon") {
-            buttonPoint.className = this.olButtonClassName + ' glyphicon glyphicon-map-marker';
-            buttonLine.className = this.olButtonClassName + ' glyphicon icon-large icon-vector-path-line';
-            buttonSquare.className = this.olButtonClassName + ' glyphicon icon-vector-path-square';
-            buttonCircle.className = this.olButtonClassName + ' glyphicon icon-vector-path-circle';
-            buttonPolygone.className = this.olButtonClassName + ' glyphicon icon-vector-path-polygon';
-            buttonDrawEnd.className = this.olButtonClassName + ' glyphicon glyphicon-ok hidden';
-        } else {
-            buttonPoint.className = this.olButtonClassName + ' glyphicon-vector-path-point';
-            buttonLine.className = this.olButtonClassName + ' glyphicon-vector-path-line';
-            buttonSquare.className = this.olButtonClassName + ' glyphicon-vector-path-square';
-            buttonCircle.className = this.olButtonClassName + ' glyphicon-vector-path-circle';
-            buttonPolygone.className = this.olButtonClassName + ' glyphicon-vector-path-polygon';
-            buttonDrawEnd.className = this.olButtonClassName + ' glyphicon-vector-path-ok hidden';
-        }
-
-        return elementDrawButtons;
-    },
-
-    drawControls: function drawControls() {
-        var elementDrawControls = new _openlayers2.default.Collection();
-
-        var buttonEdit = this.buttonEdit = document.createElement('button');
-        buttonEdit.setAttribute('title', 'Edit feature');
-        buttonEdit.id = 'Edit';
-        buttonEdit.type_control = 'edit';
-        buttonEdit.addEventListener('click', this.handleControlsClick, false);
-        elementDrawControls.push(buttonEdit);
-
-        var buttonDel = this.buttonEdit = document.createElement('button');
-        buttonDel.setAttribute('title', 'Delete feature');
-        buttonDel.id = 'Delete';
-        buttonDel.type_control = 'delete';
-        buttonDel.addEventListener('click', this.handleControlsClick, false);
-        elementDrawControls.push(buttonDel);
-
-        var buttonControlEnd = this.buttonControlEnd = document.createElement('button');
-        buttonControlEnd.setAttribute('title', 'Ending control mode');
-        buttonControlEnd.id = 'Ending';
-        buttonControlEnd.type_control = 'ending';
-        buttonControlEnd.addEventListener('click', this.handleGroupEnd, false);
-        buttonControlEnd.removeEventListener('dblclick', this.handleGroupEnd);
-        elementDrawControls.push(buttonControlEnd);
-
-        if (this.tabOptions.style_buttons == "glyphicon") {
-            buttonEdit.className = this.olButtonClassName + ' glyphicon glyphicon-pencil';
-            buttonDel.className = this.olButtonClassName + ' glyphicon glyphicon-trash';
-            buttonControlEnd.className = this.olButtonClassName + ' glyphicon glyphicon-ok hidden';
-        } else {
-            buttonEdit.className = this.olButtonClassName + ' glyphicon-vector-path-pencil';
-            buttonDel.className = this.olButtonClassName + ' glyphicon-vector-path-trash';
-            buttonControlEnd.className = this.olButtonClassName + ' glyphicon-vector-path-ok hidden';
-        }
-
-        return elementDrawControls;
-    }
-};
-
-},{"babel-runtime/core-js/json/stringify":2,"openlayers":314}],314:[function(require,module,exports){
 (function (global){
 // OpenLayers 3. See http://openlayers.org/
 // License: https://raw.githubusercontent.com/openlayers/ol3/master/LICENSE.md
@@ -34097,7 +33540,7 @@ Qr.prototype.once=Qr.prototype.M;Qr.prototype.un=Qr.prototype.K;Qr.prototype.unB
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],315:[function(require,module,exports){
+},{}],314:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34108,7 +33551,7 @@ exports.default = {
     defaultIndex: 'kurtography'
 };
 
-},{}],316:[function(require,module,exports){
+},{}],315:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34143,7 +33586,7 @@ var kuzzle = new _kuzzleSdk2.default(_config2.default.kuzzleUrl, optConnect, fun
 });
 exports.default = kuzzle;
 
-},{"./config":315,"kuzzle-sdk":303}],317:[function(require,module,exports){
+},{"./config":314,"kuzzle-sdk":303}],316:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34175,6 +33618,7 @@ exports.default = {
     state: {
         collections: [],
         tabLayersKuzzle: [],
+        mappingCollection: null,
         tabStyles: _openlayers4.default.getStylesFeatures()
     },
 
@@ -34200,11 +33644,11 @@ exports.default = {
                 if (res.total > 0) {
                     var result = [];
                     res.documents.forEach(function (kDoc, index) {
+                        kDoc.content.id = kDoc.id;
                         result.push(kDoc.content);
                     });
 
                     var dataGeoJSON = {
-                        "id": res.documents.id,
                         "type": "FeatureCollection",
                         "features": result
                     };
@@ -34214,6 +33658,7 @@ exports.default = {
                         features: kGeoJSON
                     });
                     _openlayers4.default.getSelectedLayer().setSource(kSource);
+                    _openlayers4.default.getSelectedLayer().setZIndex(20);
                 } else {
                     console.log("No datas from " + collection);
                 }
@@ -34235,16 +33680,20 @@ exports.default = {
 
         _kuzzle2.default.dataCollectionFactory(layer).createDocument(datas);
     },
-    deleteDocument: function deleteDocument(idDocument, layer) {
-        if (!idDocument) {
+    deleteDocument: function deleteDocument(feature, layer) {
+        if (!feature.getId()) {
             console.log("Delete document error, no id document");
             return false;
+        } else {
+            var idDocument = feature.getId();
         }
 
         _kuzzle2.default.dataCollectionFactory(layer).deleteDocument(idDocument, function (err, res) {
             if (err) {
-                console.error(err);
-            } else {}
+                console.error(err.message);
+            } else {
+                console.log("Delete from kuzzle " + idDocument);
+            }
         });
     },
     updateDocument: function updateDocument() {},
@@ -34254,7 +33703,7 @@ exports.default = {
         }
 
         _openlayers4.default.createZoneSubscription(distance);
-        console.log("Longitude : " + coordonatesWGS84[0] + " / Lattitude : " + coordonatesWGS84[1]);
+
 
         var filter = {
             geoDistance: {
@@ -34307,7 +33756,7 @@ exports.default = {
     }
 };
 
-},{"../services/config":315,"../services/kuzzle":316,"./openlayers":320,"openlayers":314}],318:[function(require,module,exports){
+},{"../services/config":314,"../services/kuzzle":315,"./openlayers":320,"openlayers":313}],317:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34334,7 +33783,7 @@ exports.default = {
     }
 };
 
-},{}],319:[function(require,module,exports){
+},{}],318:[function(require,module,exports){
 'use strict';
 
 var _openlayers = require('openlayers');
@@ -34502,7 +33951,568 @@ _openlayers2.default.control.LayerSwitcher.isTouchDevice_ = function () {
     }
 };
 
-},{"openlayers":314}],320:[function(require,module,exports){
+},{"openlayers":313}],319:[function(require,module,exports){
+'use strict';
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _dataLayers = require('./dataLayers');
+
+var _dataLayers2 = _interopRequireDefault(_dataLayers);
+
+var _openlayers = require('openlayers');
+
+var _openlayers2 = _interopRequireDefault(_openlayers);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_openlayers2.default.control.ControlDrawButtons = function (selected_layer, opt_options) {
+    var options = opt_options || {};
+    options.draw.Ending = true;
+
+    this.selectedLayers = selected_layer;
+
+    this.typeSelect = 'Point';
+    this.map = this.getMap();
+    this.flagDraw = new Boolean(false);
+    this.flagLocStor = new Boolean(false);
+
+    if (undefined != options.properties) {
+        this.element = options.properties.element;
+    }
+
+    this.setFlagDraw(this.flagDraw);
+    this.setFlagLocStor(this.flagLocStor);
+
+    var this_ = this;
+
+    this.setFlagLocStor(false);
+    if (options.local_storage == true) {
+
+        this.setFlagLocStor(true);
+        if (localStorage.getItem('features') !== null) {
+            console.log(localStorage.getItem('features'));
+            var featuresLS = new _openlayers2.default.format.GeoJSON().readFeatures(JSON.parse(localStorage.getItem('features')));
+
+            var sourceLS = new _openlayers2.default.source.Vector({
+                features: featuresLS
+            });
+            this.selectedLayers.setSource(sourceLS);
+        }
+    }
+
+    this.setSelectedLayer(this.selectedLayers);
+
+    if (options.style_buttons == undefined) {
+        options.style_buttons = "default";
+    }
+
+    if (options.popup_form == true) {
+        this.popup = document.getElementById('popup');
+    }
+
+    var handleButtonsClick = function handleButtonsClick(e) {
+        e = e || window.event;
+
+        var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
+        for (var i = 0; i < divsChildren.length; i++) {
+            divsChildren.item(i).classList.remove('enable');
+            divsChildren.item(i).classList.remove('progress');
+            divsChildren.item(i).disabled = true;
+        }
+
+        var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
+        for (var i = 0; i < divsChildren.length; i++) {
+            divsChildren.item(i).classList.remove('enable');
+            divsChildren.item(i).classList.remove('progress');
+            divsChildren.item(i).disabled = true;
+
+            if (divsChildren.item(i).type_control == 'ending') {
+                divsChildren.item(i).classList.remove('hidden');
+                divsChildren.item(i).disabled = false;
+            }
+        }
+
+        e.target.classList.toggle('progress');
+
+        this_.drawOnMap(e);
+        e.preventDefault();
+    };
+
+    var handleControlsClick = function handleControlsClick(e) {
+        e = e || window.event;
+
+        var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
+        for (var i = 0; i < divsChildren.length; i++) {
+            divsChildren.item(i).classList.remove('enable');
+            divsChildren.item(i).classList.remove('progress');
+            divsChildren.item(i).disabled = true;
+
+            if (divsChildren.item(i).type_control == 'ending') {
+                divsChildren.item(i).classList.remove('hidden');
+                divsChildren.item(i).disabled = false;
+            }
+        }
+
+        var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
+        for (var i = 0; i < divsChildren.length; i++) {
+            divsChildren.item(i).classList.remove('enable');
+            divsChildren.item(i).classList.remove('progress');
+            divsChildren.item(i).disabled = true;
+        }
+
+        e.target.classList.toggle('progress');
+
+        switch (e.target.type_control) {
+            case 'edit':
+                this_.controlEditOnMap(e);
+                break;
+            case 'delete':
+                this_.controlDelOnMap(e);
+                break;
+        }
+
+        e.preventDefault();
+    };
+
+    var handleGroupEnd = function handleGroupEnd(e) {
+        var divsChildren = this_.element.querySelectorAll('.div-controls button, .div-draw button');
+        for (var i = 0; i < divsChildren.length; i++) {
+            divsChildren.item(i).disabled = false;
+
+            if (divsChildren.item(i).type_control == 'ending') {
+                if (!divsChildren.item(i).classList.contains('hidden')) {
+                    divsChildren.item(i).classList.toggle('hidden');
+                }
+            }
+        }
+
+        if (undefined != this_.drawInteraction && this_.drawInteraction.getActive() == true) {
+            this_.drawInteraction.setActive(false);
+            this_.map.removeInteraction(this_.drawInteraction);
+        }
+
+        if (undefined != this_.editSelectInteraction && this_.editSelectInteraction.getActive() == true) {
+            this_.editSelectInteraction.setActive(false);
+            this_.map.removeInteraction(this_.editSelectInteraction);
+        }
+        if (undefined != this_.delInteraction && this_.delInteraction.getActive()) {
+            this_.delInteraction.setActive(false);
+            this_.map.removeInteraction(this_.delInteraction);
+        }
+        if (undefined != this_.modifyInteraction && this_.modifyInteraction.getActive() == true) {
+            this_.modifyInteraction.setActive(false);
+            this_.map.removeInteraction(this_.modifyInteraction);
+        }
+
+        if (undefined != this_.selectDelInteraction && this_.selectDelInteraction.getActive()) {
+            this_.selectDelInteraction.setActive(false);
+            this_.map.removeInteraction(this_.selectDelInteraction);
+        }
+        if (undefined != this_.delInteraction && this_.delInteraction.getActive()) {
+            this_.delInteraction.setActive(false);
+            this_.map.removeInteraction(this_.delInteraction);
+        }
+
+        if (true == this_.getFlagLocStor()) {
+            this_.setFeaturesInLocalStorage();
+        }
+
+        this_.setFlagDraw(false);
+        e.preventDefault();
+    };
+
+    var buttonsContainer = new ol3buttons.init(opt_options, handleButtonsClick, handleControlsClick, handleGroupEnd);
+
+    _openlayers2.default.control.Control.call(this, {
+        element: buttonsContainer,
+        target: options.target
+    });
+};
+
+_openlayers2.default.inherits(_openlayers2.default.control.ControlDrawButtons, _openlayers2.default.control.Control);
+
+_openlayers2.default.control.ControlDrawButtons.prototype.drawOnMap = function (evt) {
+    this.map = this.getMap();
+
+    if (!this.getSelectedLayer()) {
+        this.setFlagDraw(false);
+    } else {
+        this.setFlagDraw(true);
+    }
+
+    if (this.getFlagDraw() == true) {
+        var geometryFctDraw;
+        var typeSelect = evt.target.draw;
+
+        if (typeSelect == 'Square') {
+            typeSelect = 'Circle';
+            geometryFctDraw = this.geometryFctDraw = _openlayers2.default.interaction.Draw.createRegularPolygon(4);
+        }
+
+        var draw = this.drawInteraction = new _openlayers2.default.interaction.Draw({
+            source: this.getSelectedLayer().getSource(),
+            features: new _openlayers2.default.Collection(),
+            type: typeSelect,
+            geometryFunction: geometryFctDraw,
+            style: this.styleAdd()
+        });
+
+        draw.on('drawend', this.drawEndFeature, this);
+
+        this.map.addInteraction(draw);
+    }
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = function (evt) {
+    var feature = evt.feature;
+    var parser = new _openlayers2.default.format.GeoJSON();
+
+    if ('Circle' == feature.getGeometry().getType()) {} else {
+            console.log("Add feature : " + feature.getGeometry().getCoordinates());
+            var featureGeoJSON = parser.writeFeatureObject(feature);
+
+            if (undefined != this.element) {
+                var properties = feature.getProperties();
+                this.element.appendChild(this.formulary(properties));
+            }
+        }
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.setFeaturesInLocalStorage = function () {
+    var features = this.getSelectedLayer().getSource().getFeatures();
+    var parser = new _openlayers2.default.format.GeoJSON();
+
+    if (features.length > 0) {
+        var featuresGeoJson = parser.writeFeatures(features);
+        localStorage.clear();
+        console.log('Number of feature : ' + features.length);
+        console.log(featuresGeoJson);
+        localStorage.setItem('features', (0, _stringify2.default)(featuresGeoJson));
+    }
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.controlEditOnMap = function (evt) {
+    if (!this.getSelectedLayer()) {
+        this.setFlagDraw(false);
+    } else {
+        this.setFlagDraw(true);
+    }
+
+    if (this.getFlagDraw() == true) {
+        this.map = this.getMap();
+
+        var selectedLayer = this.getSelectedLayer();
+        var editSelectInteraction = this.editSelectInteraction = new _openlayers2.default.interaction.Select({
+            condition: _openlayers2.default.events.condition.click
+        });
+        this.map.addInteraction(editSelectInteraction);
+
+        editSelectInteraction.getFeatures().addEventListener('add', function (e) {
+            var feature = e.element;
+            feature.addEventListener('change', function (e) {
+                console.log(feature.getGeometry());
+            });
+            console.log(feature.getGeometry());
+        });
+
+        var mod = this.modifyInteraction = new _openlayers2.default.interaction.Modify({
+            features: editSelectInteraction.getFeatures(),
+            style: this.styleEdit()
+        });
+        this.map.addInteraction(mod);
+    }
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt) {
+    if (!this.getSelectedLayer()) {
+        this.setFlagDraw(false);
+    } else {
+        this.setFlagDraw(true);
+    }
+
+    if (this.getFlagDraw() == true) {
+        this.map = this.getMap();
+
+        var selectDelInteraction = this.selectDelInteraction = new _openlayers2.default.interaction.Select({
+            condition: _openlayers2.default.events.condition.click,
+            source: function source(layer) {
+                if (layer == this.getSelectedLayer()) {
+                    return layer;
+                }
+            }
+        });
+        this.map.addInteraction(selectDelInteraction);
+
+        var this_ = this;
+        selectDelInteraction.getFeatures().addEventListener('add', function (e) {
+            var feature = e.element;
+            if (confirm('Are you sure you want to delete this feature ?')) {
+                try {
+                    selectDelInteraction.getFeatures().remove(feature);
+
+                    _dataLayers2.default.deleteDocument(feature, this_.getSelectedLayer().get('title'));
+                } catch (e) {
+                    console.log(e.message);
+                }
+            }
+            e.preventDefault();
+        });
+
+        var delInteraction = this.delInteraction = new _openlayers2.default.interaction.Modify({
+            style: this.styleEdit(),
+            features: selectDelInteraction.getFeatures(),
+            deleteCondition: function deleteCondition(event) {
+                return _openlayers2.default.events.condition.singleClick(event);
+            }
+        });
+
+        this.map.addInteraction(delInteraction);
+    }
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.formulary = function (properties) {
+    var form = document.createElement('form');
+
+    return form;
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.styleAdd = function () {
+    var style = new _openlayers2.default.style.Style({
+        fill: new _openlayers2.default.style.Fill({
+            color: [69, 175, 157, 0.4] }),
+        stroke: new _openlayers2.default.style.Stroke({
+            color: [0, 75, 82, 0.75],
+            width: 1.5
+        }),
+        image: new _openlayers2.default.style.Circle({
+            radius: 7,
+            fill: new _openlayers2.default.style.Fill({
+                color: [60, 255, 100, 0.4]
+            }),
+            stroke: new _openlayers2.default.style.Stroke({
+                color: [255, 255, 255, 0.75],
+                width: 1.5
+            })
+        }),
+        zIndex: 100000
+    });
+
+    return style;
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.styleEdit = function () {
+    var style = new _openlayers2.default.style.Style({
+        fill: new _openlayers2.default.style.Fill({
+            color: [4, 100, 128, 0.4] }),
+        stroke: new _openlayers2.default.style.Stroke({
+            color: [0, 64, 28, 0.75],
+            width: 1.5
+        }),
+        image: new _openlayers2.default.style.Circle({
+            radius: 7,
+            fill: new _openlayers2.default.style.Fill({
+                color: [4, 100, 128, 0.4]
+            }),
+            stroke: new _openlayers2.default.style.Stroke({
+                color: [0, 64, 28, 0.75],
+                width: 1.5
+            })
+        }),
+        zIndex: 100000
+    });
+    return style;
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.setSelectedLayer = function (layer) {
+    this.selectedLayers = layer;
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.getSelectedLayer = function () {
+    return this.selectedLayers;
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.setFlagDraw = function (flagDraw) {
+    this.flagDraw = flagDraw;
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.getFlagDraw = function () {
+    return this.flagDraw;
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.setFlagLocStor = function (locStor) {
+    this.flagLocStor = locStor;
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.getFlagLocStor = function () {
+    return this.flagLocStor;
+};
+
+var ol3buttons = {
+
+    tabOptions: {},
+    olClassName: 'ol-unselectable ol-control',
+    drawContainer: 'toggle-control',
+    olGroupClassName: 'ol-control-group',
+    olButtonClassName: 'ol3-drawButtons',
+    handleButtonsClick: null,
+    handleControlsClick: null,
+    handleGroupEnd: null,
+
+    init: function init(tabOptions, handleButtonsClick, handleControlsClick, handleGroupEnd) {
+        var this_ = this;
+        this.tabOptions = ol3buttons.tabOptions = tabOptions;
+
+        this.olClassName = ol3buttons.olClassName;
+        this.drawContainer = ol3buttons.drawContainer;
+        this.olGroupClassName = ol3buttons.olGroupClassName;
+        this.drawClassName = this.olClassName + ' ' + this.drawContainer;
+
+        this.handleButtonsClick = ol3buttons.handleButtonsClick = handleButtonsClick;
+        this.handleControlsClick = ol3buttons.handleControlsClick = handleControlsClick;
+        this.handleGroupEnd = ol3buttons.handleGroupEnd = handleGroupEnd;
+
+        var container = ol3buttons.elContainer();
+        container.className = this.drawClassName;
+        return container;
+    },
+
+    elContainer: function elContainer() {
+        var this_ = this;
+
+        var elementDrawButtons = this.drawButtons();
+        var divDraw = document.createElement('div');
+        divDraw.className = 'div-draw ' + this.olGroupClassName;
+
+        elementDrawButtons.forEach(function (button) {
+            button.removeEventListener("dblclick", this_.handleButtonsClick);
+            if (this_.tabOptions.draw[button.draw] == true) {
+                divDraw.appendChild(button);
+            }
+        });
+
+        var elementDrawControls = this.drawControls();
+        var divControls = document.createElement('div');
+        divControls.className = 'div-controls ' + this.olGroupClassName;
+        elementDrawControls.forEach(function (button) {
+            button.removeEventListener("dblclick", this_.handleControlsClick);
+            divControls.appendChild(button);
+        });
+
+        var elementContainer = document.createElement('div');
+        elementContainer.appendChild(divDraw);
+        elementContainer.appendChild(divControls);
+
+        return elementContainer;
+    },
+
+    drawButtons: function drawButtons() {
+        var elementDrawButtons = new _openlayers2.default.Collection();
+
+        var buttonPoint = this.buttonPoint = document.createElement('button');
+        buttonPoint.setAttribute('title', 'Draw point');
+        buttonPoint.id = buttonPoint.draw = 'Point';
+        buttonPoint.type_control = 'draw';
+        buttonPoint.addEventListener('click', this.handleButtonsClick, false);
+        elementDrawButtons.push(buttonPoint);
+
+        var buttonLine = this.buttonLine = document.createElement('button');
+        buttonLine.setAttribute('title', 'Draw line');
+        buttonLine.id = buttonLine.draw = 'LineString';
+        buttonLine.type_control = 'draw';
+        buttonLine.addEventListener('click', this.handleButtonsClick, false);
+        elementDrawButtons.push(buttonLine);
+
+        var buttonSquare = this.buttonCircle = document.createElement('button');
+        buttonSquare.setAttribute('title', 'Draw square');
+        buttonSquare.id = buttonSquare.draw = 'Square';
+        buttonSquare.type_control = 'draw';
+        buttonSquare.addEventListener('click', this.handleButtonsClick, false);
+        elementDrawButtons.push(buttonSquare);
+
+        var buttonCircle = this.buttonCircle = document.createElement('button');
+        buttonCircle.setAttribute('title', 'Draw circle');
+        buttonCircle.id = buttonCircle.draw = 'Circle';
+        buttonCircle.type_control = 'draw';
+        buttonCircle.addEventListener('click', this.handleButtonsClick, false);
+        elementDrawButtons.push(buttonCircle);
+
+        var buttonPolygone = this.buttonPolygone = document.createElement('button');
+        buttonPolygone.setAttribute('title', 'Draw polygone');
+        buttonPolygone.id = buttonPolygone.draw = 'Polygon';
+        buttonPolygone.type_control = 'draw';
+        buttonPolygone.addEventListener('click', this.handleButtonsClick, false);
+        elementDrawButtons.push(buttonPolygone);
+
+        var buttonDrawEnd = this.buttonDrawEnd = document.createElement('button');
+        buttonDrawEnd.setAttribute('title', 'Ending draw mode');
+        buttonDrawEnd.id = buttonDrawEnd.draw = 'Ending';
+        buttonDrawEnd.type_control = 'ending';
+        buttonDrawEnd.addEventListener('click', this.handleGroupEnd, false);
+        buttonDrawEnd.removeEventListener('dblclick', this.handleGroupEnd);
+        elementDrawButtons.push(buttonDrawEnd);
+
+        if (this.tabOptions.style_buttons == "glyphicon") {
+            buttonPoint.className = this.olButtonClassName + ' glyphicon glyphicon-map-marker';
+            buttonLine.className = this.olButtonClassName + ' glyphicon icon-large icon-vector-path-line';
+            buttonSquare.className = this.olButtonClassName + ' glyphicon icon-vector-path-square';
+            buttonCircle.className = this.olButtonClassName + ' glyphicon icon-vector-path-circle';
+            buttonPolygone.className = this.olButtonClassName + ' glyphicon icon-vector-path-polygon';
+            buttonDrawEnd.className = this.olButtonClassName + ' glyphicon glyphicon-ok hidden';
+        } else {
+            buttonPoint.className = this.olButtonClassName + ' glyphicon-vector-path-point';
+            buttonLine.className = this.olButtonClassName + ' glyphicon-vector-path-line';
+            buttonSquare.className = this.olButtonClassName + ' glyphicon-vector-path-square';
+            buttonCircle.className = this.olButtonClassName + ' glyphicon-vector-path-circle';
+            buttonPolygone.className = this.olButtonClassName + ' glyphicon-vector-path-polygon';
+            buttonDrawEnd.className = this.olButtonClassName + ' glyphicon-vector-path-ok hidden';
+        }
+
+        return elementDrawButtons;
+    },
+
+    drawControls: function drawControls() {
+        var elementDrawControls = new _openlayers2.default.Collection();
+
+        var buttonEdit = this.buttonEdit = document.createElement('button');
+        buttonEdit.setAttribute('title', 'Edit feature');
+        buttonEdit.id = 'Edit';
+        buttonEdit.type_control = 'edit';
+        buttonEdit.addEventListener('click', this.handleControlsClick, false);
+        elementDrawControls.push(buttonEdit);
+
+        var buttonDel = this.buttonEdit = document.createElement('button');
+        buttonDel.setAttribute('title', 'Delete feature');
+        buttonDel.id = 'Delete';
+        buttonDel.type_control = 'delete';
+        buttonDel.addEventListener('click', this.handleControlsClick, false);
+        elementDrawControls.push(buttonDel);
+
+        var buttonControlEnd = this.buttonControlEnd = document.createElement('button');
+        buttonControlEnd.setAttribute('title', 'Ending control mode');
+        buttonControlEnd.id = 'Ending';
+        buttonControlEnd.type_control = 'ending';
+        buttonControlEnd.addEventListener('click', this.handleGroupEnd, false);
+        buttonControlEnd.removeEventListener('dblclick', this.handleGroupEnd);
+        elementDrawControls.push(buttonControlEnd);
+
+        if (this.tabOptions.style_buttons == "glyphicon") {
+            buttonEdit.className = this.olButtonClassName + ' glyphicon glyphicon-pencil';
+            buttonDel.className = this.olButtonClassName + ' glyphicon glyphicon-trash';
+            buttonControlEnd.className = this.olButtonClassName + ' glyphicon glyphicon-ok hidden';
+        } else {
+            buttonEdit.className = this.olButtonClassName + ' glyphicon-vector-path-pencil';
+            buttonDel.className = this.olButtonClassName + ' glyphicon-vector-path-trash';
+            buttonControlEnd.className = this.olButtonClassName + ' glyphicon-vector-path-ok hidden';
+        }
+
+        return elementDrawControls;
+    }
+};
+
+},{"./dataLayers":316,"babel-runtime/core-js/json/stringify":2,"openlayers":313}],320:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34525,7 +34535,7 @@ var _layerSwitcher = require('./layerSwitcher');
 
 var _layerSwitcher2 = _interopRequireDefault(_layerSwitcher);
 
-var _ol3Controldrawbuttons = require('./../../node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons');
+var _ol3Controldrawbuttons = require('./ol3-controldrawbuttons');
 
 var _ol3Controldrawbuttons2 = _interopRequireDefault(_ol3Controldrawbuttons);
 
@@ -34591,7 +34601,7 @@ exports.default = {
                 attributionOptions: {
                     collapsible: false
                 }
-            }).extend([new _openlayers2.default.control.Rotate(), new _openlayers2.default.control.ScaleLine(), new _openlayers2.default.control.MousePosition({
+            }).extend([new _openlayers2.default.control.ScaleLine(), new _openlayers2.default.control.Zoom(), new _openlayers2.default.control.MousePosition({
                 coordinateFormat: function coordinateFormat(coordinate) {
                     return _openlayers2.default.coordinate.format(coordinate, 'LonLat : {y}, {x}', 4);
                 },
@@ -34701,6 +34711,7 @@ exports.default = {
                 })
             })]
         });
+        this.state.zoneSubscriptionLayer.setZIndex(10);
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
     },
     addPropertiesTab: function addPropertiesTab(properties) {
@@ -34883,4 +34894,4 @@ exports.default = {
     }
 };
 
-},{"./../../node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons":313,"./dataLayers":317,"./layerSwitcher":319,"babel-runtime/helpers/typeof":4,"openlayers":314}]},{},[1]);
+},{"./dataLayers":316,"./layerSwitcher":318,"./ol3-controldrawbuttons":319,"babel-runtime/helpers/typeof":4,"openlayers":313}]},{},[1]);

@@ -66,6 +66,7 @@ export default {
                         features: kGeoJSON
                     });
                     olMap.getSelectedLayer().setSource(kSource);
+                    olMap.getSelectedLayer().setZIndex(20);
                 } else {
                     console.log("No datas from " + collection);
                 }
@@ -143,7 +144,7 @@ export default {
         }
 
         // Creation couche zone subscribe
-        //olMap.createZoneSubscription(distance);
+        olMap.createZoneSubscription(distance);
         //console.log("Longitude : " + coordonatesWGS84[0] + " / Lattitude : " + coordonatesWGS84[1]);
 
         var filter = {
