@@ -2,11 +2,11 @@
 export default {
 
     applyMargins() {
-        var leftToggler = jQuery(".mini-submenu-left");
+        var leftToggler = jQuery(".mini-submenu-right");
 
         if (leftToggler.is(":visible")) {
             jQuery("#map .ol-zoom")
-                .css("margin-left", 0)
+                .css("margin-right", 0)
                 .removeClass("zoom-top-opened-sidebar")
                 .addClass("zoom-top-collapsed");
         } else {
@@ -23,8 +23,8 @@ export default {
 
     applyInitialUIState() {
         if (this.isConstrained()) {
-            jQuery(".sidebar-left .sidebar-body").fadeOut('slide');
-            jQuery('.mini-submenu-left').fadeIn();
+            jQuery(".sidebar-right .sidebar-body").fadeOut('slide');
+            jQuery('.mini-submenu-right').fadeIn();
         }
     },
 

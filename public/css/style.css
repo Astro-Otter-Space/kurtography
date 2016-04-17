@@ -8,6 +8,7 @@ body { overflow: hidden; padding-top: 50px; }
     height:calc(100% - 0px);
 }
 #map .ol-zoom {
+    top: 0.5em;
     left: 0.4em;
     font-size: 1.2em;
     background-color: rgba(255, 255, 255, 0.46);
@@ -15,7 +16,7 @@ body { overflow: hidden; padding-top: 50px; }
     border-radius: 4px;
     padding: 9px;
     /*position: relative;*/
-    width: 42px;
+    width: 40px;
     text-align: center;
 }
 
@@ -40,7 +41,6 @@ body { overflow: hidden; padding-top: 50px; }
 }
 
 .zoom-top-opened-sidebar { margin-top: 5px; }
-.zoom-top-collapsed { margin-top: 45px; }
 
 .ol-mouse-position{
     top: auto;
@@ -89,12 +89,13 @@ body { overflow: hidden; padding-top: 50px; }
     /*position: relative;*/
     width: 42px;
     text-align: center;
+    right: .5em;
 }
 
-.mini-submenu-left {
+.mini-submenu-right {
     position: absolute;
     top: 60px;
-    left: .5em;
+    right: .5em;
     z-index: 40;
 }
 

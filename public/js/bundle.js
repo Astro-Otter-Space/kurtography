@@ -14,17 +14,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _dataLayers2.default.listCollections();
 
 jQuery(function () {
-    jQuery('.sidebar-left .slide-submenu').on('click', function () {
+    jQuery('.sidebar-right .slide-submenu').on('click', function () {
         var thisEl = jQuery(this);
         thisEl.closest('.sidebar-body').fadeOut('slide', function () {
-            jQuery('.mini-submenu-left').fadeIn();
+            jQuery('.mini-submenu-right').fadeIn();
             _initBootstrap2.default.applyMargins();
         });
     });
 
-    jQuery('.mini-submenu-left').on('click', function () {
+    jQuery('.mini-submenu-right').on('click', function () {
         var thisEl = jQuery(this);
-        jQuery('.sidebar-left .sidebar-body').toggle('slide');
+        jQuery('.sidebar-right .sidebar-body').toggle('slide');
         thisEl.hide();
         _initBootstrap2.default.applyMargins();
     });
@@ -32,8 +32,8 @@ jQuery(function () {
     jQuery(window).on("resize", _initBootstrap2.default.applyMargins);
 
     _initBootstrap2.default.applyInitialUIState();
-    jQuery('.sidebar-left .slide-submenu').closest('.sidebar-body').fadeOut('slide', function () {
-        jQuery('.mini-submenu-left').fadeIn();
+    jQuery('.sidebar-right .slide-submenu').closest('.sidebar-body').fadeOut('slide', function () {
+        jQuery('.mini-submenu-right').fadeIn();
         _initBootstrap2.default.applyMargins();
     });
 });
@@ -33764,10 +33764,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
     applyMargins: function applyMargins() {
-        var leftToggler = jQuery(".mini-submenu-left");
+        var leftToggler = jQuery(".mini-submenu-right");
 
         if (leftToggler.is(":visible")) {
-            jQuery("#map .ol-zoom").css("margin-left", 0).removeClass("zoom-top-opened-sidebar").addClass("zoom-top-collapsed");
+            jQuery("#map .ol-zoom").css("margin-right", 0).removeClass("zoom-top-opened-sidebar").addClass("zoom-top-collapsed");
         } else {
             jQuery("#map .ol-zoom").css("margin-left", jQuery(".sidebar-left").width()).removeClass("zoom-top-opened-sidebar").removeClass("zoom-top-collapsed");
         }
@@ -33777,8 +33777,8 @@ exports.default = {
     },
     applyInitialUIState: function applyInitialUIState() {
         if (this.isConstrained()) {
-            jQuery(".sidebar-left .sidebar-body").fadeOut('slide');
-            jQuery('.mini-submenu-left').fadeIn();
+            jQuery(".sidebar-right .sidebar-body").fadeOut('slide');
+            jQuery('.mini-submenu-right').fadeIn();
         }
     }
 };

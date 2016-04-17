@@ -4,17 +4,17 @@ dataLayers.listCollections();
 import initBootstrap from './public/src/init-bootstrap'
 
 jQuery(function(){
-    jQuery('.sidebar-left .slide-submenu').on('click',function() {
+    jQuery('.sidebar-right .slide-submenu').on('click',function() {
         var thisEl = jQuery(this);
         thisEl.closest('.sidebar-body').fadeOut('slide',function(){
-            jQuery('.mini-submenu-left').fadeIn();
+            jQuery('.mini-submenu-right').fadeIn();
             initBootstrap.applyMargins();
         });
     });
 
-    jQuery('.mini-submenu-left').on('click',function() {
+    jQuery('.mini-submenu-right').on('click',function() {
         var thisEl = jQuery(this);
-        jQuery('.sidebar-left .sidebar-body').toggle('slide');
+        jQuery('.sidebar-right .sidebar-body').toggle('slide');
         thisEl.hide();
         initBootstrap.applyMargins();
     });
@@ -22,8 +22,8 @@ jQuery(function(){
     jQuery(window).on("resize", initBootstrap.applyMargins);
 
     initBootstrap.applyInitialUIState();
-    jQuery('.sidebar-left .slide-submenu').closest('.sidebar-body').fadeOut('slide',function(){
-        jQuery('.mini-submenu-left').fadeIn();
+    jQuery('.sidebar-right .slide-submenu').closest('.sidebar-body').fadeOut('slide',function(){
+        jQuery('.mini-submenu-right').fadeIn();
         initBootstrap.applyMargins();
     });
 });
