@@ -1,7 +1,7 @@
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
-import ControlDrawButtons from './../../node_modules/ol3-drawButtons/src/js/ol3-controldrawbuttons'
+import ControlDrawButtons from './ol3-controldrawbuttons'
 
 /**
  * Initialisation de la map

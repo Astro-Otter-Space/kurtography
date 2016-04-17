@@ -4,6 +4,27 @@
     {
       "type": "Feature",
       "properties": {
+        "name": "Test",
+        "age": "",
+        "genre": "",
+        "tattoo": "",
+        "puce": "",
+        "race": "",
+        "colors": "",
+        "weight": "",
+        "other": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.9003825187683105,
+          43.599538148400775
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "name": "Lazerboom",
         "age" : "4",
         "genre": "male",

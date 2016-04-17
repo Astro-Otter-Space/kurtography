@@ -8,8 +8,9 @@ let subscription = null;
 export default {
 
     state: {
-        collections: [],
-        tabLayersKuzzle: [],
+        collections: [], // List of collections
+        tabLayersKuzzle: [], // Array contains layers
+        mappingCollection: null, // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures()
     },
 
@@ -49,11 +50,12 @@ export default {
                 if(res.total > 0) {
                     var result = [];
                     res.documents.forEach(function(kDoc, index) {
+                        // Push document identifier in feature data
+                        kDoc.content.id = kDoc.id;
                         result.push(kDoc.content);
                     });
 
                     var dataGeoJSON = {
-                        "id" : res.documents.id,
                         "type": "FeatureCollection",
                         "features": result
                     };
@@ -99,18 +101,22 @@ export default {
      * @param layer
      * @returns {boolean}
      */
-    deleteDocument(idDocument, layer)
+    deleteDocument(feature, layer)
     {
-        if (!idDocument) {
+        if (!feature.getId()) {
             console.log("Delete document error, no id document");
             return false;
+        } else {
+            var idDocument = feature.getId();
         }
 
         kuzzle.dataCollectionFactory(layer).deleteDocument(idDocument, (err, res) => {
             if (err) {
-                console.error(err);
+                console.error(err.message);
             } else {
-                // TODO rechargement de la map ?
+                console.log("Delete from kuzzle " + idDocument);
+                // remove from selected Layer ??
+                //olMap.getSelectedLayer().getSource().removeFeature(feature);
             }
         });
     },
@@ -137,8 +143,8 @@ export default {
         }
 
         // Creation couche zone subscribe
-        olMap.createZoneSubscription(distance);
-        console.log("Longitude : " + coordonatesWGS84[0] + " / Lattitude : " + coordonatesWGS84[1]);
+        //olMap.createZoneSubscription(distance);
+        //console.log("Longitude : " + coordonatesWGS84[0] + " / Lattitude : " + coordonatesWGS84[1]);
 
         var filter = {
             geoDistance: {
