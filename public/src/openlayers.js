@@ -1,3 +1,4 @@
+import Projection from '../services/projections'
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
@@ -12,8 +13,8 @@ export default {
     state: {
         map: null,
         tabLayersKuzzle: [],
-        projectionFrom: 'EPSG:3857',
-        projectionTo: 'EPSG:4326',
+        projectionFrom: Projection.projectionFrom,
+        projectionTo: Projection.projectionTo,
         osm: null,
         zoneSubscriptionLayer: null,
         view: null,
@@ -87,7 +88,7 @@ export default {
                 // get coordinates of mouse position
                 new ol.control.MousePosition({
                     coordinateFormat:  function(coordinate) {
-                        return ol.coordinate.format(coordinate, 'LonLat : {y}, {x}', 4);
+                        return ol.coordinate.format(coordinate, 'Lat : {y} / Long : {x}', 4);
                     },
                     projection: this.state.projectionTo
                 })
@@ -169,15 +170,16 @@ export default {
                 var lyr = e.target;
                 if (lyr.getVisible() == true) {
                     this_.setSelectedLayer(lyr);
-                    // Retrieve datas
-                    dataLayers.loadDatasFromCollection(lyr.get('title'));
 
-                    // Subscription of datas
+                    // Subscribe and Retrieve datas
                     if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
                         this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                     }
-
                     dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), 10000, 'm');
+                    dataLayers.loadDatasFromCollection(lyr.get('title'));
+
+                    // Mapping
+                    //dataLayers.getMapping(lyr.get('title'));
 
                     // Not sure if correct but it's working :|
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);
@@ -281,8 +283,8 @@ export default {
         if (tabG.childElementCount > 0) {
             while (tabG.firstChild) tabG.removeChild(tabG.firstChild);
         }
-
         switch (fGeometry.getType()) {
+
             case 'Point' :
 
                 var coordinates = ol.proj.transform(fGeometry.getCoordinates(), 'EPSG:3857', 'EPSG:4326');
@@ -341,6 +343,7 @@ export default {
      */
     formatLength(line, geodesic) {
         var length;
+        var wgs84Sphere = new ol.Sphere(6378137);
         if (geodesic) {
             var coordinates = line.getCoordinates();
             length = 0;
