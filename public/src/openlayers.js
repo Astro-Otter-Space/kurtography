@@ -179,7 +179,7 @@ export default {
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
 
                     // Mapping
-                    //dataLayers.getMapping(lyr.get('title'));
+                    dataLayers.getPropertiesMapping(lyr.get('title'));
 
                     // Not sure if correct but it's working :|
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);
@@ -256,11 +256,6 @@ export default {
 
                 var tdValue = document.createElement('td');
                 tdValue.innerHTML = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
-                //var inputValue = document.createElement('input')
-                //inputValue.type = 'text';
-                //inputValue.value = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
-                //
-                //tdValue.appendChild(inputValue);
 
                 tr.appendChild(tdKey);
                 tr.appendChild(tdValue);

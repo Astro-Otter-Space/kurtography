@@ -75,21 +75,24 @@ export default {
                 console.error(err);
             }
         });
-
     },
 
     /**
      * Store mapping of selected collection
      * @param layer
      */
-    getMapping(layer)
+    getPropertiesMapping(layer)
     {
         var this_ = this;
-        kuzzle .dataCollectionFactory(layer).getMapping(function (err, res) {
+        kuzzle.dataCollectionFactory(layer).getMapping(function (err, res) {
             // result is a KuzzleDataMapping object
             if (!err) {
-                console.log(res);
-                this_.state.dataProperties = res.mapping.properties.properties;
+                var mapping = res.mapping.properties.properties;
+                var Properties = new Object();
+                Object.keys(mapping).forEach(field => {
+                    Properties[field] = "";
+                });
+                this_.state.dataProperties = Properties;
             } else {
                 console.error(err.message);
             }
@@ -102,6 +105,7 @@ export default {
     addDocument(datas)
     {
         var layer = olMap.getSelectedLayer().get('title');
+        datas.properties = this.state.dataProperties;
         kuzzle.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
             if (!err) {
                 console.log(res);
