@@ -1,3 +1,4 @@
+import Projection from '../services/projections'
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 
@@ -254,13 +255,15 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
     if ('Circle' == feature.getGeometry().getType()) {
         //var parserCircle = parser.writeCircleGeometry_()
     } else {
-        // Addind feature to source vector
-        console.log("Add feature : " + feature.getGeometry().getCoordinates());
-        var featureGeoJSON = parser.writeFeatureObject(feature);
+        // Addind feature to source vector in EPSG:4326
+        var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
         if (undefined != this.element) {
-            var properties = feature.getProperties();
-            this.element.appendChild(this.formulary(properties));
+            //var properties = feature.getProperties();
+            //this.element.appendChild(this.formulary(properties));
+
+            // Ajout new document in Kuzzle
+            dataLayers.addDocument(featureGeoJSON);
         }
     }
 };
@@ -316,6 +319,7 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
             // ---------------------------------------------- //
             // Here, override for updating into your database //
             // ---------------------------------------------- //
+
         });
 
         // Modify interaction

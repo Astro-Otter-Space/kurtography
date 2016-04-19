@@ -42,7 +42,7 @@ String.prototype.capitalizeFirstLetter = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
-},{"./public/src/dataLayers":316,"./public/src/init-bootstrap":317}],2:[function(require,module,exports){
+},{"./public/src/dataLayers":317,"./public/src/init-bootstrap":318}],2:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/json/stringify"), __esModule: true };
 },{"core-js/library/fn/json/stringify":5}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/symbol"), __esModule: true };
@@ -33592,6 +33592,17 @@ exports.default = kuzzle;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = {
+    projectionFrom: 'EPSG:3857',
+    projectionTo: 'EPSG:4326'
+};
+
+},{}],317:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
 var _kuzzle = require('../services/kuzzle');
 
@@ -33600,6 +33611,10 @@ var _kuzzle2 = _interopRequireDefault(_kuzzle);
 var _config = require('../services/config');
 
 var _config2 = _interopRequireDefault(_config);
+
+var _projections = require('../services/projections');
+
+var _projections2 = _interopRequireDefault(_projections);
 
 var _openlayers = require('openlayers');
 
@@ -33618,7 +33633,7 @@ exports.default = {
     state: {
         collections: [],
         tabLayersKuzzle: [],
-        mappingCollection: null,
+        dataProperties: [],
         tabStyles: _openlayers4.default.getStylesFeatures()
     },
 
@@ -33653,7 +33668,7 @@ exports.default = {
                         "features": result
                     };
 
-                    var kGeoJSON = new _openlayers2.default.format.GeoJSON().readFeatures(dataGeoJSON, { featureProjection: _openlayers4.default.state.projectionFrom });
+                    var kGeoJSON = new _openlayers2.default.format.GeoJSON().readFeatures(dataGeoJSON, { featureProjection: _projections2.default.projectionFrom });
                     var kSource = new _openlayers2.default.source.Vector({
                         features: kGeoJSON
                     });
@@ -33667,18 +33682,26 @@ exports.default = {
             }
         });
     },
-    addDocument: function addDocument(datas, layer) {
-
-        var datas = {
-            "type": "Feature",
-            "properties": datas['properties'],
-            "geometry": {
-                "type": datas['type'],
-                "coordinates": [datas['coords']]
+    getMapping: function getMapping(layer) {
+        var this_ = this;
+        _kuzzle2.default.dataCollectionFactory(layer).getMapping(function (err, res) {
+            if (!err) {
+                console.log(res);
+                this_.state.dataProperties = res.mapping.properties.properties;
+            } else {
+                console.error(err.message);
             }
-        };
-
-        _kuzzle2.default.dataCollectionFactory(layer).createDocument(datas);
+        });
+    },
+    addDocument: function addDocument(datas) {
+        var layer = _openlayers4.default.getSelectedLayer().get('title');
+        _kuzzle2.default.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
+            if (!err) {
+                console.log(res);
+            } else {
+                console.log(err.message);
+            }
+        });
     },
     deleteDocument: function deleteDocument(feature, layer) {
         if (!feature.getId()) {
@@ -33756,7 +33779,7 @@ exports.default = {
     }
 };
 
-},{"../services/config":314,"../services/kuzzle":315,"./openlayers":320,"openlayers":313}],317:[function(require,module,exports){
+},{"../services/config":314,"../services/kuzzle":315,"../services/projections":316,"./openlayers":321,"openlayers":313}],318:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33783,7 +33806,7 @@ exports.default = {
     }
 };
 
-},{}],318:[function(require,module,exports){
+},{}],319:[function(require,module,exports){
 'use strict';
 
 var _openlayers = require('openlayers');
@@ -33951,12 +33974,16 @@ _openlayers2.default.control.LayerSwitcher.isTouchDevice_ = function () {
     }
 };
 
-},{"openlayers":313}],319:[function(require,module,exports){
+},{"openlayers":313}],320:[function(require,module,exports){
 'use strict';
 
 var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
+
+var _projections = require('../services/projections');
+
+var _projections2 = _interopRequireDefault(_projections);
 
 var _dataLayers = require('./dataLayers');
 
@@ -34171,12 +34198,10 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = funct
     var parser = new _openlayers2.default.format.GeoJSON();
 
     if ('Circle' == feature.getGeometry().getType()) {} else {
-            console.log("Add feature : " + feature.getGeometry().getCoordinates());
-            var featureGeoJSON = parser.writeFeatureObject(feature);
+            var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
 
             if (undefined != this.element) {
-                var properties = feature.getProperties();
-                this.element.appendChild(this.formulary(properties));
+                _dataLayers2.default.addDocument(featureGeoJSON);
             }
         }
 };
@@ -34512,7 +34537,7 @@ var ol3buttons = {
     }
 };
 
-},{"./dataLayers":316,"babel-runtime/core-js/json/stringify":2,"openlayers":313}],320:[function(require,module,exports){
+},{"../services/projections":316,"./dataLayers":317,"babel-runtime/core-js/json/stringify":2,"openlayers":313}],321:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34522,6 +34547,10 @@ Object.defineProperty(exports, "__esModule", {
 var _typeof2 = require('babel-runtime/helpers/typeof');
 
 var _typeof3 = _interopRequireDefault(_typeof2);
+
+var _projections = require('../services/projections');
+
+var _projections2 = _interopRequireDefault(_projections);
 
 var _dataLayers = require('./dataLayers');
 
@@ -34546,8 +34575,8 @@ exports.default = {
     state: {
         map: null,
         tabLayersKuzzle: [],
-        projectionFrom: 'EPSG:3857',
-        projectionTo: 'EPSG:4326',
+        projectionFrom: _projections2.default.projectionFrom,
+        projectionTo: _projections2.default.projectionTo,
         osm: null,
         zoneSubscriptionLayer: null,
         view: null,
@@ -34603,7 +34632,7 @@ exports.default = {
                 }
             }).extend([new _openlayers2.default.control.ScaleLine(), new _openlayers2.default.control.Zoom(), new _openlayers2.default.control.MousePosition({
                 coordinateFormat: function coordinateFormat(coordinate) {
-                    return _openlayers2.default.coordinate.format(coordinate, 'LonLat : {y}, {x}', 4);
+                    return _openlayers2.default.coordinate.format(coordinate, 'Lat : {y} / Long : {x}', 4);
                 },
                 projection: this.state.projectionTo
             })]),
@@ -34669,13 +34698,11 @@ exports.default = {
                 if (lyr.getVisible() == true) {
                     this_.setSelectedLayer(lyr);
 
-                    _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
-
                     if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
                         this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                     }
-
                     _dataLayers2.default.subscribeCollection(lyr, this_.geolocation.getPosition(), 10000, 'm');
+                    _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
 
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);
                 }
@@ -34757,8 +34784,8 @@ exports.default = {
                 tabG.removeChild(tabG.firstChild);
             }
         }
-
         switch (fGeometry.getType()) {
+
             case 'Point':
 
                 var coordinates = _openlayers2.default.proj.transform(fGeometry.getCoordinates(), 'EPSG:3857', 'EPSG:4326');
@@ -34809,6 +34836,7 @@ exports.default = {
     },
     formatLength: function formatLength(line, geodesic) {
         var length;
+        var wgs84Sphere = new _openlayers2.default.Sphere(6378137);
         if (geodesic) {
             var coordinates = line.getCoordinates();
             length = 0;
@@ -34894,4 +34922,4 @@ exports.default = {
     }
 };
 
-},{"./dataLayers":316,"./layerSwitcher":318,"./ol3-controldrawbuttons":319,"babel-runtime/helpers/typeof":4,"openlayers":313}]},{},[1]);
+},{"../services/projections":316,"./dataLayers":317,"./layerSwitcher":319,"./ol3-controldrawbuttons":320,"babel-runtime/helpers/typeof":4,"openlayers":313}]},{},[1]);

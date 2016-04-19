@@ -1,5 +1,6 @@
 import kuzzle from '../services/kuzzle'
 import Config from '../services/config'
+import Projection from '../services/projections'
 import ol from 'openlayers';
 import olMap from './openlayers'
 
@@ -10,7 +11,7 @@ export default {
     state: {
         collections: [], // List of collections
         tabLayersKuzzle: [], // Array contains layers
-        mappingCollection: null, // data mapping of selected collection
+        dataProperties: [], // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures()
     },
 
@@ -61,7 +62,7 @@ export default {
                     };
 
                     // Construction of geoDatas from content
-                    var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: olMap.state.projectionFrom});
+                    var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: Projection.projectionFrom});
                     var kSource = new ol.source.Vector({
                         features: kGeoJSON
                     });
@@ -78,22 +79,36 @@ export default {
     },
 
     /**
+     * Store mapping of selected collection
+     * @param layer
+     */
+    getMapping(layer)
+    {
+        var this_ = this;
+        kuzzle .dataCollectionFactory(layer).getMapping(function (err, res) {
+            // result is a KuzzleDataMapping object
+            if (!err) {
+                console.log(res);
+                this_.state.dataProperties = res.mapping.properties.properties;
+            } else {
+                console.error(err.message);
+            }
+        });
+    },
+
+    /**
      * Add document to Collection
      */
-    addDocument(datas, layer)
+    addDocument(datas)
     {
-
-        var datas = {
-            "type": "Feature",
-            "properties": datas['properties'],
-            "geometry": {
-                "type": datas['type'],
-                "coordinates": [datas['coords']]
+        var layer = olMap.getSelectedLayer().get('title');
+        kuzzle.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
+            if (!err) {
+                console.log(res);
+            } else {
+                console.log(err.message)
             }
-        };
-
-        kuzzle.dataCollectionFactory(layer).createDocument(datas);
-        // Rechargement de la couche ?
+        });
     },
 
     /**
