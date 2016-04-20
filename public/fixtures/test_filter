@@ -1,0 +1,25 @@
+https://mapbutcher.gitbooks.io/using-spatial-data-in-elasticsearch/content/query/geo_distance_filter.html
+{
+    "filtered" : {
+        "query" : {
+            "match_all" : {}
+        },
+        "filter" : {
+            "geo_distance" : {
+                "distance" : "12km",
+                "pin.location" : [-70, 40]
+            }
+        }
+    }
+
+
+
+    {
+        "geoDistance": {
+            "distance": "100km",
+            "coordinates": {
+                "lon" : 3.8928023,
+                "lat" : 43.6008834
+            }
+        }
+    }

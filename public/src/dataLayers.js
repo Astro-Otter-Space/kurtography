@@ -152,6 +152,7 @@ export default {
     /**
      * Subscribe to item from currentPosition with a radius specified by distance
      * Source : https://github.com/kuzzleio/kuzzle/blob/develop/docs/filters.md#geospacial
+     * https://www.elastic.co/guide/en/elasticsearch/reference/1.4/query-dsl-geo-distance-filter.html#_lat_lon_as_array_4
      * @param layer
      * @param currentPosition
      * @param distance
