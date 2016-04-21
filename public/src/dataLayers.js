@@ -136,7 +136,7 @@ export default {
             } else {
                 console.log("Delete from kuzzle " + idDocument);
                 // remove from selected Layer ??
-                //olMap.getSelectedLayer().getSource().removeFeature(feature);
+                olMap.getSelectedLayer().getSource().removeFeature(feature);
             }
         });
     },
@@ -152,7 +152,8 @@ export default {
     /**
      * Subscribe to item from currentPosition with a radius specified by distance
      * Source : https://github.com/kuzzleio/kuzzle/blob/develop/docs/filters.md#geospacial
-     * https://www.elastic.co/guide/en/elasticsearch/reference/1.4/query-dsl-geo-distance-filter.html#_lat_lon_as_array_4
+     * https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-geo-distance-filter.html
+     * Err : Error during Kuzzle subscription: Cannot create the room 2ebc90b3a5419f060ec9a64fa91ca77f because it has been marked for destruction
      * @param layer
      * @param currentPosition
      * @param distance
@@ -165,15 +166,19 @@ export default {
 
         // Creation couche zone subscribe
         olMap.createZoneSubscription(distance);
-        //console.log("Longitude : " + coordonatesWGS84[0] + " / Lattitude : " + coordonatesWGS84[1]);
+
+        var lon = coordonatesWGS84[0];
+        var lat = coordonatesWGS84[1];
 
         var filter = {
-            geoDistance: {
-                location: {
-                    lat: coordonatesWGS84[1],
-                    lon: coordonatesWGS84[0]
-                },
-                distance: distance + unite
+            geo_distance: {
+                distance: distance + unite,
+                "geometry.coordinates": [lon, lat]
+                //"geometry.coordinates": {
+                //    lon: lon,
+                //    lat: lat
+                //}
+                //"geometry.coordinates": LonLat
             }
         };
 
@@ -187,7 +192,7 @@ export default {
         };
 
         // index.js:25 Uncaught RangeError: Maximum call stack size exceeded
-        var subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
+        subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 console.log(resp);
 
@@ -202,6 +207,7 @@ export default {
             }
         });
     },
+
 
     /**
      *
