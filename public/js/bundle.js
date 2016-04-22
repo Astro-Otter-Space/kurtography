@@ -33717,6 +33717,9 @@ exports.default = {
             }
         });
     },
+    loadDataById: function loadDataById(idKDoc) {
+        return _kuzzle2.default.dataCollectionFactory(_openlayers4.default.getSelectedLayer().get('title')).documentFactory(idKDoc);
+    },
     getPropertiesMapping: function getPropertiesMapping(layer) {
         var this_ = this;
         _kuzzle2.default.dataCollectionFactory(layer).getMapping(function (err, res) {
@@ -33743,6 +33746,22 @@ exports.default = {
             }
         });
     },
+    updateGeodatasDocument: function updateGeodatasDocument(datas, feature) {
+        if (feature.getId()) {
+            var layer = _openlayers4.default.getSelectedLayer().get('title');
+            var kDocId = feature.getId();
+
+            _kuzzle2.default.dataCollectionFactory(layer).updateDocument(kDocId, datas, function (err, res) {
+                if (!err) {
+                    console.log(res);
+                } else {
+                    console.error(err.message);
+                }
+            });
+        } else {
+            console.error("No KuzzleDocument identifier, can't edit Kuzzle Document");
+        }
+    },
     deleteDocument: function deleteDocument(feature, layer) {
         if (!feature.getId()) {
             console.log("Delete document error, no id document");
@@ -33761,8 +33780,9 @@ exports.default = {
             }
         });
     },
-    updateDocument: function updateDocument() {},
     subscribeCollection: function subscribeCollection(layer, coordonatesWGS84, distance, unite) {
+        var _this = this;
+
         if (subscription) {
             subscription.unsubscribe();
         }
@@ -33790,19 +33810,22 @@ exports.default = {
 
         subscription = _kuzzle2.default.dataCollectionFactory(layer.get('title')).subscribe(filter, options, function (err, resp) {
             if (!err) {
-                console.log(resp);
 
+                var kDoc = _this.loadDataById(resp.result._id);
+                console.log(kDoc);
                 if (resp.scope == 'in') {
-                    console.log("Notification : ajout document");
+                    document.getElementById('messageKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
+                    $("#alertKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                 } else if (resp.scope == 'out') {
-                        console.log("Notification : suppression document");
+                        document.getElementById('messageKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
+                        $("#alertKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                     }
             } else {
-                console.error(err.message);
-            }
+                    console.error(err.message);
+                }
         });
     },
-    searchDocument: function searchDocument(search, layer) {
+    searchDocuments: function searchDocuments(search, layer) {
         var filter = {
             term: {}
         };
@@ -34244,7 +34267,6 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = funct
 
             if (undefined != this.element) {
                 if ('Point' == feature.getGeometry().getType()) {
-
                     featureGeoJSON.location = {
                         lon: featureGeoJSON.geometry.coordinates[0],
                         lat: featureGeoJSON.geometry.coordinates[1]
@@ -34284,20 +34306,37 @@ _openlayers2.default.control.ControlDrawButtons.prototype.controlEditOnMap = fun
         });
         this.map.addInteraction(editSelectInteraction);
 
-        editSelectInteraction.getFeatures().addEventListener('add', function (e) {
-            var feature = e.element;
-            feature.addEventListener('change', function (e) {
-                console.log(feature.getGeometry());
-            });
-            console.log(feature.getGeometry());
-        });
-
         var mod = this.modifyInteraction = new _openlayers2.default.interaction.Modify({
             features: editSelectInteraction.getFeatures(),
-            style: this.styleEdit()
+            style: this.styleEdit(),
+            zIndex: 50
         });
+        mod.on('modifyend', this.editEndFeature, this);
+
         this.map.addInteraction(mod);
     }
+};
+
+_openlayers2.default.control.ControlDrawButtons.prototype.editEndFeature = function (evt) {
+    var features = evt.features.getArray();
+    var parser = new _openlayers2.default.format.GeoJSON();
+
+    features.forEach(function (feature, index) {
+        console.log(feature.getId());
+
+        if ('Circle' == feature.getGeometry().getType()) {} else {
+                var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
+
+                if ('Point' == feature.getGeometry().getType()) {
+                    featureGeoJSON.location = {
+                        lon: featureGeoJSON.geometry.coordinates[0],
+                        lat: featureGeoJSON.geometry.coordinates[1]
+                    };
+                }
+
+                _dataLayers2.default.updateGeodatasDocument(featureGeoJSON, feature);
+            }
+    });
 };
 
 _openlayers2.default.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt) {
@@ -34698,6 +34737,11 @@ exports.default = {
             var lat = this_.geolocation.getPosition()[1];
             var pointCenter = new _openlayers2.default.geom.Point([lon, lat]).transform(this_.state.projectionTo, this_.state.projectionFrom).getCoordinates();
             this_.state.view.setCenter(pointCenter);
+
+            if (undefined != this.getSelectedLayer) {
+                this_.createZoneSubscription(5000);
+                _dataLayers2.default.subscribeCollection(this_.getSelectedLayer(), this_.geolocation.getPosition(), 5, 'km');
+            }
         });
 
         this.state.map.on('click', function (evt) {
@@ -34706,8 +34750,6 @@ exports.default = {
             });
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-
-                console.log(feature);
 
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();

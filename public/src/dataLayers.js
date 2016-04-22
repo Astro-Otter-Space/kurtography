@@ -77,6 +77,16 @@ export default {
         });
     },
 
+
+    /**
+     * Retrieve a kuzzle document by his ID
+     * @param idKDoc
+     */
+    loadDataById (idKDoc)
+    {
+        return kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).documentFactory(idKDoc);
+    },
+
     /**
      * Store mapping of selected collection
      * @param layer
@@ -99,8 +109,11 @@ export default {
         });
     },
 
+
     /**
-     * Add document to Collection
+     * Adding new KuzzleDocument
+     * @param datas
+     * @param newFeature
      */
     addDocument(datas, newFeature)
     {
@@ -115,6 +128,31 @@ export default {
             }
         });
     },
+
+
+    /**
+     * Update geo-datas from documents
+     */
+    updateGeodatasDocument (datas, feature)
+    {
+        if (feature.getId()) {
+            var layer = olMap.getSelectedLayer().get('title');
+            var kDocId = feature.getId();
+
+            kuzzle.dataCollectionFactory(layer).updateDocument(kDocId, datas, function (err, res) {
+                if (!err) {
+                    console.log(res);
+                } else {
+                    console.error(err.message);
+                }
+            });
+
+        } else {
+            console.error("No KuzzleDocument identifier, can't edit Kuzzle Document");
+        }
+
+    },
+
 
     /**
      * Delete document from Kuzzle
@@ -142,19 +180,11 @@ export default {
         });
     },
 
-    /**
-     * Update datas from documents
-     */
-    updateDocument ()
-    {
 
-    },
 
     /**
      * Subscribe to item from currentPosition with a radius specified by distance
-     * Source : https://github.com/kuzzleio/kuzzle/blob/develop/docs/filters.md#geospacial
      * https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-geo-distance-filter.html
-     * Err : Error during Kuzzle subscription: Cannot create the room 2ebc90b3a5419f060ec9a64fa91ca77f because it has been marked for destruction
      * @param layer
      * @param currentPosition
      * @param distance
@@ -189,13 +219,20 @@ export default {
 
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
-                console.log(resp);
 
+                var kDoc = this.loadDataById(resp.result._id);
+                console.log(kDoc);
                 if (resp.scope == 'in') {
-                    console.log("Notification : ajout document");
-                    //this.state.tabLayersKuzzle.push();
+                    document.getElementById('messageKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
+                    $("#alertKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+
+                    //olMap.getSelectedLayer().getSource().addFeature(feature);
+
+
                 } else if (resp.scope == 'out') {
-                    console.log("Notification : suppression document");
+                    document.getElementById('messageKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
+                    $("#alertKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    //olMap.getSelectedLayer().getSource().removeFeature(feature);
                 }
             } else {
                 console.error(err.message);
@@ -204,12 +241,13 @@ export default {
     },
 
 
+
     /**
      *
      * @param search
      * @param layer
      */
-    searchDocument(search, layer)
+    searchDocuments(search, layer)
     {
         var filter = {
             term: {

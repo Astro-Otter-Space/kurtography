@@ -263,7 +263,6 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
             //this.element.appendChild(this.formulary(properties));
             // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
             if ('Point' == feature.getGeometry().getType()) {
-
                 featureGeoJSON.location = {
                     lon: featureGeoJSON.geometry.coordinates[0],
                     lat : featureGeoJSON.geometry.coordinates[1]
@@ -274,6 +273,8 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
         }
     }
 };
+
+
 
 /**
  * Record features in local storage
@@ -316,27 +317,70 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
         this.map.addInteraction(editSelectInteraction);
 
         // Gestion des event sur la feature
-        editSelectInteraction.getFeatures().addEventListener('add', function (e) {
-            var feature = e.element;
-            feature.addEventListener('change', function(e) {
-                console.log(feature.getGeometry());
-            });
-            console.log(feature.getGeometry());
-
-            // ---------------------------------------------- //
-            // Here, override for updating into your database //
-            // ---------------------------------------------- //
-
-        });
+        //editSelectInteraction.getFeatures().addEventListener('add', function (e) {
+        //    var feature = e.element;
+        //    var parser = new ol.format.GeoJSON();
+        //
+        //    feature.addEventListener('change', function(e) {
+        //        console.log("On onchange");
+        //        var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+        //
+        //        if ('Point' == feature.getGeometry().getType()) {
+        //            featureGeoJSON.location = {
+        //                lon: featureGeoJSON.geometry.coordinates[0],
+        //                lat : featureGeoJSON.geometry.coordinates[1]
+        //            };
+        //        }
+        //
+        //        console.log(featureGeoJSON);
+        //    });
+        //
+        //});
 
         // Modify interaction
         var mod = this.modifyInteraction = new ol.interaction.Modify({
             features: editSelectInteraction.getFeatures(),
-            style: this.styleEdit()
+            style: this.styleEdit(),
+            zIndex: 50
         });
+        mod.on('modifyend', this.editEndFeature, this);
+
         this.map.addInteraction(mod);
     }
 };
+
+/**
+ * TODO : REPORT THIS IN REPOSITORY ol3-drawButtons
+ * @param evt
+ */
+ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
+{
+    var features = evt.features.getArray();
+    var parser = new ol.format.GeoJSON();
+    // Dont use ES2015 syntax "array.forEach(feature => { return feature; })"
+    features.forEach(function(feature, index) {
+       console.log(feature.getId());
+        // Problem with recuperation of a circle geometry : https://github.com/openlayers/ol3/pull/3434
+        if ('Circle' == feature.getGeometry().getType()) {
+            //var parserCircle = parser.writeCircleGeometry_()
+        } else {
+            // Addind feature to source vector in EPSG:4326
+            var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+
+            // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
+            if ('Point' == feature.getGeometry().getType()) {
+                featureGeoJSON.location = {
+                    lon: featureGeoJSON.geometry.coordinates[0],
+                    lat : featureGeoJSON.geometry.coordinates[1]
+                };
+            }
+            // Edit document in Kuzzle
+            dataLayers.updateGeodatasDocument(featureGeoJSON, feature);
+        }
+    });
+
+};
+
 
 /**
  * Delete a feature from map
@@ -693,4 +737,4 @@ var ol3buttons = {
 
         return elementDrawControls;
     }
-}
+};

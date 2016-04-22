@@ -109,6 +109,12 @@ export default {
             var lat =  this_.geolocation.getPosition()[1];
             var pointCenter = new ol.geom.Point([lon, lat]).transform(this_.state.projectionTo, this_.state.projectionFrom).getCoordinates();
             this_.state.view.setCenter(pointCenter);
+
+            if (undefined != this.getSelectedLayer) {
+                this_.createZoneSubscription(5000);
+                dataLayers.subscribeCollection(this_.getSelectedLayer(), this_.geolocation.getPosition(), 5, 'km');
+            }
+
         });
 
 
@@ -121,8 +127,6 @@ export default {
             );
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-
-                console.log(feature);
 
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
@@ -198,7 +202,7 @@ export default {
      */
     createZoneSubscription(distance)
     {
-        var coordonatesWGS84 = this.geolocation.getPosition()
+        var coordonatesWGS84 = this.geolocation.getPosition();
 
         var features = [];
         var coordinatesTr = ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);

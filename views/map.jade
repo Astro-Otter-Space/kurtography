@@ -2,6 +2,12 @@ extend layout
 
 block content
     // Content
+    div.alert.alert-success#alertKuzzle(role="alert")
+        button.close(type="button" data-dismiss="alert" aria-label="Close")
+            span(aria-hidden="true") &times;
+        span.glyphicon.glyphicon-send(aria-hidden="true") &nbsp;
+        span#messageKuzzle
+
     div#map
 
     div.row.main-row
