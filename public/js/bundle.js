@@ -33732,12 +33732,12 @@ exports.default = {
             }
         });
     },
-    addDocument: function addDocument(datas) {
+    addDocument: function addDocument(datas, newFeature) {
         var layer = _openlayers4.default.getSelectedLayer().get('title');
         datas.properties = this.state.dataProperties;
         _kuzzle2.default.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
             if (!err) {
-                console.log(res);
+                newFeature.setId(res.content.id);
             } else {
                 console.log(err.message);
             }
@@ -33756,6 +33756,8 @@ exports.default = {
                 console.error(err.message);
             } else {
                 console.log("Delete from kuzzle " + idDocument);
+
+                _openlayers4.default.getSelectedLayer().getSource().removeFeature(feature);
             }
         });
     },
@@ -33765,16 +33767,16 @@ exports.default = {
             subscription.unsubscribe();
         }
 
-        _openlayers4.default.createZoneSubscription(distance);
-
+        var lon = coordonatesWGS84[0];
+        var lat = coordonatesWGS84[1];
 
         var filter = {
             geoDistance: {
+                distance: distance + unite,
                 location: {
-                    lat: coordonatesWGS84[1],
-                    lon: coordonatesWGS84[0]
-                },
-                distance: distance + unite
+                    lon: lon,
+                    lat: lat
+                }
             }
         };
 
@@ -33786,7 +33788,7 @@ exports.default = {
             state: 'done'
         };
 
-        var subscription = _kuzzle2.default.dataCollectionFactory(layer.get('title')).subscribe(filter, options, function (err, resp) {
+        subscription = _kuzzle2.default.dataCollectionFactory(layer.get('title')).subscribe(filter, options, function (err, resp) {
             if (!err) {
                 console.log(resp);
 
@@ -34241,7 +34243,15 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = funct
             var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
 
             if (undefined != this.element) {
-                _dataLayers2.default.addDocument(featureGeoJSON);
+                if ('Point' == feature.getGeometry().getType()) {
+
+                    featureGeoJSON.location = {
+                        lon: featureGeoJSON.geometry.coordinates[0],
+                        lat: featureGeoJSON.geometry.coordinates[1]
+                    };
+                }
+
+                _dataLayers2.default.addDocument(featureGeoJSON, feature);
             }
         }
 };
@@ -34253,8 +34263,7 @@ _openlayers2.default.control.ControlDrawButtons.prototype.setFeaturesInLocalStor
     if (features.length > 0) {
         var featuresGeoJson = parser.writeFeatures(features);
         localStorage.clear();
-        console.log('Number of feature : ' + features.length);
-        console.log(featuresGeoJson);
+
         localStorage.setItem('features', (0, _stringify2.default)(featuresGeoJson));
     }
 };
@@ -34741,7 +34750,9 @@ exports.default = {
                     if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
                         this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                     }
-                    _dataLayers2.default.subscribeCollection(lyr, this_.geolocation.getPosition(), 10000, 'm');
+
+                    this_.createZoneSubscription(5000);
+                    _dataLayers2.default.subscribeCollection(lyr, this_.geolocation.getPosition(), 5, 'km');
                     _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
 
                     _dataLayers2.default.getPropertiesMapping(lyr.get('title'));

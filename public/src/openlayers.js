@@ -175,6 +175,8 @@ export default {
                     if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
                         this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                     }
+                    // Creation couche zone subscribe
+                    this_ .createZoneSubscription(5000);
                     dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), 5, 'km');
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
 

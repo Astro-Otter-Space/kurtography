@@ -261,9 +261,16 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
         if (undefined != this.element) {
             //var properties = feature.getProperties();
             //this.element.appendChild(this.formulary(properties));
+            // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
+            if ('Point' == feature.getGeometry().getType()) {
 
+                featureGeoJSON.location = {
+                    lon: featureGeoJSON.geometry.coordinates[0],
+                    lat : featureGeoJSON.geometry.coordinates[1]
+                };
+            }
             // Ajout new document in Kuzzle
-            dataLayers.addDocument(featureGeoJSON);
+            dataLayers.addDocument(featureGeoJSON, feature);
         }
     }
 };
@@ -280,8 +287,8 @@ ol.control.ControlDrawButtons.prototype.setFeaturesInLocalStorage = function()
     if (features.length > 0) {
         var featuresGeoJson = parser.writeFeatures(features)
         localStorage.clear();
-        console.log('Number of feature : ' + features.length);
-        console.log(featuresGeoJson);
+        //console.log('Number of feature : ' + features.length);
+        //console.log(featuresGeoJson);
         localStorage.setItem('features', JSON.stringify(featuresGeoJson));
     }
 }

@@ -102,13 +102,14 @@ export default {
     /**
      * Add document to Collection
      */
-    addDocument(datas)
+    addDocument(datas, newFeature)
     {
         var layer = olMap.getSelectedLayer().get('title');
         datas.properties = this.state.dataProperties;
         kuzzle.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
             if (!err) {
-                console.log(res);
+                // Setting of Kuzzle Document Identifier to identifier of the feature
+                newFeature.setId(res.content.id);
             } else {
                 console.log(err.message)
             }
@@ -164,21 +165,16 @@ export default {
             subscription.unsubscribe();
         }
 
-        // Creation couche zone subscribe
-        olMap.createZoneSubscription(distance);
-
         var lon = coordonatesWGS84[0];
         var lat = coordonatesWGS84[1];
 
         var filter = {
-            geo_distance: {
+            geoDistance: {
                 distance: distance + unite,
-                "geometry.coordinates": [lon, lat]
-                //"geometry.coordinates": {
-                //    lon: lon,
-                //    lat: lat
-                //}
-                //"geometry.coordinates": LonLat
+                location: {
+                    lon: lon,
+                    lat: lat
+                }
             }
         };
 
@@ -191,7 +187,6 @@ export default {
             state: 'done'
         };
 
-        // index.js:25 Uncaught RangeError: Maximum call stack size exceeded
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 console.log(resp);
