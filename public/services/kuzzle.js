@@ -12,11 +12,10 @@ var optConnect = {
 
 var kuzzle = new Kuzzle(Config.kuzzleUrl, optConnect, function (err, res) {
         if(err) {
-            console.log(err.message);
-        } else {
-            console.log("Connexion to Kuzzle OK");
+            console.error(err.message);
+            document.getElementById('msgDangerKuzzle').innerHTML = "Can't connect to Kuzzle.";
+            $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
         }
     }
 );
-//kuzzle.connect();
 export default kuzzle

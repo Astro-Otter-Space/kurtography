@@ -1,6 +1,6 @@
 {
   "name": "Kurtography",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Cartography application supported by Kuzzle",
   "main": "app.js",
   "scripts": {
@@ -12,8 +12,6 @@
     "bootstrap": "^3.3.6",
     "express": "^4.13.4",
     "jade": "^1.11.0",
-    "jquery": "^2.2.0",
-    "jsdoc": "^3.4.0",
     "kuzzle-sdk": "^1.7.3",
     "openlayers": "^3.13.1"
   },
