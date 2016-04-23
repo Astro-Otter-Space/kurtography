@@ -2,11 +2,21 @@ extend layout
 
 block content
     // Content
-    div.alert.alert-success#alertKuzzle(role="alert")
+    div.alert.alert-success#alertSuccessKuzzle(role="alert")
         button.close(type="button" data-dismiss="alert" aria-label="Close")
             span(aria-hidden="true") &times;
         span.glyphicon.glyphicon-send(aria-hidden="true") &nbsp;
-        span#messageKuzzle
+        span#msgSuccessKuzzle
+    div.alert.alert-warning#alertWarningKuzzle(role="alert")
+        button.close(type="button" data-dismiss="alert" aria-label="Close")
+            span(aria-hidden="true") &times;
+        span.glyphicon.glyphicon-send(aria-hidden="true") &nbsp;
+        span#msgWarnKuzzle
+    div.alert.alert-danger#alertDangerKuzzle(role="alert")
+        button.close(type="button" data-dismiss="alert" aria-label="Close")
+            span(aria-hidden="true") &times;
+        span.glyphicon.glyphicon-send(aria-hidden="true") &nbsp;
+        span#msgDangerKuzzle
 
     div#map
 
