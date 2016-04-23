@@ -33668,6 +33668,7 @@ exports.default = {
     state: {
         collections: [],
         tabLayersKuzzle: [],
+        newFeature: null,
         dataProperties: [],
         tabStyles: _openlayers4.default.getStylesFeatures()
     },
@@ -33710,7 +33711,6 @@ exports.default = {
                     _openlayers4.default.getSelectedLayer().setSource(kSource);
                     _openlayers4.default.getSelectedLayer().setZIndex(20);
                 } else {
-                    console.log("No datas from " + collection);
                     document.getElementById('msgWarnKuzzle').innerHTML = "There is no data for the collection " + collection;
                     $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                 }
@@ -33720,8 +33720,7 @@ exports.default = {
         });
     },
     loadDataById: function loadDataById(idKDoc) {
-        var kDocument = _kuzzle2.default.dataCollectionFactory(_openlayers4.default.getSelectedLayer().get('title')).documentFactory(idKDoc, { content: '*' });
-        console.log(kDocument);
+        var kDocument = _kuzzle2.default.dataCollectionFactory(_openlayers4.default.getSelectedLayer().get('title')).documentFactory(idKDoc).save();
         return kDocument;
     },
     getPropertiesMapping: function getPropertiesMapping(layer) {
@@ -33741,10 +33740,12 @@ exports.default = {
     },
     addDocument: function addDocument(datas, newFeature) {
         var layer = _openlayers4.default.getSelectedLayer().get('title');
+        var this_ = this;
         datas.properties = this.state.dataProperties;
+
         _kuzzle2.default.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
             if (!err) {
-                newFeature.setId(res.content.id);
+                this_.state.newFeature = res.content;
             } else {
                 console.log(err.message);
             }
@@ -33783,6 +33784,7 @@ exports.default = {
 
         var distance = arguments.length <= 2 || arguments[2] === undefined ? 10000 : arguments[2];
 
+        var this_ = this;
         if (subscription) {
             subscription.unsubscribe();
         }
@@ -33806,14 +33808,15 @@ exports.default = {
 
         subscription = _kuzzle2.default.dataCollectionFactory(layer.get('title')).subscribe(filter, options, function (err, resp) {
             if (!err) {
-                console.log(resp.action + " kDocId " + resp.result._id);
                 var kDoc = _this.loadDataById(resp.result._id);
-                console.log(kDoc);
 
                 if ('in' == resp.scope) {
                     if ("create" == resp.action) {
                         document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
                         $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+
+                        var parser = new _openlayers2.default.parser.GeoJSON();
+                        _openlayers4.default.getSelectedLayer().getSource().addFeature(parser);
                     } else if ("update" == resp.action) {
                             document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
                             $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
@@ -33821,7 +33824,6 @@ exports.default = {
                 } else if ('out' == resp.scope) {
 
                     var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
-                    console.log(featureDel);
                     _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
 
                     document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";

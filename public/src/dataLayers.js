@@ -11,6 +11,7 @@ export default {
     state: {
         collections: [], // List of collections
         tabLayersKuzzle: [], // Array contains layers
+        newFeature: null,
         dataProperties: [], // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures()
     },
@@ -69,7 +70,6 @@ export default {
                     olMap.getSelectedLayer().setSource(kSource);
                     olMap.getSelectedLayer().setZIndex(20);
                 } else {
-                    console.log("No datas from " + collection);
                     document.getElementById('msgWarnKuzzle').innerHTML = "There is no data for the collection " + collection;
                     $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                 }
@@ -87,8 +87,7 @@ export default {
      */
     loadDataById (idKDoc)
     {
-        var kDocument = kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).documentFactory(idKDoc, {content : '*' });
-        console.log(kDocument);
+        var kDocument = kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).documentFactory(idKDoc).save();
         return kDocument;
 
     },
@@ -124,11 +123,13 @@ export default {
     addDocument(datas, newFeature)
     {
         var layer = olMap.getSelectedLayer().get('title');
+        var this_ = this;
         datas.properties = this.state.dataProperties;
+
         kuzzle.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
             if (!err) {
                 // Setting of Kuzzle Document Identifier to identifier of the feature
-                newFeature.setId(res.content.id);
+                this_.state.newFeature = res.content;
             } else {
                 console.log(err.message)
             }
@@ -193,6 +194,7 @@ export default {
      */
     subscribeCollection(layer, coordonatesWGS84, distance = 10000)
     {
+        var this_ = this;
         if (subscription) {
             subscription.unsubscribe();
         }
@@ -217,20 +219,23 @@ export default {
 
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
-                console.log(resp.action + " kDocId " + resp.result._id);
                 var kDoc = this.loadDataById(resp.result._id);
-                console.log(kDoc);
 
                 if ('in' == resp.scope) {
                     if ("create" == resp.action) {
                         document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
                         $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
 
-                        // Todo : creer la feature and set the kuzzledocument Id
-                        //var feature = new ol.Feature({
-                        //    kDoc.content
+                        var parser = new ol.parser.GeoJSON();
+                        olMap.getSelectedLayer().getSource().addFeature(parser, )
+
+                        //var feature = this_.state.newFeature;
+                        //olMap.getSelectedLayer().getSource().getFeatures().push(this_.state.newFeature);
+                        //var newFeature = new ol.Feature({
+                        //    id: kDoc.id,
+                        //    geometry: new ol.geom.Point([lon, lat]).transform(this_.state.projectionTo, this_.state.projectionFrom).getCoordinates();
                         //});
-                        //olMap.getSelectedLayer().getSource().addFeature(feature);
+                        //newFeature.setGeometry()
 
                     } else if("update" == resp.action) {
                         document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
@@ -241,7 +246,6 @@ export default {
                 } else if ('out' == resp.scope) {
 
                     var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
-                    console.log(featureDel);
                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
 
                     document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
