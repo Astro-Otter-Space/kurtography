@@ -357,6 +357,7 @@ ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
 {
     var features = evt.features.getArray();
     var parser = new ol.format.GeoJSON();
+
     // Dont use ES2015 syntax "array.forEach(feature => { return feature; })"
     features.forEach(function(feature, index) {
        console.log(feature.getId());
@@ -418,8 +419,10 @@ ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt)
                     // Remove from interaction
                     selectDelInteraction.getFeatures().remove(feature);
 
+                    // Remove from kuzzle
                     dataLayers.deleteDocument(feature, this_.getSelectedLayer().get('title'));
 
+                    // The remove on map is made in the subscribe
                 } catch (e) {
                     console.log(e.message);
                 }

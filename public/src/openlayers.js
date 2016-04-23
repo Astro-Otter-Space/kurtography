@@ -111,8 +111,9 @@ export default {
             this_.state.view.setCenter(pointCenter);
 
             if (undefined != this.getSelectedLayer) {
-                this_.createZoneSubscription(5000);
-                dataLayers.subscribeCollection(this_.getSelectedLayer(), this_.geolocation.getPosition(), 5, 'km');
+                console.log("Modification of subscribe zone");
+                this_.createZoneSubscription(10000);
+                dataLayers.subscribeCollection(this_.getSelectedLayer(), this_.geolocation.getPosition(), 10000);
             }
 
         });
@@ -127,7 +128,7 @@ export default {
             );
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-
+                console.log(feature.getId());
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
@@ -180,8 +181,8 @@ export default {
                         this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                     }
                     // Creation couche zone subscribe
-                    this_ .createZoneSubscription(5000);
-                    dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), 5, 'km');
+                    this_.createZoneSubscription(10000);
+                    dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), 10000);
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
 
                     // Mapping
@@ -207,6 +208,8 @@ export default {
         var features = [];
         var coordinatesTr = ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
         var circle = new ol.geom.Circle([coordinatesTr[0], coordinatesTr[1]], distance);
+
+        //console.log("Carto subscribe : " + coordonatesWGS84[0] + " / " + coordonatesWGS84[1] + " : rayon : " + distance);
 
         features.push(new ol.Feature({
             geometry: circle

@@ -70,6 +70,8 @@ export default {
                     olMap.getSelectedLayer().setZIndex(20);
                 } else {
                     console.log("No datas from " + collection);
+                    document.getElementById('msgWarnKuzzle').innerHTML = "There is no data for the collection " + collection;
+                    $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                 }
             } else {
                 console.error(err);
@@ -81,10 +83,14 @@ export default {
     /**
      * Retrieve a kuzzle document by his ID
      * @param idKDoc
+     * @return KuzzleDocument
      */
     loadDataById (idKDoc)
     {
-        return kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).documentFactory(idKDoc);
+        var kDocument = kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).documentFactory(idKDoc, {content : '*' });
+        console.log(kDocument);
+        return kDocument;
+
     },
 
     /**
@@ -141,7 +147,7 @@ export default {
 
             kuzzle.dataCollectionFactory(layer).updateDocument(kDocId, datas, function (err, res) {
                 if (!err) {
-                    console.log(res);
+                    //console.log(res);
                 } else {
                     console.error(err.message);
                 }
@@ -172,10 +178,6 @@ export default {
         kuzzle.dataCollectionFactory(layer).deleteDocument(idDocument, (err, res) => {
             if (err) {
                 console.error(err.message);
-            } else {
-                console.log("Delete from kuzzle " + idDocument);
-                // remove from selected Layer ??
-                olMap.getSelectedLayer().getSource().removeFeature(feature);
             }
         });
     },
@@ -187,27 +189,23 @@ export default {
      * https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-geo-distance-filter.html
      * @param layer
      * @param currentPosition
-     * @param distance
+     * @param int distance : distance of radius in meters (default unity)
      */
-    subscribeCollection(layer, coordonatesWGS84, distance, unite)
+    subscribeCollection(layer, coordonatesWGS84, distance = 10000)
     {
         if (subscription) {
             subscription.unsubscribe();
         }
 
-        var lon = coordonatesWGS84[0];
-        var lat = coordonatesWGS84[1];
-
         var filter = {
             geoDistance: {
-                distance: distance + unite,
+                distance: distance,
                 location: {
-                    lon: lon,
-                    lat: lat
+                    lon: coordonatesWGS84[0],
+                    lat: coordonatesWGS84[1]
                 }
             }
         };
-
         var options = {
             // We want created messages only
             scope: 'all',
@@ -219,20 +217,35 @@ export default {
 
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
-
+                console.log(resp.action + " kDocId " + resp.result._id);
                 var kDoc = this.loadDataById(resp.result._id);
                 console.log(kDoc);
-                if (resp.scope == 'in') {
-                    document.getElementById('messageKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
-                    $("#alertKuzzle").slideDown('slow').delay(3000).slideUp('slow');
 
-                    //olMap.getSelectedLayer().getSource().addFeature(feature);
+                if ('in' == resp.scope) {
+                    if ("create" == resp.action) {
+                        document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
+                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+
+                        // Todo : creer la feature and set the kuzzledocument Id
+                        //var feature = new ol.Feature({
+                        //    kDoc.content
+                        //});
+                        //olMap.getSelectedLayer().getSource().addFeature(feature);
+
+                    } else if("update" == resp.action) {
+                        document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
+                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    }
 
 
-                } else if (resp.scope == 'out') {
-                    document.getElementById('messageKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
-                    $("#alertKuzzle").slideDown('slow').delay(3000).slideUp('slow');
-                    //olMap.getSelectedLayer().getSource().removeFeature(feature);
+                } else if ('out' == resp.scope) {
+
+                    var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
+                    console.log(featureDel);
+                    olMap.getSelectedLayer().getSource().removeFeature(featureDel);
+
+                    document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
+                    $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                 }
             } else {
                 console.error(err.message);

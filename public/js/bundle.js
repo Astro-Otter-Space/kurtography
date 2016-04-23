@@ -33610,9 +33610,9 @@ var optConnect = {
 
 var kuzzle = new _kuzzleSdk2.default(_config2.default.kuzzleUrl, optConnect, function (err, res) {
     if (err) {
-        console.log(err.message);
-    } else {
-        console.log("Connexion to Kuzzle OK");
+        console.error(err.message);
+        document.getElementById('msgDangerKuzzle').innerHTML = "Can't connect to Kuzzle.";
+        $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
     }
 });
 exports.default = kuzzle;
@@ -33711,6 +33711,8 @@ exports.default = {
                     _openlayers4.default.getSelectedLayer().setZIndex(20);
                 } else {
                     console.log("No datas from " + collection);
+                    document.getElementById('msgWarnKuzzle').innerHTML = "There is no data for the collection " + collection;
+                    $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                 }
             } else {
                 console.error(err);
@@ -33718,7 +33720,9 @@ exports.default = {
         });
     },
     loadDataById: function loadDataById(idKDoc) {
-        return _kuzzle2.default.dataCollectionFactory(_openlayers4.default.getSelectedLayer().get('title')).documentFactory(idKDoc);
+        var kDocument = _kuzzle2.default.dataCollectionFactory(_openlayers4.default.getSelectedLayer().get('title')).documentFactory(idKDoc, { content: '*' });
+        console.log(kDocument);
+        return kDocument;
     },
     getPropertiesMapping: function getPropertiesMapping(layer) {
         var this_ = this;
@@ -33752,11 +33756,9 @@ exports.default = {
             var kDocId = feature.getId();
 
             _kuzzle2.default.dataCollectionFactory(layer).updateDocument(kDocId, datas, function (err, res) {
-                if (!err) {
-                    console.log(res);
-                } else {
-                    console.error(err.message);
-                }
+                if (!err) {} else {
+                        console.error(err.message);
+                    }
             });
         } else {
             console.error("No KuzzleDocument identifier, can't edit Kuzzle Document");
@@ -33773,33 +33775,27 @@ exports.default = {
         _kuzzle2.default.dataCollectionFactory(layer).deleteDocument(idDocument, function (err, res) {
             if (err) {
                 console.error(err.message);
-            } else {
-                console.log("Delete from kuzzle " + idDocument);
-
-                _openlayers4.default.getSelectedLayer().getSource().removeFeature(feature);
             }
         });
     },
-    subscribeCollection: function subscribeCollection(layer, coordonatesWGS84, distance, unite) {
+    subscribeCollection: function subscribeCollection(layer, coordonatesWGS84) {
         var _this = this;
+
+        var distance = arguments.length <= 2 || arguments[2] === undefined ? 10000 : arguments[2];
 
         if (subscription) {
             subscription.unsubscribe();
         }
 
-        var lon = coordonatesWGS84[0];
-        var lat = coordonatesWGS84[1];
-
         var filter = {
             geoDistance: {
-                distance: distance + unite,
+                distance: distance,
                 location: {
-                    lon: lon,
-                    lat: lat
+                    lon: coordonatesWGS84[0],
+                    lat: coordonatesWGS84[1]
                 }
             }
         };
-
         var options = {
             scope: 'all',
 
@@ -33810,19 +33806,30 @@ exports.default = {
 
         subscription = _kuzzle2.default.dataCollectionFactory(layer.get('title')).subscribe(filter, options, function (err, resp) {
             if (!err) {
-
+                console.log(resp.action + " kDocId " + resp.result._id);
                 var kDoc = _this.loadDataById(resp.result._id);
                 console.log(kDoc);
-                if (resp.scope == 'in') {
-                    document.getElementById('messageKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
-                    $("#alertKuzzle").slideDown('slow').delay(3000).slideUp('slow');
-                } else if (resp.scope == 'out') {
-                        document.getElementById('messageKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
-                        $("#alertKuzzle").slideDown('slow').delay(3000).slideUp('slow');
-                    }
-            } else {
-                    console.error(err.message);
+
+                if ('in' == resp.scope) {
+                    if ("create" == resp.action) {
+                        document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
+                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    } else if ("update" == resp.action) {
+                            document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
+                            $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                        }
+                } else if ('out' == resp.scope) {
+
+                    var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
+                    console.log(featureDel);
+                    _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
+
+                    document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
+                    $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                 }
+            } else {
+                console.error(err.message);
+            }
         });
     },
     searchDocuments: function searchDocuments(search, layer) {
@@ -34739,8 +34746,9 @@ exports.default = {
             this_.state.view.setCenter(pointCenter);
 
             if (undefined != this.getSelectedLayer) {
-                this_.createZoneSubscription(5000);
-                _dataLayers2.default.subscribeCollection(this_.getSelectedLayer(), this_.geolocation.getPosition(), 5, 'km');
+                console.log("Modification of subscribe zone");
+                this_.createZoneSubscription(10000);
+                _dataLayers2.default.subscribeCollection(this_.getSelectedLayer(), this_.geolocation.getPosition(), 10000);
             }
         });
 
@@ -34750,7 +34758,7 @@ exports.default = {
             });
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-
+                console.log(feature.getId());
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = _openlayers2.default.extent.getCenter(extFeature);
@@ -34793,8 +34801,8 @@ exports.default = {
                         this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                     }
 
-                    this_.createZoneSubscription(5000);
-                    _dataLayers2.default.subscribeCollection(lyr, this_.geolocation.getPosition(), 5, 'km');
+                    this_.createZoneSubscription(10000);
+                    _dataLayers2.default.subscribeCollection(lyr, this_.geolocation.getPosition(), 10000);
                     _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
 
                     _dataLayers2.default.getPropertiesMapping(lyr.get('title'));
