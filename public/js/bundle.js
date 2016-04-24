@@ -33761,7 +33761,9 @@ exports.default = {
                     }
             });
         } else {
-            console.error("No KuzzleDocument identifier, can't edit Kuzzle Document");
+            document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
+            $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+            console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
         }
     },
     deleteDocument: function deleteDocument(feature, layer) {
@@ -33810,22 +33812,25 @@ exports.default = {
                 var kDoc = _this.loadDataById(resp.result._id);
 
                 if ('in' == resp.scope) {
-                    if ("create" == resp.action) {
+                    this_.action = resp.action;
+                    _kuzzle2.default.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, function (err, resp) {
+                        var f = new _openlayers2.default.format.GeoJSON();
+                        var newFeature = f.readFeature(resp.content, { featureProjection: _projections2.default.projectionFrom });
+                        newFeature.setId(kDoc.id);
 
-                        _kuzzle2.default.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, function (err, resp) {
-
-                            var f = new _openlayers2.default.format.GeoJSON();
-                            var newFeature = f.readFeature(resp.content, { featureProjection: _projections2.default.projectionFrom });
-                            newFeature.setId(kDoc.id);
-                            _openlayers4.default.getSelectedLayer().getSource().addFeature(newFeature);
-
-                            document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
-                            $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
-                        });
-                    } else if ("update" == resp.action) {
-                            document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
-                            $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                        if ("update" == this_.action) {
+                            var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
+                            _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
                         }
+
+                        _openlayers4.default.getSelectedLayer().getSource().addFeature(newFeature);
+                        if ("update" == this_.action) {
+                            _openlayers4.default.addPropertiesTab(newFeature.getProperties());
+                            _openlayers4.default.addGeometriesTab(newFeature.getGeometry());
+                        }
+                        document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been " + this_.action + "d in Kuzzle in your subscribe area.";
+                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    });
                 } else if ('out' == resp.scope) {
 
                         var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
@@ -34336,8 +34341,6 @@ _openlayers2.default.control.ControlDrawButtons.prototype.editEndFeature = funct
     var parser = new _openlayers2.default.format.GeoJSON();
 
     features.forEach(function (feature, index) {
-        console.log(feature.getId());
-
         if ('Circle' == feature.getGeometry().getType()) {} else {
                 var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
 

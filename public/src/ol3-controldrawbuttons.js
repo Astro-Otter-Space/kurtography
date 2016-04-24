@@ -259,8 +259,6 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
         var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
         if (undefined != this.element) {
-            //var properties = feature.getProperties();
-            //this.element.appendChild(this.formulary(properties));
             // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
             if ('Point' == feature.getGeometry().getType()) {
                 featureGeoJSON.location = {
@@ -360,7 +358,6 @@ ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
 
     // Dont use ES2015 syntax "array.forEach(feature => { return feature; })"
     features.forEach(function(feature, index) {
-       console.log(feature.getId());
         // Problem with recuperation of a circle geometry : https://github.com/openlayers/ol3/pull/3434
         if ('Circle' == feature.getGeometry().getType()) {
             //var parserCircle = parser.writeCircleGeometry_()
@@ -379,7 +376,6 @@ ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
             dataLayers.updateGeodatasDocument(featureGeoJSON, feature);
         }
     });
-
 };
 
 

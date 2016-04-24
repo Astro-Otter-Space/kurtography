@@ -119,3 +119,7 @@ body { overflow: hidden; padding-top: 50px; }
 #mainProperties{
     display: none;
 }
+
+#layers > .panel-body {
+    padding: 0px;
+}
