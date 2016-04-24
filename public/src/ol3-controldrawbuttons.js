@@ -269,7 +269,7 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
                 };
             }
             // Ajout new document in Kuzzle
-            dataLayers.addDocument(featureGeoJSON, feature);
+            dataLayers.addDocument(featureGeoJSON/*, feature*/);
         }
     }
 };

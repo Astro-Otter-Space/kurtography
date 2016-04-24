@@ -291,7 +291,7 @@ export default {
 
             case 'Point' :
 
-                var coordinates = ol.proj.transform(fGeometry.getCoordinates(), 'EPSG:3857', 'EPSG:4326');
+                var coordinates = ol.proj.transform(fGeometry.getCoordinates(), Projection.projectionFrom, Projection.projectionTo);
 
                 var trLon = document.createElement('tr');
                 var tdLonLabel = document.createElement('td'); tdLonLabel.innerHTML = 'Longitude';

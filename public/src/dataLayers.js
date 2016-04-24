@@ -11,6 +11,7 @@ export default {
     state: {
         collections: [], // List of collections
         tabLayersKuzzle: [], // Array contains layers
+        newGJsonFeature: null,
         newFeature: null,
         dataProperties: [], // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures()
@@ -120,7 +121,7 @@ export default {
      * @param datas
      * @param newFeature
      */
-    addDocument(datas, newFeature)
+    addDocument(datas/*, newFeature*/)
     {
         var layer = olMap.getSelectedLayer().get('title');
         var this_ = this;
@@ -129,7 +130,10 @@ export default {
         kuzzle.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
             if (!err) {
                 // Setting of Kuzzle Document Identifier to identifier of the feature
-                this_.state.newFeature = res.content;
+                //this_.state.newGJsonFeature = res.content;
+                //newFeature.setId();
+                //newFeature.setId(res.id);
+                //this_.state.newFeature = newFeature;
             } else {
                 console.log(err.message)
             }
@@ -222,27 +226,31 @@ export default {
                 var kDoc = this.loadDataById(resp.result._id);
 
                 if ('in' == resp.scope) {
+                    /**
+                     * Adding
+                     */
                     if ("create" == resp.action) {
-                        document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
-                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
 
-                        var parser = new ol.parser.GeoJSON();
-                        olMap.getSelectedLayer().getSource().addFeature(parser, )
+                        kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, (err, resp) => {
 
-                        //var feature = this_.state.newFeature;
-                        //olMap.getSelectedLayer().getSource().getFeatures().push(this_.state.newFeature);
-                        //var newFeature = new ol.Feature({
-                        //    id: kDoc.id,
-                        //    geometry: new ol.geom.Point([lon, lat]).transform(this_.state.projectionTo, this_.state.projectionFrom).getCoordinates();
-                        //});
-                        //newFeature.setGeometry()
+                            var f = new ol.format.GeoJSON();
+                            var newFeature = f.readFeature(resp.content, {featureProjection: Projection.projectionFrom});
+                            newFeature.setId(kDoc.id);
+                            olMap.getSelectedLayer().getSource().addFeature(newFeature);
 
+                            document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
+                            $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                        });
+                    /**
+                     * Update
+                     */
                     } else if("update" == resp.action) {
                         document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
                         $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                     }
-
-
+                /**
+                 * Suppression
+                 */
                 } else if ('out' == resp.scope) {
 
                     var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);

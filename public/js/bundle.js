@@ -33668,6 +33668,7 @@ exports.default = {
     state: {
         collections: [],
         tabLayersKuzzle: [],
+        newGJsonFeature: null,
         newFeature: null,
         dataProperties: [],
         tabStyles: _openlayers4.default.getStylesFeatures()
@@ -33738,17 +33739,15 @@ exports.default = {
             }
         });
     },
-    addDocument: function addDocument(datas, newFeature) {
+    addDocument: function addDocument(datas) {
         var layer = _openlayers4.default.getSelectedLayer().get('title');
         var this_ = this;
         datas.properties = this.state.dataProperties;
 
         _kuzzle2.default.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
-            if (!err) {
-                this_.state.newFeature = res.content;
-            } else {
-                console.log(err.message);
-            }
+            if (!err) {} else {
+                    console.log(err.message);
+                }
         });
     },
     updateGeodatasDocument: function updateGeodatasDocument(datas, feature) {
@@ -33812,23 +33811,29 @@ exports.default = {
 
                 if ('in' == resp.scope) {
                     if ("create" == resp.action) {
-                        document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
-                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
 
-                        var parser = new _openlayers2.default.parser.GeoJSON();
-                        _openlayers4.default.getSelectedLayer().getSource().addFeature(parser);
+                        _kuzzle2.default.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, function (err, resp) {
+
+                            var f = new _openlayers2.default.format.GeoJSON();
+                            var newFeature = f.readFeature(resp.content, { featureProjection: _projections2.default.projectionFrom });
+                            newFeature.setId(kDoc.id);
+                            _openlayers4.default.getSelectedLayer().getSource().addFeature(newFeature);
+
+                            document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been added in Kuzzle in your subscribe area.";
+                            $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                        });
                     } else if ("update" == resp.action) {
                             document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
                             $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                         }
                 } else if ('out' == resp.scope) {
 
-                    var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
-                    _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
+                        var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
+                        _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
 
-                    document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
-                    $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
-                }
+                        document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
+                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    }
             } else {
                 console.error(err.message);
             }
@@ -34282,7 +34287,7 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = funct
                     };
                 }
 
-                _dataLayers2.default.addDocument(featureGeoJSON, feature);
+                _dataLayers2.default.addDocument(featureGeoJSON);
             }
         }
 };
@@ -34892,7 +34897,7 @@ exports.default = {
 
             case 'Point':
 
-                var coordinates = _openlayers2.default.proj.transform(fGeometry.getCoordinates(), 'EPSG:3857', 'EPSG:4326');
+                var coordinates = _openlayers2.default.proj.transform(fGeometry.getCoordinates(), _projections2.default.projectionFrom, _projections2.default.projectionTo);
 
                 var trLon = document.createElement('tr');
                 var tdLonLabel = document.createElement('td');tdLonLabel.innerHTML = 'Longitude';
