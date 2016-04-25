@@ -3,6 +3,7 @@ import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
 import ControlDrawButtons from './ol3-controldrawbuttons'
+import turfInside from 'turf-inside';
 
 /**
  * Initialisation de la map
@@ -16,7 +17,9 @@ export default {
         projectionFrom: Projection.projectionFrom,
         projectionTo: Projection.projectionTo,
         osm: null,
+        distance: null,
         zoneSubscriptionLayer: null,
+        zoneSubscriptionGeom: null,
         view: null,
         zoom: null,
         buttonsDrawControls: null,
@@ -137,6 +140,8 @@ export default {
                 this_.addGeometriesTab(feature.getGeometry());
                 document.getElementById("mainProperties").style.display="block";
 
+                // Todo : add a popup with name ?
+
                 this_.state.view.setCenter(centerFeature);
             }
         });
@@ -173,6 +178,7 @@ export default {
         ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
             l.on("change:visible", function(e) {
                 var lyr = e.target;
+
                 if (lyr.getVisible() == true) {
                     this_.setSelectedLayer(lyr);
 
@@ -206,20 +212,27 @@ export default {
         var coordonatesWGS84 = this.geolocation.getPosition();
 
         var features = [];
+        // Transformation coordinates
         var coordinatesTr = ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
+
+        // Creation of circle
         var circle = new ol.geom.Circle([coordinatesTr[0], coordinatesTr[1]], distance);
 
-        //console.log("Carto subscribe : " + coordonatesWGS84[0] + " / " + coordonatesWGS84[1] + " : rayon : " + distance);
-
+        // Create feature : we transform the circle into polygon for having a geJSON of this feature
         features.push(new ol.Feature({
-            geometry: circle
+            geometry: new ol.geom.Polygon.fromCircle(circle, 128)
         }));
+
+        // Create Vector Source
         var vectorSource = new ol.source.Vector({
             features: features
         });
 
+        // Random color #RRGGBB
         var color = '#' + '0123456789abcdef'.split('').map(function(v,i,a){
             return i>5 ? null : a[Math.floor(Math.random()*16)] }).join('');
+
+        // Create vector layer
         this.state.zoneSubscriptionLayer = new ol.layer.Vector({
             source: vectorSource,
             title: "Subscribe zone",
@@ -229,12 +242,32 @@ export default {
                     stroke: new ol.style.Stroke({
                         color: color,
                         width: 2
-                    })
-                })]
+                    }),
+                    fill: null
+                })
+            ]
         });
         this.state.zoneSubscriptionLayer.setZIndex(10);
+        // Ajout de la couche
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
     },
+
+    /**
+     * Verify with turf-inside if a pint is inside or outside the subscribe zone
+     * @param feature
+     * @return bool
+     */
+    isPointInZoneSubscribe(feature)
+    {
+        var parser = new ol.format.GeoJSON();
+        var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+
+        var zsLayerFeature = this.state.zoneSubscriptionLayer.getSource().getFeatures()[0];
+        var zsGeoJSON = parser.writeFeatureObject(zsLayerFeature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+
+        return turfInside(featureGeoJSON, zsGeoJSON);
+    },
+
 
     /**
      * Set datas from proporties in the popup

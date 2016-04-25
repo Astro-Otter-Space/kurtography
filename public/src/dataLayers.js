@@ -121,19 +121,17 @@ export default {
      * @param datas
      * @param newFeature
      */
-    addDocument(datas/*, newFeature*/)
+    addDocument(datas, newFeature)
     {
         var layer = olMap.getSelectedLayer().get('title');
-        var this_ = this;
         datas.properties = this.state.dataProperties;
+        var this_ = this;
+        console.log(datas);
 
-        kuzzle.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
+        kuzzle.dataCollectionFactory(layer).createDocument(datas, function (err, resp) {
             if (!err) {
                 // Setting of Kuzzle Document Identifier to identifier of the feature
-                //this_.state.newGJsonFeature = res.content;
-                //newFeature.setId();
-                //newFeature.setId(res.id);
-                //this_.state.newFeature = newFeature;
+                newFeature.setId(resp.id);
             } else {
                 console.log(err.message)
             }
@@ -151,43 +149,44 @@ export default {
             var kDocId = feature.getId();
 
             kuzzle.dataCollectionFactory(layer).updateDocument(kDocId, datas, function (err, res) {
-                if (!err) {
-                    //console.log(res);
-                } else {
+                if (err) {
                     console.error(err.message);
                 }
             });
 
         } else {
-            document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
-            $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+            //document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
+            //$("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
             console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
         }
     },
 
 
     /**
-     * Delete document from Kuzzle
+     * Delete document from Kuzzle and delete from map
      * @param idDocument
      * @param layer
      * @returns {boolean}
      */
-    deleteDocument(feature, layer)
+    deleteDocument(feature)
     {
         if (!feature.getId()) {
-            console.log("Delete document error, no id document");
+            document.getElementById('msgDangerKuzzle').innerHTML = "Can't delete the kuzzle document.";
+            $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
             return false;
+
         } else {
-            var idDocument = feature.getId();
+            kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).deleteDocument(feature.getId(), (err, res) => {
+                if (err) {
+                    console.error(err.message);
+                } else {
+                    if (false == olMap.isPointInZoneSubscribe(feature)) {
+                        olMap.getSelectedLayer().getSource().removeFeature(feature);
+                    }
+                }
+            });
         }
-
-        kuzzle.dataCollectionFactory(layer).deleteDocument(idDocument, (err, res) => {
-            if (err) {
-                console.error(err.message);
-            }
-        });
     },
-
 
 
     /**
@@ -252,7 +251,7 @@ export default {
                  * Suppression
                  */
                 } else if ('out' == resp.scope) {
-
+                    console.log("delete " + kDoc.id);
                     var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
 

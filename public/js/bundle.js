@@ -42,7 +42,7 @@ String.prototype.capitalizeFirstLetter = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
-},{"./public/src/dataLayers":322,"./public/src/init-bootstrap":323}],2:[function(require,module,exports){
+},{"./public/src/dataLayers":323,"./public/src/init-bootstrap":324}],2:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/json/stringify"), __esModule: true };
 },{"core-js/library/fn/json/stringify":6}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/object/keys"), __esModule: true };
@@ -33572,6 +33572,112 @@ Qr.prototype.once=Qr.prototype.M;Qr.prototype.un=Qr.prototype.K;Qr.prototype.unB
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],319:[function(require,module,exports){
+// http://en.wikipedia.org/wiki/Even%E2%80%93odd_rule
+// modified from: https://github.com/substack/point-in-polygon/blob/master/index.js
+// which was modified from http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+
+/**
+ * Takes a {@link Point} feature and a {@link Polygon} feature and determines if the Point resides inside the Polygon. The Polygon can
+ * be convex or concave. The function accepts any valid Polygon or {@link MultiPolygon}
+ * and accounts for holes.
+ *
+ * @module turf/inside
+ * @category joins
+ * @param {Point} point a Point feature
+ * @param {Polygon} polygon a Polygon feature
+ * @return {Boolean} `true` if the Point is inside the Polygon; `false` if the Point is not inside the Polygon
+ * @example
+ * var pt1 = {
+ *   "type": "Feature",
+ *   "properties": {
+ *     "marker-color": "#f00"
+ *   },
+ *   "geometry": {
+ *     "type": "Point",
+ *     "coordinates": [-111.467285, 40.75766]
+ *   }
+ * };
+ * var pt2 = {
+ *   "type": "Feature",
+ *   "properties": {
+ *     "marker-color": "#0f0"
+ *   },
+ *   "geometry": {
+ *     "type": "Point",
+ *     "coordinates": [-111.873779, 40.647303]
+ *   }
+ * };
+ * var poly = {
+ *   "type": "Feature",
+ *   "properties": {},
+ *   "geometry": {
+ *     "type": "Polygon",
+ *     "coordinates": [[
+ *       [-112.074279, 40.52215],
+ *       [-112.074279, 40.853293],
+ *       [-111.610107, 40.853293],
+ *       [-111.610107, 40.52215],
+ *       [-112.074279, 40.52215]
+ *     ]]
+ *   }
+ * };
+ *
+ * var features = {
+ *   "type": "FeatureCollection",
+ *   "features": [pt1, pt2, poly]
+ * };
+ *
+ * //=features
+ *
+ * var isInside1 = turf.inside(pt1, poly);
+ * //=isInside1
+ *
+ * var isInside2 = turf.inside(pt2, poly);
+ * //=isInside2
+ */
+module.exports = function(point, polygon) {
+  var polys = polygon.geometry.coordinates;
+  var pt = [point.geometry.coordinates[0], point.geometry.coordinates[1]];
+  // normalize to multipolygon
+  if(polygon.geometry.type === 'Polygon') polys = [polys];
+
+  var insidePoly = false;
+  var i = 0;
+  while (i < polys.length && !insidePoly) {
+    // check if it is in the outer ring first
+    if(inRing(pt, polys[i][0])) {
+      var inHole = false;
+      var k = 1;
+      // check for the point in any of the holes
+      while(k < polys[i].length && !inHole) {
+        if(inRing(pt, polys[i][k])) {
+          inHole = true;
+        }
+        k++;
+      }
+      if(!inHole) insidePoly = true;
+    }
+    i++;
+  }
+  return insidePoly;
+}
+
+// pt is [x,y] and ring is [[x,y], [x,y],..]
+function inRing (pt, ring) {
+  var isInside = false;
+  for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    var xi = ring[i][0], yi = ring[i][1];
+    var xj = ring[j][0], yj = ring[j][1];
+    
+    var intersect = ((yi > pt[1]) != (yj > pt[1]))
+        && (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi);
+    if (intersect) isInside = !isInside;
+  }
+  return isInside;
+}
+
+
+},{}],320:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33582,7 +33688,7 @@ exports.default = {
     defaultIndex: 'kurtography'
 };
 
-},{}],320:[function(require,module,exports){
+},{}],321:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33617,7 +33723,7 @@ var kuzzle = new _kuzzleSdk2.default(_config2.default.kuzzleUrl, optConnect, fun
 });
 exports.default = kuzzle;
 
-},{"./config":319,"kuzzle-sdk":308}],321:[function(require,module,exports){
+},{"./config":320,"kuzzle-sdk":308}],322:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33628,7 +33734,7 @@ exports.default = {
     projectionTo: 'EPSG:4326'
 };
 
-},{}],322:[function(require,module,exports){
+},{}],323:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33739,15 +33845,18 @@ exports.default = {
             }
         });
     },
-    addDocument: function addDocument(datas) {
+    addDocument: function addDocument(datas, newFeature) {
         var layer = _openlayers4.default.getSelectedLayer().get('title');
-        var this_ = this;
         datas.properties = this.state.dataProperties;
+        var this_ = this;
+        console.log(datas);
 
-        _kuzzle2.default.dataCollectionFactory(layer).createDocument(datas, function (err, res) {
-            if (!err) {} else {
-                    console.log(err.message);
-                }
+        _kuzzle2.default.dataCollectionFactory(layer).createDocument(datas, function (err, resp) {
+            if (!err) {
+                newFeature.setId(resp.id);
+            } else {
+                console.log(err.message);
+            }
         });
     },
     updateGeodatasDocument: function updateGeodatasDocument(datas, feature) {
@@ -33756,29 +33865,30 @@ exports.default = {
             var kDocId = feature.getId();
 
             _kuzzle2.default.dataCollectionFactory(layer).updateDocument(kDocId, datas, function (err, res) {
-                if (!err) {} else {
-                        console.error(err.message);
-                    }
+                if (err) {
+                    console.error(err.message);
+                }
             });
         } else {
-            document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
-            $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
             console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
         }
     },
-    deleteDocument: function deleteDocument(feature, layer) {
+    deleteDocument: function deleteDocument(feature) {
         if (!feature.getId()) {
-            console.log("Delete document error, no id document");
+            document.getElementById('msgDangerKuzzle').innerHTML = "Can't delete the kuzzle document.";
+            $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
             return false;
         } else {
-            var idDocument = feature.getId();
+            _kuzzle2.default.dataCollectionFactory(_openlayers4.default.getSelectedLayer().get('title')).deleteDocument(feature.getId(), function (err, res) {
+                if (err) {
+                    console.error(err.message);
+                } else {
+                    if (false == _openlayers4.default.isPointInZoneSubscribe(feature)) {
+                        _openlayers4.default.getSelectedLayer().getSource().removeFeature(feature);
+                    }
+                }
+            });
         }
-
-        _kuzzle2.default.dataCollectionFactory(layer).deleteDocument(idDocument, function (err, res) {
-            if (err) {
-                console.error(err.message);
-            }
-        });
     },
     subscribeCollection: function subscribeCollection(layer, coordonatesWGS84) {
         var _this = this;
@@ -33828,11 +33938,11 @@ exports.default = {
                             _openlayers4.default.addPropertiesTab(newFeature.getProperties());
                             _openlayers4.default.addGeometriesTab(newFeature.getGeometry());
                         }
-                        document.getElementById('msgSuccessKuzzle').innerHTML = "A new document have been " + this_.action + "d in Kuzzle in your subscribe area.";
+                        document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been " + this_.action + "d in Kuzzle in your subscribe area.";
                         $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                     });
                 } else if ('out' == resp.scope) {
-
+                        console.log("delete " + kDoc.id);
                         var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                         _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
 
@@ -33863,7 +33973,7 @@ exports.default = {
     }
 };
 
-},{"../services/config":319,"../services/kuzzle":320,"../services/projections":321,"./openlayers":326,"babel-runtime/core-js/object/keys":3,"openlayers":318}],323:[function(require,module,exports){
+},{"../services/config":320,"../services/kuzzle":321,"../services/projections":322,"./openlayers":327,"babel-runtime/core-js/object/keys":3,"openlayers":318}],324:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33890,7 +34000,7 @@ exports.default = {
     }
 };
 
-},{}],324:[function(require,module,exports){
+},{}],325:[function(require,module,exports){
 'use strict';
 
 var _openlayers = require('openlayers');
@@ -34058,7 +34168,7 @@ _openlayers2.default.control.LayerSwitcher.isTouchDevice_ = function () {
     }
 };
 
-},{"openlayers":318}],325:[function(require,module,exports){
+},{"openlayers":318}],326:[function(require,module,exports){
 'use strict';
 
 var _stringify = require('babel-runtime/core-js/json/stringify');
@@ -34290,9 +34400,16 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = funct
                         lon: featureGeoJSON.geometry.coordinates[0],
                         lat: featureGeoJSON.geometry.coordinates[1]
                     };
+                } else if ('LineString' == feature.getGeometry().getType() || 'Polygon' == feature.getGeometry().getType()) {
+                    featureGeoJSON.location = featureGeoJSON.geometry.coordinates.map(function (point) {
+                        return {
+                            lon: point[0],
+                            lat: point[1]
+                        };
+                    });
                 }
 
-                _dataLayers2.default.addDocument(featureGeoJSON);
+                _dataLayers2.default.addDocument(featureGeoJSON, feature);
             }
         }
 };
@@ -34349,6 +34466,13 @@ _openlayers2.default.control.ControlDrawButtons.prototype.editEndFeature = funct
                         lon: featureGeoJSON.geometry.coordinates[0],
                         lat: featureGeoJSON.geometry.coordinates[1]
                     };
+                } else if ('LineString' == feature.getGeometry().getType() || 'Polygon' == feature.getGeometry().getType()) {
+                    featureGeoJSON.location = featureGeoJSON.geometry.coordinates.map(function (point) {
+                        return {
+                            lon: point[0],
+                            lat: point[1]
+                        };
+                    });
                 }
 
                 _dataLayers2.default.updateGeodatasDocument(featureGeoJSON, feature);
@@ -34382,11 +34506,11 @@ _openlayers2.default.control.ControlDrawButtons.prototype.controlDelOnMap = func
             if (confirm('Are you sure you want to delete this feature ?')) {
                 try {
                     selectDelInteraction.getFeatures().remove(feature);
-
-                    _dataLayers2.default.deleteDocument(feature, this_.getSelectedLayer().get('title'));
                 } catch (e) {
                     console.log(e.message);
                 }
+
+                _dataLayers2.default.deleteDocument(feature);
             }
             e.preventDefault();
         });
@@ -34642,7 +34766,7 @@ var ol3buttons = {
     }
 };
 
-},{"../services/projections":321,"./dataLayers":322,"babel-runtime/core-js/json/stringify":2,"openlayers":318}],326:[function(require,module,exports){
+},{"../services/projections":322,"./dataLayers":323,"babel-runtime/core-js/json/stringify":2,"openlayers":318}],327:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34673,6 +34797,10 @@ var _ol3Controldrawbuttons = require('./ol3-controldrawbuttons');
 
 var _ol3Controldrawbuttons2 = _interopRequireDefault(_ol3Controldrawbuttons);
 
+var _turfInside = require('turf-inside');
+
+var _turfInside2 = _interopRequireDefault(_turfInside);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
@@ -34683,7 +34811,9 @@ exports.default = {
         projectionFrom: _projections2.default.projectionFrom,
         projectionTo: _projections2.default.projectionTo,
         osm: null,
+        distance: null,
         zoneSubscriptionLayer: null,
+        zoneSubscriptionGeom: null,
         view: null,
         zoom: null,
         buttonsDrawControls: null,
@@ -34804,6 +34934,7 @@ exports.default = {
         _openlayers2.default.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function (l, idx, a) {
             l.on("change:visible", function (e) {
                 var lyr = e.target;
+
                 if (lyr.getVisible() == true) {
                     this_.setSelectedLayer(lyr);
 
@@ -34827,12 +34958,15 @@ exports.default = {
         var coordonatesWGS84 = this.geolocation.getPosition();
 
         var features = [];
+
         var coordinatesTr = _openlayers2.default.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
+
         var circle = new _openlayers2.default.geom.Circle([coordinatesTr[0], coordinatesTr[1]], distance);
 
         features.push(new _openlayers2.default.Feature({
-            geometry: circle
+            geometry: new _openlayers2.default.geom.Polygon.fromCircle(circle, 128)
         }));
+
         var vectorSource = new _openlayers2.default.source.Vector({
             features: features
         });
@@ -34840,6 +34974,7 @@ exports.default = {
         var color = '#' + '0123456789abcdef'.split('').map(function (v, i, a) {
             return i > 5 ? null : a[Math.floor(Math.random() * 16)];
         }).join('');
+
         this.state.zoneSubscriptionLayer = new _openlayers2.default.layer.Vector({
             source: vectorSource,
             title: "Subscribe zone",
@@ -34848,11 +34983,22 @@ exports.default = {
                 stroke: new _openlayers2.default.style.Stroke({
                     color: color,
                     width: 2
-                })
+                }),
+                fill: null
             })]
         });
         this.state.zoneSubscriptionLayer.setZIndex(10);
+
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
+    },
+    isPointInZoneSubscribe: function isPointInZoneSubscribe(feature) {
+        var parser = new _openlayers2.default.format.GeoJSON();
+        var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
+
+        var zsLayerFeature = this.state.zoneSubscriptionLayer.getSource().getFeatures()[0];
+        var zsGeoJSON = parser.writeFeatureObject(zsLayerFeature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
+
+        return (0, _turfInside2.default)(featureGeoJSON, zsGeoJSON);
     },
     addPropertiesTab: function addPropertiesTab(properties) {
         var tabP = document.getElementById('tabFProperties');
@@ -35034,4 +35180,4 @@ exports.default = {
     }
 };
 
-},{"../services/projections":321,"./dataLayers":322,"./layerSwitcher":324,"./ol3-controldrawbuttons":325,"babel-runtime/helpers/typeof":5,"openlayers":318}]},{},[1]);
+},{"../services/projections":322,"./dataLayers":323,"./layerSwitcher":325,"./ol3-controldrawbuttons":326,"babel-runtime/helpers/typeof":5,"openlayers":318,"turf-inside":319}]},{},[1]);

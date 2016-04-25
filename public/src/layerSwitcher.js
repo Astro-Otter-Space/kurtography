@@ -178,7 +178,6 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
             };
 
             a.appendChild(input);
-
         } else {
             var iGlobe = document.createElement('i');
             iGlobe.className = "fa fa-globe";

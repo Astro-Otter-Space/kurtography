@@ -123,3 +123,7 @@ body { overflow: hidden; padding-top: 50px; }
 #layers > .panel-body {
     padding: 0px;
 }
+.rangeZone {
+    width: 60%;
+    float: right;
+}

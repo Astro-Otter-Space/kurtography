@@ -265,9 +265,17 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
                     lon: featureGeoJSON.geometry.coordinates[0],
                     lat : featureGeoJSON.geometry.coordinates[1]
                 };
+            } else if ('LineString' == feature.getGeometry().getType() || ('Polygon' == feature.getGeometry().getType())) {
+                featureGeoJSON.location = featureGeoJSON.geometry.coordinates.map(point => {
+                    return {
+                        lon: point[0],
+                        lat: point[1]
+                    };
+                });
             }
+
             // Ajout new document in Kuzzle
-            dataLayers.addDocument(featureGeoJSON/*, feature*/);
+            dataLayers.addDocument(featureGeoJSON, feature);
         }
     }
 };
@@ -371,6 +379,13 @@ ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
                     lon: featureGeoJSON.geometry.coordinates[0],
                     lat : featureGeoJSON.geometry.coordinates[1]
                 };
+            } else if ('LineString' == feature.getGeometry().getType() || ('Polygon' == feature.getGeometry().getType())) {
+                featureGeoJSON.location = featureGeoJSON.geometry.coordinates.map(point => {
+                    return {
+                        lon: point[0],
+                        lat: point[1]
+                    };
+                });
             }
             // Edit document in Kuzzle
             dataLayers.updateGeodatasDocument(featureGeoJSON, feature);
@@ -414,14 +429,11 @@ ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt)
                 try {
                     // Remove from interaction
                     selectDelInteraction.getFeatures().remove(feature);
-
-                    // Remove from kuzzle
-                    dataLayers.deleteDocument(feature, this_.getSelectedLayer().get('title'));
-
-                    // The remove on map is made in the subscribe
                 } catch (e) {
                     console.log(e.message);
                 }
+                // Remove from kuzzle
+                dataLayers.deleteDocument(feature);
             }
             e.preventDefault();
         });
