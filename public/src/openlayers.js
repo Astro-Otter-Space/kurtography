@@ -4,7 +4,7 @@ import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
 import ControlDrawButtons from './ol3-controldrawbuttons'
 import turfInside from 'turf-inside';
-
+import turfCentroid from 'turf-centroid';
 /**
  * Initialisation de la map
  * @returns {ol.Map|*}
@@ -250,6 +250,8 @@ export default {
         this.state.zoneSubscriptionLayer.setZIndex(10);
         // Ajout de la couche
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
+
+        // Adding edit interaction
     },
 
     /**
@@ -257,10 +259,10 @@ export default {
      * @param feature
      * @return bool
      */
-    isPointInZoneSubscribe(feature)
+    isPointInZoneSubscribe(featureGeoJSON)
     {
         var parser = new ol.format.GeoJSON();
-        var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+        //var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
         var zsLayerFeature = this.state.zoneSubscriptionLayer.getSource().getFeatures()[0];
         var zsGeoJSON = parser.writeFeatureObject(zsLayerFeature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
@@ -268,6 +270,20 @@ export default {
         return turfInside(featureGeoJSON, zsGeoJSON);
     },
 
+
+    /**
+     * Return the centroid of a polygon/linestring feature
+     * @param featureGeoJSON : geoJson a the feature
+     * @return centroid of feature
+     */
+    getFeatureCentroid(featureGeoJSON)
+    {
+        //var parser = new ol.format.GeoJSON();
+        //var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+
+        var centroidPt = turfCentroid(featureGeoJSON);
+        return centroidPt;
+    },
 
     /**
      * Set datas from proporties in the popup

@@ -259,23 +259,11 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
         var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
         if (undefined != this.element) {
-            // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
-            if ('Point' == feature.getGeometry().getType()) {
-                featureGeoJSON.location = {
-                    lon: featureGeoJSON.geometry.coordinates[0],
-                    lat : featureGeoJSON.geometry.coordinates[1]
-                };
-            } else if ('LineString' == feature.getGeometry().getType() || ('Polygon' == feature.getGeometry().getType())) {
-                featureGeoJSON.location = featureGeoJSON.geometry.coordinates.map(point => {
-                    return {
-                        lon: point[0],
-                        lat: point[1]
-                    };
-                });
-            }
 
             // Ajout new document in Kuzzle
             dataLayers.addDocument(featureGeoJSON, feature);
+        } else {
+            console.error("Problem create new feature");
         }
     }
 };
@@ -322,27 +310,6 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
         });
         this.map.addInteraction(editSelectInteraction);
 
-        // Gestion des event sur la feature
-        //editSelectInteraction.getFeatures().addEventListener('add', function (e) {
-        //    var feature = e.element;
-        //    var parser = new ol.format.GeoJSON();
-        //
-        //    feature.addEventListener('change', function(e) {
-        //        console.log("On onchange");
-        //        var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-        //
-        //        if ('Point' == feature.getGeometry().getType()) {
-        //            featureGeoJSON.location = {
-        //                lon: featureGeoJSON.geometry.coordinates[0],
-        //                lat : featureGeoJSON.geometry.coordinates[1]
-        //            };
-        //        }
-        //
-        //        console.log(featureGeoJSON);
-        //    });
-        //
-        //});
-
         // Modify interaction
         var mod = this.modifyInteraction = new ol.interaction.Modify({
             features: editSelectInteraction.getFeatures(),
@@ -373,20 +340,6 @@ ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
             // Addind feature to source vector in EPSG:4326
             var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
-            // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
-            if ('Point' == feature.getGeometry().getType()) {
-                featureGeoJSON.location = {
-                    lon: featureGeoJSON.geometry.coordinates[0],
-                    lat : featureGeoJSON.geometry.coordinates[1]
-                };
-            } else if ('LineString' == feature.getGeometry().getType() || ('Polygon' == feature.getGeometry().getType())) {
-                featureGeoJSON.location = featureGeoJSON.geometry.coordinates.map(point => {
-                    return {
-                        lon: point[0],
-                        lat: point[1]
-                    };
-                });
-            }
             // Edit document in Kuzzle
             dataLayers.updateGeodatasDocument(featureGeoJSON, feature);
         }

@@ -20,6 +20,10 @@ app.get('/', function(req, res) {
 
 });
 
+app.get('/_search', function(req, res) {
+
+});
+
 // Choix du port 9966 pour avoir le même que pour browserfy
 app.listen(9966);
 //http://www.lilleweb.fr/js/2015/05/18/mettre-en-production-application-nodejs/

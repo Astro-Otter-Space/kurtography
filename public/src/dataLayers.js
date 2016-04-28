@@ -121,14 +121,30 @@ export default {
      * @param datas
      * @param newFeature
      */
-    addDocument(datas, newFeature)
+    addDocument(fDatasGeoJson, newFeature)
     {
-        var layer = olMap.getSelectedLayer().get('title');
-        datas.properties = this.state.dataProperties;
         var this_ = this;
-        console.log(datas);
+        var layer = olMap.getSelectedLayer().get('title');
+        // Create properties
+        fDatasGeoJson.properties = this.state.dataProperties;
 
-        kuzzle.dataCollectionFactory(layer).createDocument(datas, function (err, resp) {
+        // Create location point for subscribe zone
+        // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
+        if ('Point' == newFeature.getGeometry().getType()) {
+            fDatasGeoJson.location = {
+                lon: fDatasGeoJson.geometry.coordinates[0],
+                lat : fDatasGeoJson.geometry.coordinates[1]
+            };
+        } else if ('LineString' == newFeature.getGeometry().getType() || ('Polygon' == newFeature.getGeometry().getType())) {
+
+            var fCentroid = olMap.getFeatureCentroid(fDatasGeoJson);
+            fDatasGeoJson.location = {
+                lon: fCentroid.geometry.coordinates[0],
+                lat: fCentroid.geometry.coordinates[1]
+            };
+        }
+
+        kuzzle.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
             if (!err) {
                 // Setting of Kuzzle Document Identifier to identifier of the feature
                 newFeature.setId(resp.id);
@@ -142,15 +158,46 @@ export default {
     /**
      * Update geo-datas from documents
      */
-    updateGeodatasDocument (datas, feature)
+    updateGeodatasDocument (fDatasGeoJson, feature)
     {
         if (feature.getId()) {
             var layer = olMap.getSelectedLayer().get('title');
             var kDocId = feature.getId();
 
-            kuzzle.dataCollectionFactory(layer).updateDocument(kDocId, datas, function (err, res) {
+
+            if ('Point' == feature.getGeometry().getType()) {
+                fDatasGeoJson.location = {
+                    lon: fDatasGeoJson.geometry.coordinates[0],
+                    lat : fDatasGeoJson.geometry.coordinates[1]
+                };
+            } else if ('LineString' == feature.getGeometry().getType() || ('Polygon' == feature.getGeometry().getType())) {
+
+                var fCentroid = olMap.getFeatureCentroid(fDatasGeoJson);
+                fDatasGeoJson.location = {
+                    lon: fCentroid.geometry.coordinates[0],
+                    lat: fCentroid.geometry.coordinates[1]
+                };
+            }
+
+            kuzzle.dataCollectionFactory(layer).updateDocument(kDocId, fDatasGeoJson, function (err, res) {
                 if (err) {
                     console.error(err.message);
+                } else {
+                    var parser = new ol.format.GeoJSON();
+                    var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+
+                    if ('Point' == feature.getGeometry().getType()) {
+                        if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
+                            olMap.getSelectedLayer().getSource().removeFeature(feature);
+                            olMap.getSelectedLayer().getSource().addFeature(feature);
+                        }
+                    } else {
+                        var centroidPt = olMap.getFeatureCentroid(fDatasGeoJson);
+                        if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
+                            olMap.getSelectedLayer().getSource().removeFeature(feature);
+                            olMap.getSelectedLayer().getSource().addFeature(feature);
+                        }
+                    }
                 }
             });
 
@@ -180,9 +227,20 @@ export default {
                 if (err) {
                     console.error(err.message);
                 } else {
-                    if (false == olMap.isPointInZoneSubscribe(feature)) {
-                        olMap.getSelectedLayer().getSource().removeFeature(feature);
+                    var parser = new ol.format.GeoJSON();
+                    var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+
+                    if ('Point' == feature.getGeometry().getType()) {
+                        if (false == olMap.isPointInZoneSubscribe(featureGeoJSON)) {
+                            olMap.getSelectedLayer().getSource().removeFeature(feature);
+                        }
+                    } else {
+                        var centroidPt = olMap.getFeatureCentroid(featureGeoJSON);
+                        if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
+                            olMap.getSelectedLayer().getSource().removeFeature(feature);
+                        }
                     }
+
                 }
             });
         }

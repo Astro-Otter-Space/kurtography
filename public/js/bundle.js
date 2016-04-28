@@ -42,7 +42,7 @@ String.prototype.capitalizeFirstLetter = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
-},{"./public/src/dataLayers":323,"./public/src/init-bootstrap":324}],2:[function(require,module,exports){
+},{"./public/src/dataLayers":326,"./public/src/init-bootstrap":327}],2:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/json/stringify"), __esModule: true };
 },{"core-js/library/fn/json/stringify":6}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/object/keys"), __esModule: true };
@@ -33572,6 +33572,226 @@ Qr.prototype.once=Qr.prototype.M;Qr.prototype.un=Qr.prototype.K;Qr.prototype.unB
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],319:[function(require,module,exports){
+var each = require('turf-meta').coordEach;
+var point = require('turf-point');
+
+/**
+ * Takes one or more features and calculates the centroid using the arithmetic mean of all vertices.
+ * This lessens the effect of small islands and artifacts when calculating
+ * the centroid of a set of polygons.
+ *
+ * @module turf/centroid
+ * @category measurement
+ * @param {(Feature|FeatureCollection)} features input features
+ * @return {Feature<Point>} the centroid of the input features
+ * @example
+ * var poly = {
+ *   "type": "Feature",
+ *   "properties": {},
+ *   "geometry": {
+ *     "type": "Polygon",
+ *     "coordinates": [[
+ *       [105.818939,21.004714],
+ *       [105.818939,21.061754],
+ *       [105.890007,21.061754],
+ *       [105.890007,21.004714],
+ *       [105.818939,21.004714]
+ *     ]]
+ *   }
+ * };
+ *
+ * var centroidPt = turf.centroid(poly);
+ *
+ * var result = {
+ *   "type": "FeatureCollection",
+ *   "features": [poly, centroidPt]
+ * };
+ *
+ * //=result
+ */
+module.exports = function(features) {
+  var xSum = 0, ySum = 0, len = 0;
+  each(features, function(coord) {
+    xSum += coord[0];
+    ySum += coord[1];
+    len++;
+  }, true);
+  return point([xSum / len, ySum / len]);
+};
+
+},{"turf-meta":320,"turf-point":321}],320:[function(require,module,exports){
+/**
+ * Lazily iterate over coordinates in any GeoJSON object, similar to
+ * Array.forEach.
+ *
+ * @param {Object} layer any GeoJSON object
+ * @param {Function} callback a method that takes (value)
+ * @param {boolean=} excludeWrapCoord whether or not to include
+ * the final coordinate of LinearRings that wraps the ring in its iteration.
+ * @example
+ * var point = { type: 'Point', coordinates: [0, 0] };
+ * coordEach(point, function(coords) {
+ *   // coords is equal to [0, 0]
+ * });
+ */
+function coordEach(layer, callback, excludeWrapCoord) {
+  var i, j, k, g, geometry, stopG, coords,
+    geometryMaybeCollection,
+    wrapShrink = 0,
+    isGeometryCollection,
+    isFeatureCollection = layer.type === 'FeatureCollection',
+    isFeature = layer.type === 'Feature',
+    stop = isFeatureCollection ? layer.features.length : 1;
+
+  // This logic may look a little weird. The reason why it is that way
+  // is because it's trying to be fast. GeoJSON supports multiple kinds
+  // of objects at its root: FeatureCollection, Features, Geometries.
+  // This function has the responsibility of handling all of them, and that
+  // means that some of the `for` loops you see below actually just don't apply
+  // to certain inputs. For instance, if you give this just a
+  // Point geometry, then both loops are short-circuited and all we do
+  // is gradually rename the input until it's called 'geometry'.
+  //
+  // This also aims to allocate as few resources as possible: just a
+  // few numbers and booleans, rather than any temporary arrays as would
+  // be required with the normalization approach.
+  for (i = 0; i < stop; i++) {
+
+    geometryMaybeCollection = (isFeatureCollection ? layer.features[i].geometry :
+        (isFeature ? layer.geometry : layer));
+    isGeometryCollection = geometryMaybeCollection.type === 'GeometryCollection';
+    stopG = isGeometryCollection ? geometryMaybeCollection.geometries.length : 1;
+
+    for (g = 0; g < stopG; g++) {
+
+      geometry = isGeometryCollection ?
+          geometryMaybeCollection.geometries[g] : geometryMaybeCollection;
+      coords = geometry.coordinates;
+
+      wrapShrink = (excludeWrapCoord &&
+        (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon')) ?
+        1 : 0;
+
+      if (geometry.type === 'Point') {
+        callback(coords);
+      } else if (geometry.type === 'LineString' || geometry.type === 'MultiPoint') {
+        for (j = 0; j < coords.length; j++) callback(coords[j]);
+      } else if (geometry.type === 'Polygon' || geometry.type === 'MultiLineString') {
+        for (j = 0; j < coords.length; j++)
+          for (k = 0; k < coords[j].length - wrapShrink; k++)
+            callback(coords[j][k]);
+      } else if (geometry.type === 'MultiPolygon') {
+        for (j = 0; j < coords.length; j++)
+          for (k = 0; k < coords[j].length; k++)
+            for (l = 0; l < coords[j][k].length - wrapShrink; l++)
+              callback(coords[j][k][l]);
+      } else {
+        throw new Error('Unknown Geometry Type');
+      }
+    }
+  }
+}
+module.exports.coordEach = coordEach;
+
+/**
+ * Lazily reduce coordinates in any GeoJSON object into a single value,
+ * similar to how Array.reduce works. However, in this case we lazily run
+ * the reduction, so an array of all coordinates is unnecessary.
+ *
+ * @param {Object} layer any GeoJSON object
+ * @param {Function} callback a method that takes (memo, value) and returns
+ * a new memo
+ * @param {boolean=} excludeWrapCoord whether or not to include
+ * the final coordinate of LinearRings that wraps the ring in its iteration.
+ * @param {*} memo the starting value of memo: can be any type.
+ */
+function coordReduce(layer, callback, memo, excludeWrapCoord) {
+  coordEach(layer, function(coord) {
+    memo = callback(memo, coord);
+  }, excludeWrapCoord);
+  return memo;
+}
+module.exports.coordReduce = coordReduce;
+
+/**
+ * Lazily iterate over property objects in any GeoJSON object, similar to
+ * Array.forEach.
+ *
+ * @param {Object} layer any GeoJSON object
+ * @param {Function} callback a method that takes (value)
+ * @example
+ * var point = { type: 'Feature', geometry: null, properties: { foo: 1 } };
+ * propEach(point, function(props) {
+ *   // props is equal to { foo: 1}
+ * });
+ */
+function propEach(layer, callback) {
+  var i;
+  switch (layer.type) {
+      case 'FeatureCollection':
+        features = layer.features;
+        for (i = 0; i < layer.features.length; i++) {
+            callback(layer.features[i].properties);
+        }
+        break;
+      case 'Feature':
+        callback(layer.properties);
+        break;
+  }
+}
+module.exports.propEach = propEach;
+
+/**
+ * Lazily reduce properties in any GeoJSON object into a single value,
+ * similar to how Array.reduce works. However, in this case we lazily run
+ * the reduction, so an array of all properties is unnecessary.
+ *
+ * @param {Object} layer any GeoJSON object
+ * @param {Function} callback a method that takes (memo, coord) and returns
+ * a new memo
+ * @param {*} memo the starting value of memo: can be any type.
+ */
+function propReduce(layer, callback, memo) {
+  propEach(layer, function(prop) {
+    memo = callback(memo, prop);
+  });
+  return memo;
+}
+module.exports.propReduce = propReduce;
+
+},{}],321:[function(require,module,exports){
+/**
+ * Takes coordinates and properties (optional) and returns a new {@link Point} feature.
+ *
+ * @module turf/point
+ * @category helper
+ * @param {number} longitude position west to east in decimal degrees
+ * @param {number} latitude position south to north in decimal degrees
+ * @param {Object} properties an Object that is used as the {@link Feature}'s
+ * properties
+ * @return {Point} a Point feature
+ * @example
+ * var pt1 = turf.point([-75.343, 39.984]);
+ *
+ * //=pt1
+ */
+var isArray = Array.isArray || function(arg) {
+  return Object.prototype.toString.call(arg) === '[object Array]';
+};
+module.exports = function(coordinates, properties) {
+  if (!isArray(coordinates)) throw new Error('Coordinates must be an array');
+  if (coordinates.length < 2) throw new Error('Coordinates must be at least 2 numbers long');
+  return {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: coordinates
+    },
+    properties: properties || {}
+  };
+};
+
+},{}],322:[function(require,module,exports){
 // http://en.wikipedia.org/wiki/Even%E2%80%93odd_rule
 // modified from: https://github.com/substack/point-in-polygon/blob/master/index.js
 // which was modified from http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
@@ -33677,7 +33897,7 @@ function inRing (pt, ring) {
 }
 
 
-},{}],320:[function(require,module,exports){
+},{}],323:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33688,7 +33908,7 @@ exports.default = {
     defaultIndex: 'kurtography'
 };
 
-},{}],321:[function(require,module,exports){
+},{}],324:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33723,7 +33943,7 @@ var kuzzle = new _kuzzleSdk2.default(_config2.default.kuzzleUrl, optConnect, fun
 });
 exports.default = kuzzle;
 
-},{"./config":320,"kuzzle-sdk":308}],322:[function(require,module,exports){
+},{"./config":323,"kuzzle-sdk":308}],325:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33734,7 +33954,7 @@ exports.default = {
     projectionTo: 'EPSG:4326'
 };
 
-},{}],323:[function(require,module,exports){
+},{}],326:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33845,13 +34065,27 @@ exports.default = {
             }
         });
     },
-    addDocument: function addDocument(datas, newFeature) {
-        var layer = _openlayers4.default.getSelectedLayer().get('title');
-        datas.properties = this.state.dataProperties;
+    addDocument: function addDocument(fDatasGeoJson, newFeature) {
         var this_ = this;
-        console.log(datas);
+        var layer = _openlayers4.default.getSelectedLayer().get('title');
 
-        _kuzzle2.default.dataCollectionFactory(layer).createDocument(datas, function (err, resp) {
+        fDatasGeoJson.properties = this.state.dataProperties;
+
+        if ('Point' == newFeature.getGeometry().getType()) {
+            fDatasGeoJson.location = {
+                lon: fDatasGeoJson.geometry.coordinates[0],
+                lat: fDatasGeoJson.geometry.coordinates[1]
+            };
+        } else if ('LineString' == newFeature.getGeometry().getType() || 'Polygon' == newFeature.getGeometry().getType()) {
+
+            var fCentroid = _openlayers4.default.getFeatureCentroid(fDatasGeoJson);
+            fDatasGeoJson.location = {
+                lon: fCentroid.geometry.coordinates[0],
+                lat: fCentroid.geometry.coordinates[1]
+            };
+        }
+
+        _kuzzle2.default.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
             if (!err) {
                 newFeature.setId(resp.id);
             } else {
@@ -33859,14 +34093,44 @@ exports.default = {
             }
         });
     },
-    updateGeodatasDocument: function updateGeodatasDocument(datas, feature) {
+    updateGeodatasDocument: function updateGeodatasDocument(fDatasGeoJson, feature) {
         if (feature.getId()) {
             var layer = _openlayers4.default.getSelectedLayer().get('title');
             var kDocId = feature.getId();
 
-            _kuzzle2.default.dataCollectionFactory(layer).updateDocument(kDocId, datas, function (err, res) {
+            if ('Point' == feature.getGeometry().getType()) {
+                fDatasGeoJson.location = {
+                    lon: fDatasGeoJson.geometry.coordinates[0],
+                    lat: fDatasGeoJson.geometry.coordinates[1]
+                };
+            } else if ('LineString' == feature.getGeometry().getType() || 'Polygon' == feature.getGeometry().getType()) {
+
+                var fCentroid = _openlayers4.default.getFeatureCentroid(fDatasGeoJson);
+                fDatasGeoJson.location = {
+                    lon: fCentroid.geometry.coordinates[0],
+                    lat: fCentroid.geometry.coordinates[1]
+                };
+            }
+
+            _kuzzle2.default.dataCollectionFactory(layer).updateDocument(kDocId, fDatasGeoJson, function (err, res) {
                 if (err) {
                     console.error(err.message);
+                } else {
+                    var parser = new _openlayers2.default.format.GeoJSON();
+                    var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
+
+                    if ('Point' == feature.getGeometry().getType()) {
+                        if (false == _openlayers4.default.isPointInZoneSubscribe(fDatasGeoJson)) {
+                            _openlayers4.default.getSelectedLayer().getSource().removeFeature(feature);
+                            _openlayers4.default.getSelectedLayer().getSource().addFeature(feature);
+                        }
+                    } else {
+                        var centroidPt = _openlayers4.default.getFeatureCentroid(fDatasGeoJson);
+                        if (false == _openlayers4.default.isPointInZoneSubscribe(centroidPt)) {
+                            _openlayers4.default.getSelectedLayer().getSource().removeFeature(feature);
+                            _openlayers4.default.getSelectedLayer().getSource().addFeature(feature);
+                        }
+                    }
                 }
             });
         } else {
@@ -33883,8 +34147,18 @@ exports.default = {
                 if (err) {
                     console.error(err.message);
                 } else {
-                    if (false == _openlayers4.default.isPointInZoneSubscribe(feature)) {
-                        _openlayers4.default.getSelectedLayer().getSource().removeFeature(feature);
+                    var parser = new _openlayers2.default.format.GeoJSON();
+                    var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
+
+                    if ('Point' == feature.getGeometry().getType()) {
+                        if (false == _openlayers4.default.isPointInZoneSubscribe(featureGeoJSON)) {
+                            _openlayers4.default.getSelectedLayer().getSource().removeFeature(feature);
+                        }
+                    } else {
+                        var centroidPt = _openlayers4.default.getFeatureCentroid(featureGeoJSON);
+                        if (false == _openlayers4.default.isPointInZoneSubscribe(centroidPt)) {
+                            _openlayers4.default.getSelectedLayer().getSource().removeFeature(feature);
+                        }
                     }
                 }
             });
@@ -33973,7 +34247,7 @@ exports.default = {
     }
 };
 
-},{"../services/config":320,"../services/kuzzle":321,"../services/projections":322,"./openlayers":327,"babel-runtime/core-js/object/keys":3,"openlayers":318}],324:[function(require,module,exports){
+},{"../services/config":323,"../services/kuzzle":324,"../services/projections":325,"./openlayers":330,"babel-runtime/core-js/object/keys":3,"openlayers":318}],327:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -34000,7 +34274,7 @@ exports.default = {
     }
 };
 
-},{}],325:[function(require,module,exports){
+},{}],328:[function(require,module,exports){
 'use strict';
 
 var _openlayers = require('openlayers');
@@ -34168,7 +34442,7 @@ _openlayers2.default.control.LayerSwitcher.isTouchDevice_ = function () {
     }
 };
 
-},{"openlayers":318}],326:[function(require,module,exports){
+},{"openlayers":318}],329:[function(require,module,exports){
 'use strict';
 
 var _stringify = require('babel-runtime/core-js/json/stringify');
@@ -34395,21 +34669,9 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = funct
             var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
 
             if (undefined != this.element) {
-                if ('Point' == feature.getGeometry().getType()) {
-                    featureGeoJSON.location = {
-                        lon: featureGeoJSON.geometry.coordinates[0],
-                        lat: featureGeoJSON.geometry.coordinates[1]
-                    };
-                } else if ('LineString' == feature.getGeometry().getType() || 'Polygon' == feature.getGeometry().getType()) {
-                    featureGeoJSON.location = featureGeoJSON.geometry.coordinates.map(function (point) {
-                        return {
-                            lon: point[0],
-                            lat: point[1]
-                        };
-                    });
-                }
-
                 _dataLayers2.default.addDocument(featureGeoJSON, feature);
+            } else {
+                console.error("Problem create new feature");
             }
         }
 };
@@ -34460,20 +34722,6 @@ _openlayers2.default.control.ControlDrawButtons.prototype.editEndFeature = funct
     features.forEach(function (feature, index) {
         if ('Circle' == feature.getGeometry().getType()) {} else {
                 var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
-
-                if ('Point' == feature.getGeometry().getType()) {
-                    featureGeoJSON.location = {
-                        lon: featureGeoJSON.geometry.coordinates[0],
-                        lat: featureGeoJSON.geometry.coordinates[1]
-                    };
-                } else if ('LineString' == feature.getGeometry().getType() || 'Polygon' == feature.getGeometry().getType()) {
-                    featureGeoJSON.location = featureGeoJSON.geometry.coordinates.map(function (point) {
-                        return {
-                            lon: point[0],
-                            lat: point[1]
-                        };
-                    });
-                }
 
                 _dataLayers2.default.updateGeodatasDocument(featureGeoJSON, feature);
             }
@@ -34766,7 +35014,7 @@ var ol3buttons = {
     }
 };
 
-},{"../services/projections":322,"./dataLayers":323,"babel-runtime/core-js/json/stringify":2,"openlayers":318}],327:[function(require,module,exports){
+},{"../services/projections":325,"./dataLayers":326,"babel-runtime/core-js/json/stringify":2,"openlayers":318}],330:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34800,6 +35048,10 @@ var _ol3Controldrawbuttons2 = _interopRequireDefault(_ol3Controldrawbuttons);
 var _turfInside = require('turf-inside');
 
 var _turfInside2 = _interopRequireDefault(_turfInside);
+
+var _turfCentroid = require('turf-centroid');
+
+var _turfCentroid2 = _interopRequireDefault(_turfCentroid);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -34991,14 +35243,19 @@ exports.default = {
 
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
     },
-    isPointInZoneSubscribe: function isPointInZoneSubscribe(feature) {
+    isPointInZoneSubscribe: function isPointInZoneSubscribe(featureGeoJSON) {
         var parser = new _openlayers2.default.format.GeoJSON();
-        var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
+
 
         var zsLayerFeature = this.state.zoneSubscriptionLayer.getSource().getFeatures()[0];
         var zsGeoJSON = parser.writeFeatureObject(zsLayerFeature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
 
         return (0, _turfInside2.default)(featureGeoJSON, zsGeoJSON);
+    },
+    getFeatureCentroid: function getFeatureCentroid(featureGeoJSON) {
+
+        var centroidPt = (0, _turfCentroid2.default)(featureGeoJSON);
+        return centroidPt;
     },
     addPropertiesTab: function addPropertiesTab(properties) {
         var tabP = document.getElementById('tabFProperties');
@@ -35180,4 +35437,4 @@ exports.default = {
     }
 };
 
-},{"../services/projections":322,"./dataLayers":323,"./layerSwitcher":325,"./ol3-controldrawbuttons":326,"babel-runtime/helpers/typeof":5,"openlayers":318,"turf-inside":319}]},{},[1]);
+},{"../services/projections":325,"./dataLayers":326,"./layerSwitcher":328,"./ol3-controldrawbuttons":329,"babel-runtime/helpers/typeof":5,"openlayers":318,"turf-centroid":319,"turf-inside":322}]},{},[1]);
