@@ -20,8 +20,12 @@ app.get('/', function(req, res) {
 
 });
 
-app.get('/_search', function(req, res) {
+app.post('/_search', function(req, res) {
+    // Recupreation request
+    console.log(req);
 
+    // Response
+    res.setHeader('Content-Type', 'application/json');
 });
 
 // Choix du port 9966 pour avoir le même que pour browserfy

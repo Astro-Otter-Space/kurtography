@@ -251,7 +251,7 @@ export default {
         // Ajout de la couche
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
 
-        // Adding edit interaction
+        // TODO Adding edit interaction
     },
 
     /**
