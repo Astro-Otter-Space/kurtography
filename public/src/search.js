@@ -8,8 +8,8 @@ export default {
 
     state: {
         type: "POST",
-        url: "/_searching",
-        sync: false,
+        url: "search",
+        sync: true,
         data: null,
     },
 
@@ -20,11 +20,19 @@ export default {
 
         // Prepare request
         xhr.open(this.state.type, this.state.url, this.state.sync);
+        xhr.onreadystatechange = function (aEvt) {
+            if (xhr.readyState == 4) {
+                if(xhr.status == 200)
+                    dump(xhr.responseText);
+                else
+                    console.error("Erreur pendant le chargement de la page.\n");
+            }
+        };
         xhr.setRequestHeader('Content-type', 'application/json');
 
         // Sending request
         // TODO : how to call anonymous function
-        xhr.send(this.state.url, this.state.type, done(), this.state.data, this.state.sync);
+        xhr.send(this.state.data);
     },
 
 

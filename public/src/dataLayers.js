@@ -13,7 +13,7 @@ export default {
         tabLayersKuzzle: [], // Array contains layers
         newGJsonFeature: null,
         newFeature: null,
-        dataProperties: [], // data mapping of selected collection
+        dataProperties: null, // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures()
     },
 
@@ -329,24 +329,46 @@ export default {
      * @param search
      * @param layer
      */
-    searchDocuments(search, layer)
+    searchDocuments(searchItem)
     {
-        var filter = {
-            term: {
+        if (null != olMap.getSelectedLayer()) {
+            var layer = olMap.getSelectedLayer().get('title');
 
-            }
-        };
+            var collMapping = this.state.dataProperties;
+            var filterMapping = Object.keys(collMapping).map(field => {
+                console.log(field);
+                return {
+                    term: {
+                        properties[field]: searchItem
+                    }
+                };
+            });
 
-        var search = kuzzle.dataCollectionFactory(layer).advancedSearch(filter, (err, resp) => {
-            res.document.forEach(kDoc => {
+            var filter = {
+                or: filterMapping,
+                sort: ['properties.name'],
+                from: 0,
+                size: 9999
+            };
 
-                console.log("Recherche : " + kDoc.content);
+            console.log(JSON.stringify(filter));
 
-                var extFeature =  kDoc.content.getGeometry().getExtent();
-                var centerFeature = ol.extent.getCenter(extFeature);
+            kuzzle.dataCollectionFactory(layer).advancedSearch(filter, (err, resp) => {
+                console.log(resp);
+                //resp.document.forEach(kDoc => {
+                //
+                //    console.log("Recherche : " + kDoc.content);
+                //
+                //    var extFeature =  kDoc.content.getGeometry().getExtent();
+                //    var centerFeature = ol.extent.getCenter(extFeature);
+                //
+                //    olMap.state.view.setCenter(centerFeature);
+                //})
+            });
+        } else {
+            document.getElementById('msgWarnKuzzle').innerHTML = "Please, select a layer to the right.";
+            $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+        }
 
-                olMap.state.view.setCenter(centerFeature);
-            })
-        });
     }
 };

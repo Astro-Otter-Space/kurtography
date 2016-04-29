@@ -2,6 +2,17 @@ import dataLayers from './public/src/dataLayers';
 dataLayers.listCollections();
 
 /**
+ * Ajax request for search
+ * @returns {string}
+ */
+jQuery(function(){
+    jQuery('form[name="formSearch"]').on('keyup', function(e){
+        if(3 <= e.target.value.length) {
+            dataLayers.searchDocuments(e.target.value);
+        }
+    });
+});
+/**
  * Initialisation Bootstrap
  */
 import initBootstrap from './public/src/init-bootstrap'
@@ -30,19 +41,7 @@ jQuery(function(){
     });
 });
 
-/**
- * Ajax request for search
- * TODO :
- * @returns {string}
- */
-import search from './public/src/search.js';
-jQuery(function(){
-    jQuery('form[name="formSearch"]').on('keyup', function(e){
-        if(3 >= e.target.value.length) {
-            search.init(e.target.value);
-        }
-    });
-});
+
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
