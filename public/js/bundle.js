@@ -14,6 +14,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _dataLayers2.default.listCollections();
 
 jQuery(function () {
+    jQuery('form[name="formSearch"]').on('keyup', function (e) {
+        if (3 <= e.target.value.length) {
+            _dataLayers2.default.searchDocuments(e.target.value);
+        }
+    });
+});
+
+jQuery(function () {
     jQuery('.sidebar-right .slide-submenu').on('click', function () {
         var thisEl = jQuery(this);
         thisEl.closest('.sidebar-body').fadeOut('slide', function () {
@@ -33996,7 +34004,7 @@ exports.default = {
         tabLayersKuzzle: [],
         newGJsonFeature: null,
         newFeature: null,
-        dataProperties: [],
+        dataProperties: null,
         tabStyles: _openlayers4.default.getStylesFeatures()
     },
 
@@ -34228,22 +34236,44 @@ exports.default = {
             }
         });
     },
-    searchDocuments: function searchDocuments(search, layer) {
-        var filter = {
-            term: {}
-        };
+    searchDocuments: function searchDocuments(searchItem) {
+        if (null != _openlayers4.default.getSelectedLayer()) {
+            var layer = _openlayers4.default.getSelectedLayer().get('title');
 
-        var search = _kuzzle2.default.dataCollectionFactory(layer).advancedSearch(filter, function (err, resp) {
-            res.document.forEach(function (kDoc) {
-
-                console.log("Recherche : " + kDoc.content);
-
-                var extFeature = kDoc.content.getGeometry().getExtent();
-                var centerFeature = _openlayers2.default.extent.getCenter(extFeature);
-
-                _openlayers4.default.state.view.setCenter(centerFeature);
+            var collMapping = this.state.dataProperties;
+            var filterMapping = (0, _keys2.default)(collMapping).map(function (field) {
+                var filterOr = {
+                    term: {}
+                };
+                filterOr.term['properties.' + field] = searchItem;
+                return filterOr;
             });
-        });
+
+            var filter = {
+                filter: {
+                    or: filterMapping
+                }
+            };
+
+            _kuzzle2.default.dataCollectionFactory(layer).advancedSearch(filter, function (err, resp) {
+                if (!err) {
+                    console.log(resp);
+                    if (1 > resp.total) {
+                        document.getElementById('msgWarnKuzzle').innerHTML = "No document find, retry with another term.";
+                        $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    } else {
+                        console.log(resp.document);
+                    }
+                } else {
+                        console.error(err);
+                        document.getElementById('msgDangerKuzzle').innerHTML = "Research error.";
+                        $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    }
+            });
+        } else {
+            document.getElementById('msgWarnKuzzle').innerHTML = "Please, select a layer to the right.";
+            $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+        }
     }
 };
 

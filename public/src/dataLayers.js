@@ -336,34 +336,46 @@ export default {
 
             var collMapping = this.state.dataProperties;
             var filterMapping = Object.keys(collMapping).map(field => {
-                console.log(field);
-                return {
-                    term: {
-                        properties[field]: searchItem
+                var filterOr = {
+                    term :{
                     }
                 };
+                filterOr.term['properties.'+field] = searchItem;
+                return filterOr;
             });
-
+            //sort: ['properties.name'],
+            //from: 0,
+            //size: 9999
             var filter = {
-                or: filterMapping,
-                sort: ['properties.name'],
-                from: 0,
-                size: 9999
+                filter :{
+                    or: filterMapping
+                }
             };
 
-            console.log(JSON.stringify(filter));
-
             kuzzle.dataCollectionFactory(layer).advancedSearch(filter, (err, resp) => {
-                console.log(resp);
-                //resp.document.forEach(kDoc => {
-                //
-                //    console.log("Recherche : " + kDoc.content);
-                //
-                //    var extFeature =  kDoc.content.getGeometry().getExtent();
-                //    var centerFeature = ol.extent.getCenter(extFeature);
-                //
-                //    olMap.state.view.setCenter(centerFeature);
-                //})
+                if(!err) {
+                    console.log(resp);
+                    if (1 > resp.total) {
+                        document.getElementById('msgWarnKuzzle').innerHTML = "No document find, retry with another term.";
+                        $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    } else {
+                        console.log(resp.document);
+                        //resp.document.forEach(kDoc => {
+                            //
+                            //    console.log("Recherche : " + kDoc.content);
+                            //
+                            //    var extFeature =  kDoc.content.getGeometry().getExtent();
+                            //    var centerFeature = ol.extent.getCenter(extFeature);
+                            //
+                            //    olMap.state.view.setCenter(centerFeature);
+                            //})
+                    }
+                } else {
+                    console.error(err);
+                    document.getElementById('msgDangerKuzzle').innerHTML = "Research error.";
+                    $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                }
+
             });
         } else {
             document.getElementById('msgWarnKuzzle').innerHTML = "Please, select a layer to the right.";
