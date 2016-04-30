@@ -56,12 +56,13 @@
 
 .toggle-control button.progress:disabled {
     text-decoration: none;
-    background-color: rgba(44, 128, 27, 0.75);
+    /*background-color: rgba(44, 128, 27, 0.75);*/
+    background-color: rgba(145, 196, 133, 0.7);
 }
 
 
 .toggle-control button:disabled {
     text-decoration: none;
-    background-color: rgba(244, 35, 36, 0.75);
+    background-color: rgba(70, 70, 70, 0.5);
 }
 

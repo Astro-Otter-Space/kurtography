@@ -3,11 +3,13 @@ body { overflow: hidden; padding-top: 50px; }
 .alert { margin-bottom: 0px; display: none; }
 .map { padding: 0px; margin: 0px;}
 #map {
-    position: absolute;
-    width:100%;
+    /*position: absolute;*/
+    /*width:100%;*/
     height: 100%;
     height:calc(100% - 0px);
 }
+.no-padding-left{ padding-left : 0px;}
+.no-padding-right{ padding-right: 0px;}
 #map .ol-zoom {
     top: 0.5em;
     left: 0.4em;
@@ -126,4 +128,8 @@ body { overflow: hidden; padding-top: 50px; }
 .rangeZone {
     width: 60%;
     float: right;
+}
+
+.properties-edit {
+    display: none;
 }

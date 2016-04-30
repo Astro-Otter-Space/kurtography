@@ -131,21 +131,35 @@ export default {
             );
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-                console.log(feature.getId());
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
 
-                this_.addPropertiesTab(fProperties);
+                this_.addPropertiesTab(fProperties, feature.getId());
                 this_.addGeometriesTab(feature.getGeometry());
                 document.getElementById("mainProperties").style.display="block";
 
-                // Todo : add a popup with name ?
+                // Retrieve datas from Form Edit Properties
+                var form = document.getElementsByName("form-edit-properties")[0];
+                var handleSubmit = function(e) {
+                    e.preventDefault();
+                    //document.getElementById('toggle-properties').prop('checked', false).change();
+                    var objPropertiesFeature = new Object();
+                     Array.from(e.target.elements).forEach(element => {
+                        if ("text" == element.type && "undefined" != element.type) {
+                            objPropertiesFeature[element.name] = element.value;
+                        }
+                    });
+
+                    dataLayers.updatePropertiesDocument(feature, objPropertiesFeature);
+                    // TODO : switcher le toggle
+                    return false;
+                };
+                form.addEventListener('submit', handleSubmit, false);
 
                 this_.state.view.setCenter(centerFeature);
             }
         });
-
         this.initControls();
     },
 
@@ -313,13 +327,46 @@ export default {
                 tdKey.innerHTML = (typeof key == "string") ? key.capitalizeFirstLetter() : key;
 
                 var tdValue = document.createElement('td');
-                tdValue.innerHTML = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
+
+                // Label
+                var label = document.createElement('span');
+                label.className = "properties-read";
+                label.name = 'span_' + key;
+                label.innerHTML = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
+
+                // Input for edit propertie
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'form-control properties-edit';
+                input.name = key;
+                input.setAttribute('disabled', 'disabled');
+                input.value = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
+                input.setAttribute('placeholder', properties[key]);
+
+                tdValue.appendChild(label);
+                tdValue.appendChild(input);
+
 
                 tr.appendChild(tdKey);
                 tr.appendChild(tdValue);
                 tbody.appendChild(tr);
             }
         }
+
+        // Add edit button
+        var btnEdit = document.createElement('button');
+        btnEdit.className = 'btn btn-primary properties-edit';
+        btnEdit.innerHTML = "Edit properties";
+        btnEdit.type = 'submit';
+
+        var trBtnEdit = document.createElement('tr');
+        var tdBtnEdit = document.createElement('td');
+        tdBtnEdit.setAttribute('colspan', 2);
+
+        tdBtnEdit.appendChild(btnEdit);
+        trBtnEdit.appendChild(tdBtnEdit);
+        tbody.appendChild(trBtnEdit);
+
         tabP.appendChild(tbody);
         return tabP;
     },

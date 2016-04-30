@@ -8,6 +8,24 @@ nav.navbar.navbar-inverse.navbar-fixed-top
                 span.icon-bar
             a.navbar-brand(href='#') Kurtography : webmapping by Kuzzle
         #bs-example-navbar-collapse-1.collapse.navbar-collapse
+            ul.nav.navbar-nav.navbar-right
+                li
+                    a(href="/login", disabled) Log in
+                li
+                    a(href="/register", disabled) Register
+                li.dropdown
+                    a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-haspopup="true", aria-expanded="false") Export span.caret
+                    ul.dropdown-menu
+                        li
+                            a(href="/export?type=geojson", disabled) GeoJSON
+                        li
+                            a(href="/export?type=csv", disabled) CSV
+                        li
+                            a(href="/export?type=kml", disabled) KML
+                        li
+                            a(href="/export?type=wkt", disabled) WKT
+                        li
+                            a(href="/export?type=shape", disabled) Shapefile
             form.navbar-form.navbar-right(name='formSearch', role='search')
                 .form-group
                     input.form-control(type='text', placeholder='Search')

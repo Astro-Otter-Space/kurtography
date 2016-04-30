@@ -10,9 +10,12 @@ div.panel.panel-default#mainProperties
                     a(href="#tProperties", aria-controls="tProperties", role="tab", data-toggle="tab") Properties
                 li(role="presentation")
                     a(href="#tGeometry", aria-controls="tGeometry", role="tab", data-toggle="tab") Geometry
+                li
+                    input#toggle-properties(type="checkbox", data-width="80")
 
             div.tab-content
                 div.tab-pane.fade.in.active#tProperties(role="tabpanel")
-                    table.table.table-responsive.table-striped#tabFProperties
+                    form(name="form-edit-properties")
+                        table.table.table-responsive.table-striped#tabFProperties
                 div.tab-pane.fade#tGeometry(role="tabpanel")
                     table.table.table-responsive.table-striped#tabFGeometry

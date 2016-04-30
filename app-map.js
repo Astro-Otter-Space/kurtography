@@ -15,15 +15,16 @@ jQuery(function(){
 /**
  * Initialisation Bootstrap
  */
-import initBootstrap from './public/src/init-bootstrap'
+import initBootstrap from './public/src/init-bootstrap';
+import 'bootstrap-toggle';
 jQuery(function(){
-    jQuery('.sidebar-right .slide-submenu').on('click',function() {
-        var thisEl = jQuery(this);
-        thisEl.closest('.sidebar-body').fadeOut('slide',function(){
-            jQuery('.mini-submenu-right').fadeIn();
-            initBootstrap.applyMargins();
-        });
-    });
+//    jQuery('.sidebar-right .slide-submenu').on('click',function() {
+//        var thisEl = jQuery(this);
+//        thisEl.closest('.sidebar-body').fadeOut('slide',function(){
+//            jQuery('.mini-submenu-right').fadeIn();
+//            initBootstrap.applyMargins();
+//        });
+//    });
 
     jQuery('.mini-submenu-right').on('click',function() {
         var thisEl = jQuery(this);
@@ -35,9 +36,27 @@ jQuery(function(){
     jQuery(window).on("resize", initBootstrap.applyMargins);
 
     initBootstrap.applyInitialUIState();
-    jQuery('.sidebar-right .slide-submenu').closest('.sidebar-body').fadeOut('slide',function(){
-        jQuery('.mini-submenu-right').fadeIn();
-        initBootstrap.applyMargins();
+    //jQuery('.sidebar-right .slide-submenu').closest('.sidebar-body').fadeOut('slide',function(){
+    //    jQuery('.mini-submenu-right').fadeIn();
+    //    initBootstrap.applyMargins();
+    //});
+
+    $('#toggle-properties').bootstrapToggle({
+        on: 'Read',
+        off: 'Edit'
+    });
+    $('#toggle-properties').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('span.properties-read').hide();
+            $('span.properties-read').attr('disabled', true);
+            $('.properties-edit').show();
+            $('input[type="text"].properties-edit').removeAttr('disabled');
+        } else {
+            $('.properties-edit').hide();
+            $('input[type="text"].properties-edit').attr('disabled', true);
+            $('span.properties-read').show();
+            $('span.properties-read').removeAttr('disabled');
+        }
     });
 });
 

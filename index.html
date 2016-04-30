@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
         <link href="/public/css/bootstrap-glyphicons-extends/css/bootstrap.icon-large.min.css" rel="stylesheet">
         <link rel="stylesheet" href="node_modules/openlayers/css/ol.css">
+        <link rel="stylesheet" href="node_modules/bootstrap-toggle/css/bootstrap-toggle.min.css">
         <!--<link rel="stylesheet" href="node_modules/ol3-layerswitcher/src/ol3-layerswitcher.css">-->
         <link rel="stylesheet" href="/public/css/ol3-drawcontrols.css">
 		<link rel="stylesheet" href="/public/css/style.css">
@@ -19,7 +20,6 @@
             <nav class="navbar navbar-inverse navbar-fixed-top">
                 <div class="container-fluid">
                     <div class="navbar-header">
-
                         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                             <span class="sr-only">Toggle navigation</span>
                             <span class="icon-bar"></span>
@@ -30,6 +30,22 @@
                     </div>
 
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a href="/login" disabled>Log in</a></li>
+                            <li><a href="/register" disabled>Register</a></li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Export <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/export?type=geojson" disabled>GeoJSON</a></li>
+                                    <li><a href="/export?type=csv" disabled>CSV</a></li>
+                                    <li><a href="/export?type=kml" disabled>KML</a></li>
+                                    <li><a href="/export?type=wkt" disabled>WKT</a></li>
+                                    <li><a href="/export?type=shape" disabled>Shapefile</a></li>
+                                    <!--<li role="separator" class="divider"></li>-->
+                                    <!--<li><a href="#">Separated link</a></li>-->
+                                </ul>
+                            </li>
+                        </ul>
                         <form name="formSearch" class="navbar-form navbar-right" role="search">
                             <div class="form-group">
                                 <input type="text" class="form-control" placeholder="Search">
@@ -56,83 +72,68 @@
             <span id="msgDangerKuzzle"></span>
         </div>
 
-        <div id="map"></div>
+        <div class="row">
+            <div class="col-xs-8 col-sm-9 col-md-9 col-lg-10 no-padding-right" id="map"></div>
 
-        <div class="row main-row">
-            <div class="col-sm-3 col-md-3 sidebar sidebar-right pull-right">
-                <div class="panel-group sidebar-body" id="accordion-right">
+            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-2 no-padding-left">
 
-                    <div class="panel panel-default" id="mainLayer">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" href="#layers">
-                                    <i class="fa fa-list-alt"></i> Layers
-                                </a>
-                            <span class="pull-right slide-submenu">
-                                <i class="fa fa-chevron-left"></i>
-                            </span>
-                            </h4>
-                        </div>
-                        <div id="layers" class="panel-collapse collapse in"></div>
-                    </div>
+                <div class="row main-row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 sidebar sidebar-right pull-right">
+                        <div class="panel-group sidebar-body" id="accordion-right">
 
+                            <div class="panel panel-default" id="mainLayer">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#layers">
+                                            <i class="fa fa-list-alt"></i> Layers
+                                        </a>
+                                        <span class="pull-right slide-submenu">
+                                            <i class="fa fa-chevron-left"></i>
+                                        </span>
+                                    </h4>
+                                </div>
+                                <div id="layers" class="panel-collapse collapse in"></div>
+                            </div>
 
-                    <!--<div class="panel panel-default" id="mainDistanceZone">-->
-                        <!--<div class="panel-heading">-->
-                            <!--<h4 class="panel-title">-->
-                                <!--<a data-toggle="collapse" href="#layers">-->
-                                    <!--<i class="fa fa-list-alt"></i> Subscription zone-->
-                                <!--</a>-->
-                            <!--</h4>-->
-                        <!--</div>-->
-                        <!--<div id="zone" class="panel-collapse collapse in">-->
-                            <!--<div class="panel-body">-->
-                                <!--<input type="range" value="10000" min="10" max="1000000" step="10" class="form-control">-->
-                            <!--</div>-->
-                        <!--</div>-->
-                    <!--</div>-->
+                            <div class="panel panel-default" id="mainProperties">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">
+                                        <a data-toggle="collapse" href="#properties">
+                                            <i class="fa fa-list-alt"></i> Properties
+                                        </a>
 
+                                    </h4>
+                                </div>
+                                <div id="properties" class="panel-collapse collapse in">
 
-                    <div class="panel panel-default" id="mainProperties">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" href="#properties">
-                                    <i class="fa fa-list-alt"></i> Properties
-                                </a>
-                            </h4>
-                        </div>
-                        <div id="properties" class="panel-collapse collapse in">
-                            <div class="panel-body">
-                                <!-- Nav tabs -->
-                                <ul class="nav nav-tabs" role="tablist">
-                                    <li role="presentation" class="active"><a href="#tProperties" aria-controls="tProperties" role="tab" data-toggle="tab">Properties</a></li>
-                                    <li role="presentation"><a href="#tGeometry" aria-controls="tGeometry" role="tab" data-toggle="tab">Geometry</a></li>
-                                </ul>
+                                    <div class="panel-body">
+                                        <!-- Nav tabs -->
+                                        <ul class="nav nav-tabs" role="tablist">
+                                            <li role="presentation" class="active"><a href="#tProperties" aria-controls="tProperties" role="tab" data-toggle="tab">Properties</a></li>
+                                            <li role="presentation"><a href="#tGeometry" aria-controls="tGeometry" role="tab" data-toggle="tab">Geometry</a></li>
+                                            <li><input id="toggle-properties" type="checkbox" data-width="80"></li>
+                                        </ul>
 
-                                <!-- Tab panes -->
-                                <div class="tab-content">
-                                    <div role="tabpanel" class="tab-pane fade in active" id="tProperties">
-                                        <table class="table table-responsive table-striped" id="tabFProperties"></table>
-                                    </div>
-                                    <div role="tabpanel" class="tab-pane fade" id="tGeometry">
-                                        <table class="table table-responsive table-striped" id="tabFGeometry"></table>
+                                        <!-- Tab panes -->
+                                        <div class="tab-content">
+                                            <div role="tabpanel" class="tab-pane fade in active" id="tProperties">
+                                                <form name="form-edit-properties">
+                                                    <table class="table table-responsive table-striped" id="tabFProperties"></table>
+                                                </form>
+                                            </div>
+                                            <div role="tabpanel" class="tab-pane fade" id="tGeometry">
+                                                <table class="table table-responsive table-striped" id="tabFGeometry"></table>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
 
-                            </div>
-                        </div>
-                        <div id="addingproperties" class="panel-collapse collapse in">
-                            <div class="panel-body">
-                            </div>
                         </div>
                     </div>
-
                 </div>
-            </div>
-        </div>
 
-        <div class="mini-submenu mini-submenu-right pull-right">
-            <i class="fa fa-list-alt"></i>
+            </div>
         </div>
 
         <script src="http://code.jquery.com/jquery-2.2.3.min.js"></script>

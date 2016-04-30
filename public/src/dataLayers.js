@@ -90,7 +90,6 @@ export default {
     {
         var kDocument = kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).documentFactory(idKDoc).save();
         return kDocument;
-
     },
 
     /**
@@ -164,7 +163,6 @@ export default {
             var layer = olMap.getSelectedLayer().get('title');
             var kDocId = feature.getId();
 
-
             if ('Point' == feature.getGeometry().getType()) {
                 fDatasGeoJson.location = {
                     lon: fDatasGeoJson.geometry.coordinates[0],
@@ -205,6 +203,34 @@ export default {
             //document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
             //$("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
             console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
+        }
+    },
+
+    /**
+     * Update properties of a document
+     * @param idKuzzleDoc
+     * @param dataProperties
+     */
+    updatePropertiesDocument(feature, propertiesDatas)
+    {
+        var layer = olMap.getSelectedLayer().get('title');
+        if (undefined != feature.getId()) {
+
+            var parser = new ol.format.GeoJSON();
+            var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+            featureGeoJSON.properties = propertiesDatas;
+
+            kuzzle.dataCollectionFactory(layer).updateDocument(feature.getId(), featureGeoJSON, (err, res) => {
+                if (err) {
+                    console.error(err.message);
+                } else {
+                    console.log(res);
+                }
+            });
+
+        } else {
+            document.getElementById('msgDangerKuzzle').innerHTML = "Sorry impossible to edit this kuzzle document, there is no identifier.";
+            $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
         }
     },
 
@@ -351,6 +377,10 @@ export default {
                     or: filterMapping
                 }
             };
+
+            kuzzle.dataCollectionFactory(layer).getMapping(function (err, res) {
+               console.log(res);
+            });
 
             kuzzle.dataCollectionFactory(layer).advancedSearch(filter, (err, resp) => {
                 if(!err) {

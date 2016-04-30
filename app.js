@@ -20,13 +20,13 @@ app.get('/', function(req, res) {
 
 });
 
-//app.get('/search', function(req, res) {
-//    // Recupreation request
-//    console.log(req);
-//
-//    // Response
-//    res.setHeader('Content-Type', 'application/json');
-//});
+app.get('/export', function(req, res) {
+    // Recupreation request
+    console.log(req);
+
+    // Response
+    res.setHeader('Content-Type', 'application/json');
+});
 
 app.listen(9966);
 //http://www.lilleweb.fr/js/2015/05/18/mettre-en-production-application-nodejs/
