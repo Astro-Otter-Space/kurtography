@@ -385,6 +385,9 @@ export default {
     addGeoJSONTab(fGeoJson)
     {
         var container = document.getElementById("jsoneditor");
+        if(container.hasChildNodes()) {
+            container.removeChild( container.childNodes[0] );
+        }
         var options = {
             mode: 'code'
         };

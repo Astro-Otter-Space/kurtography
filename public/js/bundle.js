@@ -70303,11 +70303,16 @@ exports.default = {
         var this_ = this;
         _kuzzle2.default.dataCollectionFactory(layer).getMapping(function (err, res) {
             if (!err) {
-                var mapping = res.mapping.properties.properties;
                 var mappingProperties = new Object();
-                (0, _keys2.default)(mapping).forEach(function (field) {
-                    mappingProperties[field] = "";
-                });
+                if (undefined != res.mapping.properties) {
+                    var mapping = res.mapping.properties.properties;
+                    (0, _keys2.default)(mapping).forEach(function (field) {
+                        mappingProperties[field] = "";
+                    });
+                } else {
+                    mappingProperties["name"] = "";
+                }
+
                 this_.state.dataProperties = mappingProperties;
             } else {
                 console.error(err.message);
@@ -71645,6 +71650,9 @@ exports.default = {
     },
     addGeoJSONTab: function addGeoJSONTab(fGeoJson) {
         var container = document.getElementById("jsoneditor");
+        if (container.hasChildNodes()) {
+            container.removeChild(container.childNodes[0]);
+        }
         var options = {
             mode: 'code'
         };

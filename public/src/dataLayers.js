@@ -101,13 +101,19 @@ export default {
     {
         var this_ = this;
         kuzzle.dataCollectionFactory(layer).getMapping(function (err, res) {
-            // result is a KuzzleDataMapping object
+            // res is a KuzzleDataMapping object
             if (!err) {
-                var mapping = res.mapping.properties.properties;
                 var mappingProperties = new Object();
-                Object.keys(mapping).forEach(field => {
-                    mappingProperties[field] = "";
-                });
+                if (undefined != res.mapping.properties) {
+                    var mapping = res.mapping.properties.properties;
+                    Object.keys(mapping).forEach(field => {
+                        mappingProperties[field] = "";
+                    });
+                } else {
+                    // If no mapping in properties, we assign a default value
+                    mappingProperties["name"] = "";
+                }
+
                 this_.state.dataProperties = mappingProperties;
             } else {
                 console.error(err.message);
