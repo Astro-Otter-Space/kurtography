@@ -27,24 +27,9 @@ npm start
 ```
 
 
-Getting started
+Configuration and Getting started
 -------------
-If you want to test on mode onlive :
-```
-npm test
-```
 
-Compile all modifications with browserify :
-```
-npm run bundle
-```
-A script bundle.js will be compiled, and after run with
-```
-npm start
-```
-
-Configuration
--------------
 
 #### <i class="icon-upload"></i> Connexion to kuzzle
 
@@ -66,12 +51,56 @@ export default {
 }
 ```
 
-> **Note:** Don't change projectionFrom value, it's the projection using fot cartography with Openlayers. If you want to record in Kuzzle yours datas in other projection,
-check the [spatial reference list](http://spatialreference.org/ref/epsg/). Default value is 'EPSG:4326' who is the WGS-84 projection, using for GPS, Google Map...
+> **Note:** Don't change "projectionFrom" value, it's the projection using by Openlayers. If you want to record yours datas in Kuzzle with an other projection,
+check the [spatial reference list](http://spatialreference.org/ref/epsg/) and edit "projectionTo" value. Default value is 'EPSG:4326' who is the WGS-84 projection (using in GPS, Google Map...)
 
 
-API
+If you want to test on mode onlive :
+```
+npm test
+```
+
+Compile all modifications with browserify :
+```
+npm run bundle
+```
+A script bundle.js will be compiled, and after run with
+```
+npm start
+```
+
+
+Kuzzle data format
 -------------
+Datas are recording in [GeoJSON](http://geojson.org/) format in Kuzzle. See [Kuzzle documentation](http://kuzzle.io/sdk-documentation/) for more information about KuzzleCollection and KuzzleDocument
+Exemple of KuzzleDocument working in Kurtography :
+```
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      3.9609146118164054,
+      43.624395670027354
+    ]
+  },
+  "properties": {
+    "name": "Test",
+  },
+  "location": {
+    "lon": 3.9609146118164054,
+    "lat": 43.624395670027354
+  },
+  "id": "AVRO9acbPyvkbVrqtBU0"
+}
+```
+
+Item     | Value | Information
+-------- | -------- | ----------
+type | "feature" | default value, don't change it
+geometry | Object |
+properties | Object |
+location | Object |
 
 
 Features
