@@ -7,15 +7,16 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 [TOC]
 
+
+
 Plugin Status
 -------------
-Is currently in Beta stage of development.
-v. 0.6.5
+Is currently in Beta stage of development : v. 0.6.5
 
 Requirements
 -------------
  - [NodeJS and NPM](https://nodejs.org/en/)
- - [A Kuzzle instance](http://kuzzle.io/guide/), (installation)[https://github.com/kuzzleio/kuzzle#installation]
+ - [A Kuzzle instance](http://kuzzle.io/guide/), [installation](https://github.com/kuzzleio/kuzzle#installation)
 
 
 Installation
@@ -33,7 +34,6 @@ npm start
 
 Configuration and Getting started
 -------------
-
 
 #### <i class="icon-upload"></i> Connexion to kuzzle
 
