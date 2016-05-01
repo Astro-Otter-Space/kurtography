@@ -129,6 +129,10 @@ body { overflow: hidden; padding-top: 50px; }
     float: right;
 }
 
+.toggle.btn{ float: right; }
+.toggle.android { border-radius: 0px;}
+.toggle.android .toggle-handle { border-radius: 0px; }
+#jsoneditor{height: 400px;}
 .properties-edit {
     display: none;
 }

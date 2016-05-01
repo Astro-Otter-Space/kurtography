@@ -5,6 +5,7 @@ import LayerSwitcher from './layerSwitcher'
 import ControlDrawButtons from './ol3-controldrawbuttons'
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
+import jsoneditor from 'jsoneditor';
 /**
  * Initialisation de la map
  * @returns {ol.Map|*}
@@ -131,13 +132,18 @@ export default {
             );
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
+                var parser = new ol.format.GeoJSON();
+
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
                 var centerFeature = ol.extent.getCenter(extFeature);
+                var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
                 this_.addPropertiesTab(fProperties, feature.getId());
+                this_.addGeoJSONTab(fGeoJson);
                 this_.addGeometriesTab(feature.getGeometry());
-                document.getElementById("mainProperties").style.display="block";
+
+                document.getElementById("mainProperties").style.display = "block";
 
                 // Retrieve datas from Form Edit Properties
                 var form = document.getElementsByName("form-edit-properties")[0];
@@ -152,7 +158,7 @@ export default {
                     });
 
                     dataLayers.updatePropertiesDocument(feature, objPropertiesFeature);
-                    // TODO : switcher le toggle
+                    jQuery('#toggle-properties').bootstrapToggle('off');
                     return false;
                 };
                 form.addEventListener('submit', handleSubmit, false);
@@ -369,6 +375,21 @@ export default {
 
         tabP.appendChild(tbody);
         return tabP;
+    },
+
+
+    /**
+     * Show the selected feature in geoJson format
+     * @param fGeoJson
+     */
+    addGeoJSONTab(fGeoJson)
+    {
+        var container = document.getElementById("jsoneditor");
+        var options = {
+            mode: 'code'
+        };
+        var editor = new jsoneditor(container, options);
+        editor.set(fGeoJson);
     },
 
     /**

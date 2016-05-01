@@ -11,8 +11,10 @@
   "dependencies": {
     "bootstrap": "^3.3.6",
     "bootstrap-toggle": "^2.2.2",
+    "codemirror": "^5.14.2",
     "express": "^4.13.4",
     "jade": "^1.11.0",
+    "jsoneditor": "^5.5.2",
     "kuzzle-sdk": "^1.7.3",
     "openlayers": "^3.13.1",
     "turf-centroid": "^1.1.3",

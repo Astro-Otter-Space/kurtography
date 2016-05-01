@@ -3,19 +3,21 @@ div.panel.panel-default#mainProperties
         h4.panel-title
             a(data-toggle="collapse", href="#properties")
                 i.fa.fa-list-alt  Properties
+            input#toggle-properties(type="checkbox", data-width="70", data-style="android", data-size="mini")
     div#properties.panel-collapse.collapse.in
         div.panel-body
             ul.nav.nav-tabs(role="tablist")
                 li.active(role="presentation")
                     a(href="#tProperties", aria-controls="tProperties", role="tab", data-toggle="tab") Properties
                 li(role="presentation")
+                    a(href="#tGeoJSON", aria-controls="tGeoJSON", role="tab", data-toggle="tab") GeoJSON
+                li(role="presentation")
                     a(href="#tGeometry", aria-controls="tGeometry", role="tab", data-toggle="tab") Geometry
-                li
-                    input#toggle-properties(type="checkbox", data-width="80")
-
             div.tab-content
                 div.tab-pane.fade.in.active#tProperties(role="tabpanel")
                     form(name="form-edit-properties")
                         table.table.table-responsive.table-striped#tabFProperties
+                div.tab-pane.fade.in#tGeoJSON(role="tabpanel")
+                    div.panel-body#jsoneditor
                 div.tab-pane.fade#tGeometry(role="tabpanel")
                     table.table.table-responsive.table-striped#tabFGeometry

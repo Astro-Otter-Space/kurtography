@@ -11,7 +11,8 @@
         <link href="/public/css/bootstrap-glyphicons-extends/css/bootstrap.icon-large.min.css" rel="stylesheet">
         <link rel="stylesheet" href="node_modules/openlayers/css/ol.css">
         <link rel="stylesheet" href="node_modules/bootstrap-toggle/css/bootstrap-toggle.min.css">
-        <!--<link rel="stylesheet" href="node_modules/ol3-layerswitcher/src/ol3-layerswitcher.css">-->
+        <!--<link rel="stylesheet" href="node_modules/codemirror/lib/codemirror.css">-->
+        <link rel="stylesheet" href="node_modules/jsoneditor/dist/jsoneditor.min.css">
         <link rel="stylesheet" href="/public/css/ol3-drawcontrols.css">
 		<link rel="stylesheet" href="/public/css/style.css">
 	</head>
@@ -73,9 +74,9 @@
         </div>
 
         <div class="row">
-            <div class="col-xs-8 col-sm-9 col-md-9 col-lg-10 no-padding-right" id="map"></div>
+            <div class="col-xs-8 col-sm-9 col-md-9 col-lg-9 no-padding-right" id="map"></div>
 
-            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-2 no-padding-left">
+            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3 no-padding-left">
 
                 <div class="row main-row">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 sidebar sidebar-right pull-right">
@@ -101,7 +102,7 @@
                                         <a data-toggle="collapse" href="#properties">
                                             <i class="fa fa-list-alt"></i> Properties
                                         </a>
-
+                                        <input id="toggle-properties" type="checkbox" data-width="70" data-style="android" data-size="mini">
                                     </h4>
                                 </div>
                                 <div id="properties" class="panel-collapse collapse in">
@@ -110,8 +111,8 @@
                                         <!-- Nav tabs -->
                                         <ul class="nav nav-tabs" role="tablist">
                                             <li role="presentation" class="active"><a href="#tProperties" aria-controls="tProperties" role="tab" data-toggle="tab">Properties</a></li>
+                                            <li role="presentation"><a href="#tGeoJSON" aria-controls="tGeoJSON" role="tab" data-toggle="tab">GeoJSON</a></li>
                                             <li role="presentation"><a href="#tGeometry" aria-controls="tGeometry" role="tab" data-toggle="tab">Geometry</a></li>
-                                            <li><input id="toggle-properties" type="checkbox" data-width="80"></li>
                                         </ul>
 
                                         <!-- Tab panes -->
@@ -120,6 +121,9 @@
                                                 <form name="form-edit-properties">
                                                     <table class="table table-responsive table-striped" id="tabFProperties"></table>
                                                 </form>
+                                            </div>
+                                            <div role="tabpanel" class="tab-pane fade" id="tGeoJSON">
+                                                <div class="panel-body" id="jsoneditor" style="height: 400px;"></div>
                                             </div>
                                             <div role="tabpanel" class="tab-pane fade" id="tGeometry">
                                                 <table class="table table-responsive table-striped" id="tabFGeometry"></table>

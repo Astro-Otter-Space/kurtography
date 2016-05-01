@@ -50,30 +50,31 @@ export default {
         var this_ = this;
         kuzzle.dataCollectionFactory(collection).fetchAllDocuments(function(err, res) {
             if (!err) {
+                var result = [];
                 if(res.total > 0) {
-                    var result = [];
-                    res.documents.forEach(function(kDoc, index) {
+                    res.documents.forEach(function (kDoc, index) {
                         // Push document identifier in feature data
                         kDoc.content.id = kDoc.id;
                         result.push(kDoc.content);
                     });
-
-                    var dataGeoJSON = {
-                        "type": "FeatureCollection",
-                        "features": result
-                    };
-
-                    // Construction of geoDatas from content
-                    var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: Projection.projectionFrom});
-                    var kSource = new ol.source.Vector({
-                        features: kGeoJSON
-                    });
-                    olMap.getSelectedLayer().setSource(kSource);
-                    olMap.getSelectedLayer().setZIndex(20);
                 } else {
                     document.getElementById('msgWarnKuzzle').innerHTML = "There is no data for the collection " + collection;
                     $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                 }
+
+                var dataGeoJSON = {
+                    "type": "FeatureCollection",
+                    "features": result
+                };
+
+                // Construction of geoDatas from content
+                var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: Projection.projectionFrom});
+                var kSource = new ol.source.Vector({
+                    features: kGeoJSON
+                });
+                olMap.getSelectedLayer().setSource(kSource);
+                olMap.getSelectedLayer().setZIndex(20);
+
             } else {
                 console.error(err);
             }
@@ -103,11 +104,11 @@ export default {
             // result is a KuzzleDataMapping object
             if (!err) {
                 var mapping = res.mapping.properties.properties;
-                var Properties = new Object();
+                var mappingProperties = new Object();
                 Object.keys(mapping).forEach(field => {
-                    Properties[field] = "";
+                    mappingProperties[field] = "";
                 });
-                this_.state.dataProperties = Properties;
+                this_.state.dataProperties = mappingProperties;
             } else {
                 console.error(err.message);
             }
@@ -142,7 +143,6 @@ export default {
                 lat: fCentroid.geometry.coordinates[1]
             };
         }
-
         kuzzle.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
             if (!err) {
                 // Setting of Kuzzle Document Identifier to identifier of the feature
@@ -320,10 +320,12 @@ export default {
                             var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                             olMap.getSelectedLayer().getSource().removeFeature(featureDel);
                         }
-
                         olMap.getSelectedLayer().getSource().addFeature(newFeature);
+
+                        olMap.addPropertiesTab(newFeature.getProperties());
+                        var newFeatureGeoJson = f.writeFeatureObject(newFeature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom})
+                        olMap.addGeoJSONTab(newFeatureGeoJson);
                         if ("update" == this_.action) {
-                            olMap.addPropertiesTab(newFeature.getProperties());
                             olMap.addGeometriesTab(newFeature.getGeometry());
                         }
                         document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been " +  this_.action + "d in Kuzzle in your subscribe area.";
