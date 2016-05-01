@@ -16,18 +16,29 @@ Requirements
 
 Getting started
 -------------
-  - Clone the repository : `git clone git@github.com:HamHamFonFon/kurtogaphy.git <dirname>`
-  - cd <dirname>
-  - npm install
-  - npm start
+```
+// Clone the repository
+git clone git@github.com:HamHamFonFon/kurtogaphy.git dirname
+cd dirname
+
+// Installation
+npm install
+npm start
+```
 
 If you want to test on mode onlive :
-  - npm test
+```
+npm test
+```
 
 Compile all modifications with browserify :
-  - npm run bundle
-
-A script bundle.js will be compiled, and after run with `npm start`.
+```
+npm run bundle
+```
+A script bundle.js will be compiled, and after run with
+```
+npm start
+```
 
 API
 -------------
