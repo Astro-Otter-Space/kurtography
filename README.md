@@ -3,6 +3,10 @@ Kurtography
 
 Welcome !! Kurtography is a cartography application based on [Openlayers 3](http://openlayers.org/) and [Kuzzle](http://kuzzle.io) for Kaliop Koding Challenge
 
+### Table of contents
+
+`[TOC]`:
+
 Plugin Status
 -------------
 Is currently in Beta stage of development.
@@ -36,7 +40,7 @@ Configuration and Getting started
 Edit file public\services\config.js
 ```
 export default {
-    kuzzleUrl: 'path_to_kuzzle_instance', // ex : http://localhost:7512
+    kuzzleUrl: 'url_to_kuzzle_instance', // ex : http://localhost:7512
     defaultIndex: 'name of your kuzzle index'
 }
 ```
@@ -54,6 +58,8 @@ export default {
 > **Note:** Don't change "projectionFrom" value, it's the projection using by Openlayers. If you want to record yours datas in Kuzzle with an other projection,
 check the [spatial reference list](http://spatialreference.org/ref/epsg/) and edit "projectionTo" value. Default value is 'EPSG:4326' who is the WGS-84 projection (using in GPS, Google Map...)
 
+
+#### <i class="icon-upload"></i> Developpement
 
 If you want to test on mode onlive :
 ```
@@ -108,7 +114,7 @@ Features
   - Loading collections as layers
   - Show features from the selected layers
   - Selected a projection for features (in EPSG format)
-  - Create, edit and delete features with the openlayers3 plugins
+  - Create, edit and delete features with an [openlayers3 draw control plugin](https://github.com/HamHamFonFon/ol3-drawButtons)
   - Create and edit properties
   - Create a reference point (for polygons an lines, the reference point is the centroid) for the subscribe room
   - Subscribe room : zone from geolocation with 10km radius
