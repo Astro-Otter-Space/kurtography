@@ -363,32 +363,31 @@ export default {
      * @param search
      * @param layer
      */
-    searchDocuments(searchItem)
+    searchDocuments(searchItem, response)
     {
         if (null != olMap.getSelectedLayer()) {
+
+            console.log("lancement de la recherche de " + searchItem);
             var layer = olMap.getSelectedLayer().get('title');
 
-            var collMapping = this.state.dataProperties;
-            var filterMapping = Object.keys(collMapping).map(field => {
-                var filterOr = {
-                    term :{
-                    }
-                };
-                filterOr.term['properties.'+field] = searchItem;
-                return filterOr;
-            });
-            //sort: ['properties.name'],
-            //from: 0,
-            //size: 9999
+            //var collMapping = this.state.dataProperties;
+            //var filterMapping = Object.keys(collMapping).map(field => {
+            //    var filterOr = {
+            //        term :{
+            //        }
+            //    };
+            //    filterOr.term['properties.'+field] = searchItem;
+            //    return filterOr;
+            //});
+
             var filter = {
-                filter :{
-                    or: filterMapping
+                filter: {
+                    prefix: {
+                        "properties.name": searchItem
+                    }
+                    //or: filterMapping
                 }
             };
-
-            kuzzle.dataCollectionFactory(layer).getMapping(function (err, res) {
-               console.log(res);
-            });
 
             kuzzle.dataCollectionFactory(layer).advancedSearch(filter, (err, resp) => {
                 if(!err) {

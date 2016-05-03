@@ -26,6 +26,7 @@ export default {
         buttonsDrawControls: null,
         layerSwitcher: null,
         groupKuzzleLayers:null,
+        featureForm: null,
         selectedLayer: null,
         tabStyles: null
     },
@@ -122,10 +123,33 @@ export default {
 
         });
 
+        /**
+         * Callback on submit
+         * @param e
+         * @returns {boolean}
+         */
+        var handleSubmit = function(e) {
+            e.preventDefault();
+            var featureForm = this_.state.featureForm;
+            var objPropertiesFeature = new Object();
+            Array.from(e.target.elements).forEach(element => {
+                if ("text" == element.type && "undefined" != element.type) {
+                    objPropertiesFeature[element.name] = element.value;
+                }
+            });
+            console.log("Lancement sauvegarde de " + featureForm.getId());
+            dataLayers.updatePropertiesDocument(featureForm, objPropertiesFeature);
+            jQuery('#toggle-properties').bootstrapToggle('off');
+            return false;
+        };
 
         // Show feature data + listener
         this.state.map.on('click', function(evt) {
-            var feature = this_.state.map.forEachFeatureAtPixel(evt.pixel,
+            //var this_ = this;
+            var form = document.getElementsByName("form-edit-properties")[0];
+            form.removeEventListener('submit', handleSubmit);
+
+            var feature = this_.state.featureForm = this_.state.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
                     return feature;
                 }
@@ -133,6 +157,7 @@ export default {
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
                 var parser = new ol.format.GeoJSON();
+                console.log("Identifiant : " + this_.state.featureForm.getId());
 
                 var fProperties = feature.getProperties();
                 var extFeature = feature.getGeometry().getExtent();
@@ -146,21 +171,7 @@ export default {
                 document.getElementById("mainProperties").style.display = "block";
 
                 // Retrieve datas from Form Edit Properties
-                var form = document.getElementsByName("form-edit-properties")[0];
-                var handleSubmit = function(e) {
-                    e.preventDefault();
-                    //document.getElementById('toggle-properties').prop('checked', false).change();
-                    var objPropertiesFeature = new Object();
-                     Array.from(e.target.elements).forEach(element => {
-                        if ("text" == element.type && "undefined" != element.type) {
-                            objPropertiesFeature[element.name] = element.value;
-                        }
-                    });
 
-                    dataLayers.updatePropertiesDocument(feature, objPropertiesFeature);
-                    jQuery('#toggle-properties').bootstrapToggle('off');
-                    return false;
-                };
                 form.addEventListener('submit', handleSubmit, false);
 
                 this_.state.view.setCenter(centerFeature);
