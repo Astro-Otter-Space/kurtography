@@ -70355,7 +70355,7 @@ exports.default = {
         _kuzzle2.default.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
             if (!err) {
                 newFeature.setId(resp.id);
-
+                _openlayers4.default.state.featureForm = newFeature;
                 _openlayers4.default.showFeaturesInformations(newFeature, false);
             } else {
                 console.log(err.message);

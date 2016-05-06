@@ -154,7 +154,7 @@ export default {
             if (!err) {
                 // Setting of Kuzzle Document Identifier to identifier of the feature
                 newFeature.setId(resp.id);
-                // TODO : newFeature and fDatasGeoJson are no matching !!
+                olMap.state.featureForm = newFeature;
                 olMap.showFeaturesInformations(newFeature, false);
             } else {
                 console.log(err.message)
