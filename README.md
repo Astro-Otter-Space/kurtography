@@ -5,13 +5,10 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 ### Table of contents
 
-[TOC]
-
-
 
 Plugin Status
 -------------
-Is currently in Beta stage of development : v. 0.6.5
+Beta stage of development : v. 0.6.6
 
 Requirements
 -------------
@@ -23,8 +20,8 @@ Installation
 -------------
 ```
 // Clone the repository
-git clone git@github.com:HamHamFonFon/kurtogaphy.git dirname
-cd dirname
+git clone git@github.com:HamHamFonFon/kurtogaphy.git kurtography
+cd kurtography
 
 // Installation
 npm install
@@ -37,17 +34,17 @@ Configuration and Getting started
 
 #### <i class="icon-upload"></i> Connexion to kuzzle
 
-Edit file public\services\config.js
+Edit file public\services\config.js and change values kuzzleUrl and defaultIndex
 ```
 export default {
     kuzzleUrl: 'url_to_kuzzle_instance', // ex : http://localhost:7512
-    defaultIndex: 'name of your kuzzle index'
+    defaultIndex: 'name_of_your_kuzzle_index'
 }
 ```
 
 #### <i class="icon-upload"></i> Geodatas projection
 
-Edit file public\services\projection.js
+Edit file public\services\projection.js and change value projectionTo
 ```
 export default {
     projectionFrom: 'EPSG:3857',
@@ -61,12 +58,12 @@ check the [spatial reference list](http://spatialreference.org/ref/epsg/) and ed
 
 #### <i class="icon-upload"></i> Developpement
 
-If you want to test on mode onlive :
+Live test :
 ```
 npm test
 ```
 
-Compile all modifications with browserify :
+Run the app with the following command which compile modifications using browserify and babelify :
 ```
 npm run bundle
 ```
@@ -78,7 +75,9 @@ npm start
 
 Kuzzle data format
 -------------
-Datas are recording in [GeoJSON](http://geojson.org/) format in Kuzzle. See [Kuzzle documentation](http://kuzzle.io/sdk-documentation/) for more information about KuzzleCollection and KuzzleDocument
+Datas are recording in [GeoJSON](http://geojson.org/) format in Kuzzle.
+Read [Kuzzle documentation](http://kuzzle.io/sdk-documentation/) for more information about KuzzleCollection and KuzzleDocument
+
 Exemple of KuzzleDocument working in Kurtography :
 ```
 {
@@ -103,7 +102,7 @@ Exemple of KuzzleDocument working in Kurtography :
 
 Item     | Value | Information
 -------- | -------- | ----------
-type | "feature" | default value, don't change it
+type | "Feature" | default value, don't change it
 geometry | Object |
 properties | Object |
 location | Object |
@@ -113,16 +112,22 @@ Features
 -------------
   - Loading collections as layers
   - Show features from the selected layers
-  - Selected a projection for features (in EPSG format)
+  - Select a projection in EPSG format
   - Create, edit and delete features with an [openlayers3 draw control plugin](https://github.com/HamHamFonFon/ol3-drawButtons)
   - Create and edit properties
   - Create a reference point (for polygons an lines, the reference point is the centroid) for the subscribe room
   - Subscribe room : zone from geolocation with 10km radius
+  - Search items
 
 Features in progress
 -------------
-  - Search items
-  - Edit manually the subscribe zone
+  - Search only in subscribe area
+  - Edit the subscribe zone
+
+Features will be avalaible soon:
+-------------
+  - Change of subscribe zone by geolocalisation
+  - Design refactoring with Material-Ui and React
 
 Author(s)
 -------------
