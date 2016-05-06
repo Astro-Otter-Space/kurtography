@@ -15,24 +15,38 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _dataLayers2.default.listCollections();
 
-jQuery(function () {
-    jQuery('form[name="formSearch"]').on('keyup', function (e) {
-        if (3 <= e.target.value.length) {
-            _dataLayers2.default.searchDocuments(e.target.value);
+$(function () {
+    $('input[name="search"]').autocomplete({
+        delay: 200,
+        source: function source(request, response) {
+            _dataLayers2.default.searchDocuments(request.term);
+            if (_dataLayers2.default.state.rstAdvancedSearch) {
+                response(_dataLayers2.default.state.rstAdvancedSearch);
+            }
+        },
+        minLength: 2,
+        open: function open(event, ui) {
+            $(".ui-autocomplete").css("z-index", 10000);
+        },
+        focus: function focus(event, ui) {
+            $(this).val("");
+        },
+        select: function select(event, ui) {
+            _dataLayers2.default.setCenterKuzzleDoc(ui.item.id);
         }
     });
 });
 
-jQuery(function () {
+$(function () {
 
-    jQuery('.mini-submenu-right').on('click', function () {
+    $('.mini-submenu-right').on('click', function () {
         var thisEl = jQuery(this);
         jQuery('.sidebar-right .sidebar-body').toggle('slide');
         thisEl.hide();
         _initBootstrap2.default.applyMargins();
     });
 
-    jQuery(window).on("resize", _initBootstrap2.default.applyMargins);
+    $(window).on("resize", _initBootstrap2.default.applyMargins);
 
     _initBootstrap2.default.applyInitialUIState();
 
@@ -70246,7 +70260,8 @@ exports.default = {
         newGJsonFeature: null,
         newFeature: null,
         dataProperties: null,
-        tabStyles: _openlayers4.default.getStylesFeatures()
+        tabStyles: _openlayers4.default.getStylesFeatures(),
+        rstAdvancedSearch: null
     },
 
     listCollections: function listCollections() {
@@ -70504,47 +70519,51 @@ exports.default = {
         });
     },
     searchDocuments: function searchDocuments(searchItem) {
+        var _this2 = this;
+
         if (null != _openlayers4.default.getSelectedLayer()) {
+
             var layer = _openlayers4.default.getSelectedLayer().get('title');
 
-            var collMapping = this.state.dataProperties;
-            var filterMapping = (0, _keys2.default)(collMapping).map(function (field) {
-                var filterOr = {
-                    term: {}
-                };
-                filterOr.term['properties.' + field] = searchItem;
-                return filterOr;
-            });
 
             var filter = {
                 filter: {
-                    or: filterMapping
+                    prefix: {
+                        "properties.name": searchItem
+                    }
                 }
             };
 
-            _kuzzle2.default.dataCollectionFactory(layer).getMapping(function (err, res) {
-                console.log(res);
-            });
-
             _kuzzle2.default.dataCollectionFactory(layer).advancedSearch(filter, function (err, resp) {
                 if (!err) {
-                    console.log(resp);
                     if (1 > resp.total) {
                         document.getElementById('msgWarnKuzzle').innerHTML = "No document find, retry with another term.";
                         $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                     } else {
-                        console.log(resp.document);
+                        var respAutoComplete = new Object();
+                        respAutoComplete = resp.documents.map(function (kDoc) {
+                            return {
+                                id: kDoc.id,
+
+                                label: kDoc.content.properties.name
+                            };
+                        });
+                        _this2.state.rstAdvancedSearch = respAutoComplete;
                     }
                 } else {
-                        console.error(err);
-                        document.getElementById('msgDangerKuzzle').innerHTML = "Research error.";
-                        $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
-                    }
+                    console.error(err);
+                    document.getElementById('msgDangerKuzzle').innerHTML = "Research error.";
+                    $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                }
             });
         } else {
             document.getElementById('msgWarnKuzzle').innerHTML = "Please, select a layer to the right.";
             $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
         }
+    },
+    setCenterKuzzleDoc: function setCenterKuzzleDoc(kdocId) {
+        var kFeature = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kdocId);
+        _openlayers4.default.showFeaturesInformations(kFeature);
     }
 };
 
@@ -71380,6 +71399,7 @@ exports.default = {
         buttonsDrawControls: null,
         layerSwitcher: null,
         groupKuzzleLayers: null,
+        featureForm: null,
         selectedLayer: null,
         tabStyles: null
     },
@@ -71453,43 +71473,28 @@ exports.default = {
             }
         });
 
+        var handleSubmit = this.handleSubmit = function (e) {
+            e.preventDefault();
+            var featureForm = this_.state.featureForm;
+            var objPropertiesFeature = new Object();
+            (0, _from2.default)(e.target.elements).forEach(function (element) {
+                if ("text" == element.type && "undefined" != element.type) {
+                    objPropertiesFeature[element.name] = element.value;
+                }
+            });
+            console.log("Lancement sauvegarde de " + featureForm.getId());
+            _dataLayers2.default.updatePropertiesDocument(featureForm, objPropertiesFeature);
+            jQuery('#toggle-properties').bootstrapToggle('off');
+            return false;
+        };
+
         this.state.map.on('click', function (evt) {
-            var feature = this_.state.map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+            var feature = this_.state.featureForm = this_.state.map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                 return feature;
             });
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-                var parser = new _openlayers2.default.format.GeoJSON();
-
-                var fProperties = feature.getProperties();
-                var extFeature = feature.getGeometry().getExtent();
-                var centerFeature = _openlayers2.default.extent.getCenter(extFeature);
-                var fGeoJson = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
-
-                this_.addPropertiesTab(fProperties, feature.getId());
-                this_.addGeoJSONTab(fGeoJson);
-                this_.addGeometriesTab(feature.getGeometry());
-
-                document.getElementById("mainProperties").style.display = "block";
-
-                var form = document.getElementsByName("form-edit-properties")[0];
-                var handleSubmit = function handleSubmit(e) {
-                    e.preventDefault();
-
-                    var objPropertiesFeature = new Object();
-                    (0, _from2.default)(e.target.elements).forEach(function (element) {
-                        if ("text" == element.type && "undefined" != element.type) {
-                            objPropertiesFeature[element.name] = element.value;
-                        }
-                    });
-
-                    _dataLayers2.default.updatePropertiesDocument(feature, objPropertiesFeature);
-                    jQuery('#toggle-properties').bootstrapToggle('off');
-                    return false;
-                };
-                form.addEventListener('submit', handleSubmit, false);
-
-                this_.state.view.setCenter(centerFeature);
+                this_.showFeaturesInformations(feature);
             }
         });
         this.initControls();
@@ -71534,6 +71539,24 @@ exports.default = {
             });
         });
         this.state.map.addControl(this.state.buttonsDrawControls);
+    },
+    showFeaturesInformations: function showFeaturesInformations(feature) {
+        var form = document.getElementsByName("form-edit-properties")[0];
+        form.removeEventListener('submit', this.handleSubmit);
+
+        var parser = new _openlayers2.default.format.GeoJSON();
+
+        var fProperties = feature.getProperties();
+        var fGeoJson = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
+
+        this.setCenterFeature(feature.getId());
+        this.addPropertiesTab(fProperties, feature.getId());
+        this.addGeoJSONTab(fGeoJson);
+        this.addGeometriesTab(feature.getGeometry());
+
+        document.getElementById("mainProperties").style.display = "block";
+
+        form.addEventListener('submit', this.handleSubmit, false);
     },
     createZoneSubscription: function createZoneSubscription(distance) {
         var coordonatesWGS84 = this.geolocation.getPosition();
@@ -71585,6 +71608,15 @@ exports.default = {
 
         var centroidPt = (0, _turfCentroid2.default)(featureGeoJSON);
         return centroidPt;
+    },
+    setCenterFeature: function setCenterFeature(featureId) {
+        if (featureId) {
+            var feature = this.getSelectedLayer().getSource().getFeatureById(featureId);
+            var extFeature = feature.getGeometry().getExtent();
+            var centerFeature = _openlayers2.default.extent.getCenter(extFeature);
+            this.state.view.setCenter(centerFeature);
+            this.state.view.setZoom(17);
+        }
     },
     addPropertiesTab: function addPropertiesTab(properties) {
         var tabP = document.getElementById('tabFProperties');

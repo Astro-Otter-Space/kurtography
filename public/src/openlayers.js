@@ -128,7 +128,7 @@ export default {
          * @param e
          * @returns {boolean}
          */
-        var handleSubmit = function(e) {
+        var handleSubmit = this.handleSubmit = function(e) {
             e.preventDefault();
             var featureForm = this_.state.featureForm;
             var objPropertiesFeature = new Object();
@@ -145,10 +145,6 @@ export default {
 
         // Show feature data + listener
         this.state.map.on('click', function(evt) {
-            //var this_ = this;
-            var form = document.getElementsByName("form-edit-properties")[0];
-            form.removeEventListener('submit', handleSubmit);
-
             var feature = this_.state.featureForm = this_.state.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
                     return feature;
@@ -156,25 +152,7 @@ export default {
             );
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-                var parser = new ol.format.GeoJSON();
-                console.log("Identifiant : " + this_.state.featureForm.getId());
-
-                var fProperties = feature.getProperties();
-                var extFeature = feature.getGeometry().getExtent();
-                var centerFeature = ol.extent.getCenter(extFeature);
-                var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-
-                this_.addPropertiesTab(fProperties, feature.getId());
-                this_.addGeoJSONTab(fGeoJson);
-                this_.addGeometriesTab(feature.getGeometry());
-
-                document.getElementById("mainProperties").style.display = "block";
-
-                // Retrieve datas from Form Edit Properties
-
-                form.addEventListener('submit', handleSubmit, false);
-
-                this_.state.view.setCenter(centerFeature);
+                this_.showFeaturesInformations(feature);
             }
         });
         this.initControls();
@@ -233,6 +211,31 @@ export default {
         this.state.map.addControl(this.state.buttonsDrawControls);
     },
 
+
+    /**
+     * Show feature information by feature
+     * @param feature
+     */
+    showFeaturesInformations(feature)
+    {
+        var form = document.getElementsByName("form-edit-properties")[0];
+        form.removeEventListener('submit', this.handleSubmit);
+
+        var parser = new ol.format.GeoJSON();
+
+        var fProperties = feature.getProperties();
+        var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+
+        this.setCenterFeature(feature.getId());
+        this.addPropertiesTab(fProperties, feature.getId());
+        this.addGeoJSONTab(fGeoJson);
+        this.addGeometriesTab(feature.getGeometry());
+
+        document.getElementById("mainProperties").style.display = "block";
+
+        // Retrieve datas from Form Edit Properties
+        form.addEventListener('submit', this.handleSubmit, false);
+    },
 
     /**
      * Create a zone where kuzzle subscription is active
@@ -315,6 +318,22 @@ export default {
         var centroidPt = turfCentroid(featureGeoJSON);
         return centroidPt;
     },
+
+
+    /**
+     * Center to the map of the selected feature
+     */
+    setCenterFeature(featureId)
+    {
+        if (featureId) {
+            var feature = this.getSelectedLayer().getSource().getFeatureById(featureId);
+            var extFeature = feature.getGeometry().getExtent();
+            var centerFeature = ol.extent.getCenter(extFeature);
+            this.state.view.setCenter(centerFeature);
+            this.state.view.setZoom(17);
+        }
+    },
+
 
     /**
      * Set datas from proporties in the popup

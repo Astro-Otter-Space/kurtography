@@ -7,7 +7,7 @@ nav.navbar.navbar-inverse.navbar-fixed-top
                 span.icon-bar
                 span.icon-bar
             a.navbar-brand(href='#') Kurtography : webmapping by Kuzzle
-        #bs-example-navbar-collapse-1.collapse.navbar-collapse
+        div#bs-example-navbar-collapse-1.collapse.navbar-collapse
             ul.nav.navbar-nav.navbar-right
                 li
                     a(href="/login", disabled) Log in
@@ -29,5 +29,4 @@ nav.navbar.navbar-inverse.navbar-fixed-top
                             a(href="/export?type=shape", disabled) Shapefile
             form.navbar-form.navbar-right(name='formSearch', role='search')
                 .form-group
-                    input.form-control(type='text', placeholder='Search')
-                //button#search.btn.btn-warning(type='submit', disabled='') Go
+                    input.form-control(type='text', name="search", placeholder='Search')

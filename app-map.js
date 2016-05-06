@@ -6,14 +6,24 @@ dataLayers.listCollections();
  * @returns {string}
  */
 $(function(){
+    $('form')
     $('input[name="search"]').autocomplete({
-        source: function(req, res) {
-            dataLayers.searchDocuments(req.term, res);
+        source: function(request, response) {
+            dataLayers.searchDocuments(request.term);
+            if (dataLayers.state.rstAdvancedSearch) {
+                response(dataLayers.state.rstAdvancedSearch);
+            }
         },
-        minLength: 3,
+        minLength: 2,
+        open: function(event, ui) {
+            $(".ui-autocomplete").css("z-index", 10000);
+        },
+        focus: function(event, ui) {
+            $(this).val("");
+        },
         select: function(event, ui)
         {
-
+            dataLayers.setCenterKuzzleDoc(ui.item.id);
         }
     });
 });

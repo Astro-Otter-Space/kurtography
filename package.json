@@ -9,12 +9,9 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "bootstrap": "^3.3.6",
     "bootstrap-toggle": "^2.2.2",
     "express": "^4.13.4",
     "jade": "^1.11.0",
-    "jquery": "^2.2.3",
-    "jquery-ui": "^1.10.5",
     "jsoneditor": "^5.5.2",
     "kuzzle-sdk": "^1.7.3",
     "openlayers": "^3.13.1",
@@ -32,11 +29,14 @@
   },
   "browserify": {
     "transform": [
-      [ "babelify", {
+      [
+        "babelify",
+        {
           "presets": [
             "es2015"
           ]
-      }]
+        }
+      ]
     ]
   },
   "repository": {
@@ -44,9 +44,8 @@
     "url": "https://github.com/HamHamFonFon/kurtogaphy.git"
   },
   "keywords": [
-    "nodejs",
-    "kuzzle",
-    "openlayers"
+    "kuzzle", "openlayers",
+    "nodeJS", "browserfify", "babel", "ES6"
   ],
   "author": "Stéphane MEAUDRE <smeaudre@kaliop.com> (S. Meaudre)",
   "license": "MIT",

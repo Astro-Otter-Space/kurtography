@@ -14,7 +14,8 @@ export default {
         newGJsonFeature: null,
         newFeature: null,
         dataProperties: null, // data mapping of selected collection
-        tabStyles: olMap.getStylesFeatures()
+        tabStyles: olMap.getStylesFeatures(),
+        rstAdvancedSearch: null
     },
 
     /**
@@ -363,13 +364,11 @@ export default {
      * @param search
      * @param layer
      */
-    searchDocuments(searchItem, response)
+    searchDocuments(searchItem)
     {
         if (null != olMap.getSelectedLayer()) {
 
-            console.log("lancement de la recherche de " + searchItem);
             var layer = olMap.getSelectedLayer().get('title');
-
             //var collMapping = this.state.dataProperties;
             //var filterMapping = Object.keys(collMapping).map(field => {
             //    var filterOr = {
@@ -391,21 +390,19 @@ export default {
 
             kuzzle.dataCollectionFactory(layer).advancedSearch(filter, (err, resp) => {
                 if(!err) {
-                    console.log(resp);
                     if (1 > resp.total) {
                         document.getElementById('msgWarnKuzzle').innerHTML = "No document find, retry with another term.";
                         $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                     } else {
-                        console.log(resp.document);
-                        //resp.document.forEach(kDoc => {
-                            //
-                            //    console.log("Recherche : " + kDoc.content);
-                            //
-                            //    var extFeature =  kDoc.content.getGeometry().getExtent();
-                            //    var centerFeature = ol.extent.getCenter(extFeature);
-                            //
-                            //    olMap.state.view.setCenter(centerFeature);
-                            //})
+                        var respAutoComplete = new Object();
+                        respAutoComplete = resp.documents.map(kDoc => {
+                            return {
+                                id: kDoc.id,
+                                //value: kDoc.id,
+                                label: kDoc.content.properties.name
+                            }
+                        });
+                        this.state.rstAdvancedSearch = respAutoComplete;
                     }
                 } else {
                     console.error(err);
@@ -418,6 +415,17 @@ export default {
             document.getElementById('msgWarnKuzzle').innerHTML = "Please, select a layer to the right.";
             $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
         }
+    },
 
+    /**
+     * Bridge between kuzzle search result and Map datas
+     * @param kdocId
+     */
+    setCenterKuzzleDoc(kdocId)
+    {
+        var kFeature = olMap.getSelectedLayer().getSource().getFeatureById(kdocId);
+        olMap.showFeaturesInformations(kFeature);
     }
+
+
 };

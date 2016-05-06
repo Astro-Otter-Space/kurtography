@@ -1,3 +1,3 @@
-/**
- * Created by stephane on 03/05/16.
- */
+export default {
+    autocomplete : require('jquery-ui/autocomplete')
+}
