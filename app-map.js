@@ -6,7 +6,9 @@ dataLayers.listCollections();
  * @returns {string}
  */
 $(function(){
-    $('form')
+    $('form[name="formSearch"]').on('submit', function (e) {
+        e.preventDefault();
+    });
     $('input[name="search"]').autocomplete({
         source: function(request, response) {
             dataLayers.searchDocuments(request.term);
@@ -14,12 +16,9 @@ $(function(){
                 response(dataLayers.state.rstAdvancedSearch);
             }
         },
-        minLength: 2,
+        minLength: 3,
         open: function(event, ui) {
             $(".ui-autocomplete").css("z-index", 10000);
-        },
-        focus: function(event, ui) {
-            $(this).val("");
         },
         select: function(event, ui)
         {

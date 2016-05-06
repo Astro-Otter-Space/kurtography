@@ -16,20 +16,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _dataLayers2.default.listCollections();
 
 $(function () {
+    $('form[name="formSearch"]').on('submit', function (e) {
+        e.preventDefault();
+    });
     $('input[name="search"]').autocomplete({
-        delay: 200,
         source: function source(request, response) {
             _dataLayers2.default.searchDocuments(request.term);
             if (_dataLayers2.default.state.rstAdvancedSearch) {
                 response(_dataLayers2.default.state.rstAdvancedSearch);
             }
         },
-        minLength: 2,
+        minLength: 3,
         open: function open(event, ui) {
             $(".ui-autocomplete").css("z-index", 10000);
-        },
-        focus: function focus(event, ui) {
-            $(this).val("");
         },
         select: function select(event, ui) {
             _dataLayers2.default.setCenterKuzzleDoc(ui.item.id);
@@ -70356,6 +70355,8 @@ exports.default = {
         _kuzzle2.default.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
             if (!err) {
                 newFeature.setId(resp.id);
+
+                _openlayers4.default.showFeaturesInformations(newFeature, false);
             } else {
                 console.log(err.message);
             }
@@ -70417,7 +70418,16 @@ exports.default = {
                 if (err) {
                     console.error(err.message);
                 } else {
-                    console.log(res);
+                    if ('Point' == feature.getGeometry().getType()) {
+                        if (false == _openlayers4.default.isPointInZoneSubscribe(featureGeoJSON)) {
+                            _openlayers4.default.showFeaturesInformations(feature, false);
+                        }
+                    } else {
+                        var centroidPt = _openlayers4.default.getFeatureCentroid(featureGeoJSON);
+                        if (false == _openlayers4.default.isPointInZoneSubscribe(centroidPt)) {
+                            _openlayers4.default.showFeaturesInformations(feature, false);
+                        }
+                    }
                 }
             });
         } else {
@@ -70435,6 +70445,7 @@ exports.default = {
                 if (err) {
                     console.error(err.message);
                 } else {
+                    console.log("Suppression de Kuzzle OK");
                     var parser = new _openlayers2.default.format.GeoJSON();
                     var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
 
@@ -70482,31 +70493,31 @@ exports.default = {
         subscription = _kuzzle2.default.dataCollectionFactory(layer.get('title')).subscribe(filter, options, function (err, resp) {
             if (!err) {
                 var kDoc = _this.loadDataById(resp.result._id);
-
+                console.log(resp.scope);
+                console.log(resp.action);
                 if ('in' == resp.scope) {
                     this_.action = resp.action;
                     _kuzzle2.default.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, function (err, resp) {
                         var f = new _openlayers2.default.format.GeoJSON();
-                        var newFeature = f.readFeature(resp.content, { featureProjection: _projections2.default.projectionFrom });
-                        newFeature.setId(kDoc.id);
 
                         if ("update" == this_.action) {
                             var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                             _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
                         }
+
+                        var newFeature = f.readFeature(resp.content, { featureProjection: _projections2.default.projectionFrom });
+                        if (undefined == newFeature.getId()) {
+                            newFeature.setId(kDoc.id);
+                        }
+
                         _openlayers4.default.getSelectedLayer().getSource().addFeature(newFeature);
 
-                        _openlayers4.default.addPropertiesTab(newFeature.getProperties());
-                        var newFeatureGeoJson = f.writeFeatureObject(newFeature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
-                        _openlayers4.default.addGeoJSONTab(newFeatureGeoJson);
-                        if ("update" == this_.action) {
-                            _openlayers4.default.addGeometriesTab(newFeature.getGeometry());
-                        }
+                        _openlayers4.default.showFeaturesInformations(newFeature, false);
+
                         document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been " + this_.action + "d in Kuzzle in your subscribe area.";
                         $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                     });
                 } else if ('out' == resp.scope) {
-                        console.log("delete " + kDoc.id);
                         var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                         _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
 
@@ -70524,27 +70535,35 @@ exports.default = {
         if (null != _openlayers4.default.getSelectedLayer()) {
 
             var layer = _openlayers4.default.getSelectedLayer().get('title');
+            var coordonatesWGS84 = _openlayers4.default.geolocation.getPosition();
 
-
-            var filter = {
+            var filterSearch = {
                 filter: {
-                    prefix: {
-                        "properties.name": searchItem
-                    }
+                    and: [{
+                        prefix: {
+                            "properties.name": searchItem
+                        }
+                    }, {
+                        geo_distance: {
+                            distance: 10000,
+                            location: {
+                                lon: coordonatesWGS84[0], lat: coordonatesWGS84[1]
+                            }
+                        }
+                    }]
                 }
+
             };
 
-            _kuzzle2.default.dataCollectionFactory(layer).advancedSearch(filter, function (err, resp) {
+            _kuzzle2.default.dataCollectionFactory(layer).advancedSearch(filterSearch, function (err, resp) {
                 if (!err) {
                     if (1 > resp.total) {
                         document.getElementById('msgWarnKuzzle').innerHTML = "No document find, retry with another term.";
                         $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                     } else {
-                        var respAutoComplete = new Object();
-                        respAutoComplete = resp.documents.map(function (kDoc) {
+                        var respAutoComplete = resp.documents.map(function (kDoc) {
                             return {
                                 id: kDoc.id,
-
                                 label: kDoc.content.properties.name
                             };
                         });
@@ -71541,21 +71560,25 @@ exports.default = {
         this.state.map.addControl(this.state.buttonsDrawControls);
     },
     showFeaturesInformations: function showFeaturesInformations(feature) {
-        var form = document.getElementsByName("form-edit-properties")[0];
-        form.removeEventListener('submit', this.handleSubmit);
+        var centerTofeature = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
         var parser = new _openlayers2.default.format.GeoJSON();
 
         var fProperties = feature.getProperties();
         var fGeoJson = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
 
-        this.setCenterFeature(feature.getId());
+        if (true == centerTofeature) {
+            this.setCenterFeature(feature.getId());
+        }
+
         this.addPropertiesTab(fProperties, feature.getId());
         this.addGeoJSONTab(fGeoJson);
         this.addGeometriesTab(feature.getGeometry());
 
         document.getElementById("mainProperties").style.display = "block";
 
+        var form = document.getElementsByName("form-edit-properties")[0];
+        form.removeEventListener('submit', this.handleSubmit);
         form.addEventListener('submit', this.handleSubmit, false);
     },
     createZoneSubscription: function createZoneSubscription(distance) {

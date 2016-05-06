@@ -216,17 +216,17 @@ export default {
      * Show feature information by feature
      * @param feature
      */
-    showFeaturesInformations(feature)
+    showFeaturesInformations(feature, centerTofeature = true)
     {
-        var form = document.getElementsByName("form-edit-properties")[0];
-        form.removeEventListener('submit', this.handleSubmit);
-
         var parser = new ol.format.GeoJSON();
 
         var fProperties = feature.getProperties();
         var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
-        this.setCenterFeature(feature.getId());
+        if (true == centerTofeature) {
+            this.setCenterFeature(feature.getId());
+        }
+
         this.addPropertiesTab(fProperties, feature.getId());
         this.addGeoJSONTab(fGeoJson);
         this.addGeometriesTab(feature.getGeometry());
@@ -234,6 +234,8 @@ export default {
         document.getElementById("mainProperties").style.display = "block";
 
         // Retrieve datas from Form Edit Properties
+        var form = document.getElementsByName("form-edit-properties")[0];
+        form.removeEventListener('submit', this.handleSubmit);
         form.addEventListener('submit', this.handleSubmit, false);
     },
 

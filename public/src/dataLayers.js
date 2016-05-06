@@ -154,6 +154,8 @@ export default {
             if (!err) {
                 // Setting of Kuzzle Document Identifier to identifier of the feature
                 newFeature.setId(resp.id);
+                // TODO : newFeature and fDatasGeoJson are no matching !!
+                olMap.showFeaturesInformations(newFeature, false);
             } else {
                 console.log(err.message)
             }
@@ -191,6 +193,7 @@ export default {
                     var parser = new ol.format.GeoJSON();
                     var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
+                    // If Document is not in the subscribe zone
                     if ('Point' == feature.getGeometry().getType()) {
                         if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
                             olMap.getSelectedLayer().getSource().removeFeature(feature);
@@ -231,7 +234,19 @@ export default {
                 if (err) {
                     console.error(err.message);
                 } else {
-                    console.log(res);
+
+                    // If Document is not in the subscribe zone
+                    if ('Point' == feature.getGeometry().getType()) {
+                        if (false == olMap.isPointInZoneSubscribe(featureGeoJSON)) {
+                            olMap.showFeaturesInformations(feature, false);
+                        }
+                    } else {
+                        var centroidPt = olMap.getFeatureCentroid(featureGeoJSON);
+                        if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
+                            olMap.showFeaturesInformations(feature, false);
+                        }
+                    }
+
                 }
             });
 
@@ -260,6 +275,7 @@ export default {
                 if (err) {
                     console.error(err.message);
                 } else {
+                    console.log("Suppression de Kuzzle OK");
                     var parser = new ol.format.GeoJSON();
                     var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
@@ -315,26 +331,27 @@ export default {
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 var kDoc = this.loadDataById(resp.result._id);
-
+                console.log(resp.scope);
+                console.log(resp.action);
                 if ('in' == resp.scope) {
                     this_.action = resp.action;
                     kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, (err, resp) => {
                         var f = new ol.format.GeoJSON();
-                        var newFeature = f.readFeature(resp.content, {featureProjection: Projection.projectionFrom});
-                        newFeature.setId(kDoc.id);
 
                         if ("update" == this_.action) {
                             var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                             olMap.getSelectedLayer().getSource().removeFeature(featureDel);
                         }
+
+                        var newFeature = f.readFeature(resp.content, {featureProjection: Projection.projectionFrom});
+                        if (undefined == newFeature.getId()) {
+                            newFeature.setId(kDoc.id);
+                        }
+
                         olMap.getSelectedLayer().getSource().addFeature(newFeature);
 
-                        olMap.addPropertiesTab(newFeature.getProperties());
-                        var newFeatureGeoJson = f.writeFeatureObject(newFeature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom})
-                        olMap.addGeoJSONTab(newFeatureGeoJson);
-                        if ("update" == this_.action) {
-                            olMap.addGeometriesTab(newFeature.getGeometry());
-                        }
+                        olMap.showFeaturesInformations(newFeature, false);
+
                         document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been " +  this_.action + "d in Kuzzle in your subscribe area.";
                         $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                     });
@@ -344,7 +361,6 @@ export default {
                  * Suppression
                  */
                 } else if ('out' == resp.scope) {
-                    console.log("delete " + kDoc.id);
                     var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
 
@@ -369,6 +385,7 @@ export default {
         if (null != olMap.getSelectedLayer()) {
 
             var layer = olMap.getSelectedLayer().get('title');
+            var coordonatesWGS84 = olMap.geolocation.getPosition();
             //var collMapping = this.state.dataProperties;
             //var filterMapping = Object.keys(collMapping).map(field => {
             //    var filterOr = {
@@ -378,27 +395,64 @@ export default {
             //    filterOr.term['properties.'+field] = searchItem;
             //    return filterOr;
             //});
+            //or: filterMapping
 
-            var filter = {
+            // Filter search on name of items with a geoDistance filter
+            var filterSearch =
+            {
                 filter: {
-                    prefix: {
-                        "properties.name": searchItem
-                    }
-                    //or: filterMapping
+                    and: [
+                        {
+                            prefix: {
+                                "properties.name": searchItem
+                            }
+                        },
+                        {
+                            geo_distance: {
+                                distance: 10000,
+                                location: {
+                                    lon: coordonatesWGS84[0], lat: coordonatesWGS84[1]
+                                }
+                            }
+                        }
+                    ]
                 }
+
+                /*bool: {
+                    must: [
+                        {
+                            prefix: {
+                                "properties.name": searchItem
+                            }
+                        },
+                        {
+                            geoDistance: {
+                                distance: 10000,
+                                location: {
+                                    lon: coordonatesWGS84[0],
+                                    lat: coordonatesWGS84[1]
+                                }
+                            }
+                        }
+                    ],
+                    'must_not': [
+
+                    ],
+                    should: [
+
+                    ]
+                }*/
             };
 
-            kuzzle.dataCollectionFactory(layer).advancedSearch(filter, (err, resp) => {
+            kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearch, (err, resp) => {
                 if(!err) {
                     if (1 > resp.total) {
                         document.getElementById('msgWarnKuzzle').innerHTML = "No document find, retry with another term.";
                         $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
                     } else {
-                        var respAutoComplete = new Object();
-                        respAutoComplete = resp.documents.map(kDoc => {
+                        var respAutoComplete = resp.documents.map(kDoc => {
                             return {
                                 id: kDoc.id,
-                                //value: kDoc.id,
                                 label: kDoc.content.properties.name
                             }
                         });
