@@ -329,7 +329,7 @@ export default {
             state: 'done'
         };
 
-        console.log(JSON.stringify(filter, null, '\t'));
+        //console.log(JSON.stringify(filter, null, '\t'));
 
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
