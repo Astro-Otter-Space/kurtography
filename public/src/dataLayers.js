@@ -303,14 +303,15 @@ export default {
      * @param currentPosition
      * @param int distance : distance of radius in meters (default unity)
      */
-    subscribeCollection(layer, coordonatesWGS84, distance = 10000)
+    subscribeCollection(layer, coordonatesWGS84, distance)
     {
         var this_ = this;
         if (subscription) {
             subscription.unsubscribe();
         }
 
-        var filter = {
+        var filter =
+        {
             geoDistance: {
                 distance: distance,
                 location: {
@@ -327,6 +328,8 @@ export default {
             // We want only messages once they are stored (and volatile are always done)
             state: 'done'
         };
+
+        console.log(JSON.stringify(filter, null, '\t'));
 
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
@@ -398,7 +401,8 @@ export default {
             //or: filterMapping
 
             // Filter search on name of items with a geoDistance filter
-            var filterSearch =
+            // TEST AVEC FILTER AND
+            var filterSearchAND =
             {
                 filter: {
                     and: [
@@ -411,40 +415,64 @@ export default {
                             geo_distance: {
                                 distance: 10000,
                                 location: {
-                                    lon: coordonatesWGS84[0], lat: coordonatesWGS84[1]
+                                    lat: coordonatesWGS84[1],
+                                    lon: coordonatesWGS84[0]
                                 }
                             }
                         }
                     ]
                 }
+            };
 
-                /*bool: {
-                    must: [
+            // TEST AVEC QUERY + FILTER : https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-geo-distance-filter.html
+            var filterSearchQF =
+            {
+                query: {
+                    prefix: {
+                        "properties.name": searchItem
+                    }
+                },
+                filter: {
+                    geo_distance: {
+                        distance: 10,
+                        location: {
+                            lat: coordonatesWGS84[1],
+                            lon: coordonatesWGS84[0]
+                        }
+                    }
+                }
+            };
+
+            // TEST AVEC BOOL MUST
+            var filterSearchBM =
+            {
+                bool: {
+                    should: [
                         {
                             prefix: {
                                 "properties.name": searchItem
                             }
                         },
                         {
-                            geoDistance: {
+                            geo_distance: {
                                 distance: 10000,
                                 location: {
-                                    lon: coordonatesWGS84[0],
-                                    lat: coordonatesWGS84[1]
+                                    lat: coordonatesWGS84[1],
+                                    lon: coordonatesWGS84[0]
+
                                 }
                             }
                         }
-                    ],
-                    'must_not': [
-
-                    ],
-                    should: [
-
                     ]
-                }*/
+                }
             };
 
-            kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearch, (err, resp) => {
+            //console.log(JSON.stringify(filterSearchAND, null, '\t'));
+            //console.log(JSON.stringify(filterSearchQF, null, '\t'));
+            //console.log(JSON.stringify({"filtered": filterSearchQF}, null, '\t'));
+            //console.log(JSON.stringify(filterSearchBM, null, '\t'));
+
+            kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearchBM, (err, resp) => {
                 if(!err) {
                     if (1 > resp.total) {
                         document.getElementById('msgWarnKuzzle').innerHTML = "No document find, retry with another term.";
@@ -470,6 +498,7 @@ export default {
             $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
         }
     },
+
 
     /**
      * Bridge between kuzzle search result and Map datas

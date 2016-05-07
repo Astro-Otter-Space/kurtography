@@ -2,6 +2,7 @@ import Projection from '../services/projections'
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
+import SubscribeZone from './ol3-subscribeRoom'
 import ControlDrawButtons from './ol3-controldrawbuttons'
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
@@ -18,13 +19,13 @@ export default {
         projectionFrom: Projection.projectionFrom,
         projectionTo: Projection.projectionTo,
         osm: null,
-        distance: null,
+        distance: 10000,
         zoneSubscriptionLayer: null,
-        zoneSubscriptionGeom: null,
         view: null,
         zoom: null,
         buttonsDrawControls: null,
         layerSwitcher: null,
+        subscribeZoneCtrl: null,
         groupKuzzleLayers:null,
         featureForm: null,
         selectedLayer: null,
@@ -116,9 +117,7 @@ export default {
             this_.state.view.setCenter(pointCenter);
 
             if (undefined != this.getSelectedLayer) {
-                console.log("Modification of subscribe zone");
-                this_.createZoneSubscription(10000);
-                dataLayers.subscribeCollection(this_.getSelectedLayer(), this_.geolocation.getPosition(), 10000);
+                this_.createZoneSubscription(this.state.distance);
             }
 
         });
@@ -170,6 +169,14 @@ export default {
         this.state.layerSwitcher = new ol.control.LayerSwitcher();
         this.state.map.addControl(this.state.layerSwitcher);
 
+        // Adding subscribe zone control
+        var optionsEditLayer = {
+            defaultUnit: 'm',
+            distance: this.state.distance
+        }
+        this.state.subscribeZoneCtrl = new ol.control.SubscribeZone(optionsEditLayer);
+        this.state.map.addControl(this.state.subscribeZoneCtrl);
+
         // Adding draw controls
         var optionsControlDraw = {
             "style_buttons" : null,
@@ -196,12 +203,15 @@ export default {
                         this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                     }
                     // Creation couche zone subscribe
-                    this_.createZoneSubscription(10000);
-                    dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), 10000);
-                    dataLayers.loadDatasFromCollection(lyr.get('title'));
+                    this_.createZoneSubscription(this_.state.distance);
+                    //dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), this_.state.distance);
 
-                    // Mapping
+                    // Load datas and Mapping
+                    dataLayers.loadDatasFromCollection(lyr.get('title'));
                     dataLayers.getPropertiesMapping(lyr.get('title'));
+
+                    // Add form edit subscribe room
+                    document.getElementById("mainRoom").style.display = "block";
 
                     // Not sure if correct but it's working :|
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);
@@ -227,6 +237,7 @@ export default {
             this.setCenterFeature(feature.getId());
         }
 
+        //this.addSubscribeRoomTab();
         this.addPropertiesTab(fProperties, feature.getId());
         this.addGeoJSONTab(fGeoJson);
         this.addGeometriesTab(feature.getGeometry());
@@ -287,7 +298,8 @@ export default {
         // Ajout de la couche
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
 
-        // TODO Adding edit interaction
+        // Rebuild the subscribe zone
+        dataLayers.subscribeCollection(this.getSelectedLayer(), this.geolocation.getPosition(), this.state.distance);
     },
 
     /**

@@ -117,7 +117,7 @@ body { overflow: hidden; padding-top: 50px; }
     cursor: pointer;
 }
 
-#mainProperties{
+#mainProperties, #mainRoom{
     display: none;
 }
 
@@ -182,4 +182,14 @@ body { overflow: hidden; padding-top: 50px; }
     -webkit-border-radius: 0px;
     -moz-border-radius: 0px;
     background-image: none;
+}
+
+/*.my-group .form-control{*/
+    /*width:50%;*/
+/*}*/
+#zoneUnit{
+    width: 30%;
+}
+#zoneRadius{
+    width: 70%;
 }
