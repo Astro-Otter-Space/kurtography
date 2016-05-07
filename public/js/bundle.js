@@ -71487,7 +71487,6 @@ _openlayers2.default.control.SubscribeZone.prototype.renderPanel = function () {
 
         if (undefined != _openlayers4.default.state.zoneSubscriptionLayer) {
             var distance = evt.target.value;
-            console.log('Unity change slider : ' + this_.unity);
             var newDistance = 'km' == this_.unity ? distance * 1000 : distance;
             var lblDistance = distance + ' ' + this_.unity;
 
