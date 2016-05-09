@@ -16,7 +16,7 @@ $(function(){
                 response(dataLayers.state.rstAdvancedSearch);
             }
         },
-        minLength: 3,
+        minLength: 2,
         open: function(event, ui) {
             $(".ui-autocomplete").css("z-index", 10000);
         },
@@ -27,22 +27,12 @@ $(function(){
     });
 });
 
-
-
 /**
  * Initialisation Bootstrap
  */
 import initBootstrap from './public/src/init-bootstrap';
 import 'bootstrap-toggle';
 $(function(){
-//    jQuery('.sidebar-right .slide-submenu').on('click',function() {
-//        var thisEl = jQuery(this);
-//        thisEl.closest('.sidebar-body').fadeOut('slide',function(){
-//            jQuery('.mini-submenu-right').fadeIn();
-//            initBootstrap.applyMargins();
-//        });
-//    });
-
     $('.mini-submenu-right').on('click',function() {
         var thisEl = jQuery(this);
         jQuery('.sidebar-right .sidebar-body').toggle('slide');
@@ -51,12 +41,7 @@ $(function(){
     });
 
     $(window).on("resize", initBootstrap.applyMargins);
-
     initBootstrap.applyInitialUIState();
-    //jQuery('.sidebar-right .slide-submenu').closest('.sidebar-body').fadeOut('slide',function(){
-    //    jQuery('.mini-submenu-right').fadeIn();
-    //    initBootstrap.applyMargins();
-    //});
 
     $('#toggle-properties').bootstrapToggle({
         on: 'Read',
@@ -80,4 +65,3 @@ $(function(){
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
-

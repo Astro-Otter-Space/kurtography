@@ -26,7 +26,7 @@ $(function () {
                 response(_dataLayers2.default.state.rstAdvancedSearch);
             }
         },
-        minLength: 3,
+        minLength: 2,
         open: function open(event, ui) {
             $(".ui-autocomplete").css("z-index", 10000);
         },
@@ -37,7 +37,6 @@ $(function () {
 });
 
 $(function () {
-
     $('.mini-submenu-right').on('click', function () {
         var thisEl = jQuery(this);
         jQuery('.sidebar-right .sidebar-body').toggle('slide');
@@ -46,9 +45,7 @@ $(function () {
     });
 
     $(window).on("resize", _initBootstrap2.default.applyMargins);
-
     _initBootstrap2.default.applyInitialUIState();
-
 
     $('#toggle-properties').bootstrapToggle({
         on: 'Read',
@@ -70271,7 +70268,6 @@ exports.default = {
                 this_.state.collections = collections.stored.map(function (layer) {
                     return layer;
                 });
-
                 _openlayers4.default.initMap(13);
             } else {
                 console.error(err.message);
@@ -70352,6 +70348,7 @@ exports.default = {
                 lat: fCentroid.geometry.coordinates[1]
             };
         }
+
         _kuzzle2.default.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
             if (!err) {
                 newFeature.setId(resp.id);
@@ -70373,7 +70370,6 @@ exports.default = {
                     lat: fDatasGeoJson.geometry.coordinates[1]
                 };
             } else if ('LineString' == feature.getGeometry().getType() || 'Polygon' == feature.getGeometry().getType()) {
-
                 var fCentroid = _openlayers4.default.getFeatureCentroid(fDatasGeoJson);
                 fDatasGeoJson.location = {
                     lon: fCentroid.geometry.coordinates[0],
@@ -70463,7 +70459,7 @@ exports.default = {
             });
         }
     },
-    subscribeCollection: function subscribeCollection(layer, coordonatesWGS84, distance) {
+    subscribeCollection: function subscribeCollection(layer, coordonatesWGS84) {
         var _this = this;
 
         var this_ = this;
@@ -70473,7 +70469,7 @@ exports.default = {
 
         var filter = {
             geoDistance: {
-                distance: distance,
+                distance: _openlayers4.default.state.distance,
                 location: {
                     lon: coordonatesWGS84[0],
                     lat: coordonatesWGS84[1]
@@ -70535,61 +70531,27 @@ exports.default = {
             var layer = _openlayers4.default.getSelectedLayer().get('title');
             var coordonatesWGS84 = _openlayers4.default.geolocation.getPosition();
 
-            var filterSearchAND = {
+            var filterSearch = {
                 filter: {
-                    and: [{
-                        prefix: {
-                            "properties.name": searchItem
+                    geo_distance: {
+                        distance: _openlayers4.default.state.distance,
+                        location: {
+                            lon: coordonatesWGS84[0],
+                            lat: coordonatesWGS84[1]
                         }
-                    }, {
-                        geo_distance: {
-                            distance: 10000,
-                            location: {
-                                lat: coordonatesWGS84[1],
-                                lon: coordonatesWGS84[0]
-                            }
-                        }
-                    }]
-                }
-            };
-
-            var filterSearchQF = {
+                    }
+                },
                 query: {
                     prefix: {
                         "properties.name": searchItem
                     }
                 },
-                filter: {
-                    geo_distance: {
-                        distance: 10,
-                        location: {
-                            lat: coordonatesWGS84[1],
-                            lon: coordonatesWGS84[0]
-                        }
-                    }
-                }
+                sort: ['properties.name'],
+                from: 0,
+                size: 10
             };
 
-            var filterSearchBM = {
-                bool: {
-                    should: [{
-                        prefix: {
-                            "properties.name": searchItem
-                        }
-                    }, {
-                        geo_distance: {
-                            distance: 10000,
-                            location: {
-                                lat: coordonatesWGS84[1],
-                                lon: coordonatesWGS84[0]
-
-                            }
-                        }
-                    }]
-                }
-            };
-
-            _kuzzle2.default.dataCollectionFactory(layer).advancedSearch(filterSearchBM, function (err, resp) {
+            _kuzzle2.default.dataCollectionFactory(layer).advancedSearch(filterSearch, function (err, resp) {
                 if (!err) {
                     if (1 > resp.total) {
                         document.getElementById('msgWarnKuzzle').innerHTML = "No document find, retry with another term.";
