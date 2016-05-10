@@ -261,13 +261,12 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
         if (undefined != this.element) {
 
             // Ajout new document in Kuzzle
-            dataLayers.addDocument(featureGeoJSON, feature);
+            dataLayers.addDocument(featureGeoJSON, feature.getGeometry().getType());
         } else {
             console.error("Problem create new feature");
         }
     }
 };
-
 
 
 /**

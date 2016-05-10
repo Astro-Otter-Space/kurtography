@@ -129,21 +129,21 @@ export default {
          */
         var handleSubmit = this.handleSubmit = function(e) {
             e.preventDefault();
-            var featureForm = this_.state.featureForm;
+            //var featureForm = this_.state.featureForm;
             var objPropertiesFeature = new Object();
             Array.from(e.target.elements).forEach(element => {
                 if ("text" == element.type && "undefined" != element.type) {
                     objPropertiesFeature[element.name] = element.value;
                 }
             });
-            console.log("Lancement sauvegarde de " + featureForm.getId());
-            dataLayers.updatePropertiesDocument(featureForm, objPropertiesFeature);
+            dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
             jQuery('#toggle-properties').bootstrapToggle('off');
             return false;
         };
 
         // Show feature data + listener
         this.state.map.on('click', function(evt) {
+            // When we select a feature, it's become the featureForm
             var feature = this_.state.featureForm = this_.state.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
                     return feature;
@@ -173,7 +173,7 @@ export default {
         var optionsEditLayer = {
             defaultUnit: 'm',
             distance: this.state.distance
-        }
+        };
         this.state.subscribeZoneCtrl = new ol.control.SubscribeZone(optionsEditLayer);
         this.state.map.addControl(this.state.subscribeZoneCtrl);
 
@@ -238,7 +238,7 @@ export default {
         }
 
         //this.addSubscribeRoomTab();
-        this.addPropertiesTab(fProperties, feature.getId());
+        this.addPropertiesTab(fProperties);
         this.addGeoJSONTab(fGeoJson);
         this.addGeometriesTab(feature.getGeometry());
 

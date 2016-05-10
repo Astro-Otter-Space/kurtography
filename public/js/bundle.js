@@ -70329,18 +70329,18 @@ exports.default = {
             }
         });
     },
-    addDocument: function addDocument(fDatasGeoJson, newFeature) {
+    addDocument: function addDocument(fDatasGeoJson, typeFeature) {
         var this_ = this;
         var layer = _openlayers4.default.getSelectedLayer().get('title');
 
         fDatasGeoJson.properties = this.state.dataProperties;
 
-        if ('Point' == newFeature.getGeometry().getType()) {
+        if ('Point' == typeFeature) {
             fDatasGeoJson.location = {
                 lon: fDatasGeoJson.geometry.coordinates[0],
                 lat: fDatasGeoJson.geometry.coordinates[1]
             };
-        } else if ('LineString' == newFeature.getGeometry().getType() || 'Polygon' == newFeature.getGeometry().getType()) {
+        } else if ('LineString' == typeFeature || 'Polygon' == typeFeature) {
 
             var fCentroid = _openlayers4.default.getFeatureCentroid(fDatasGeoJson);
             fDatasGeoJson.location = {
@@ -70351,9 +70351,23 @@ exports.default = {
 
         _kuzzle2.default.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
             if (!err) {
+                var f = new _openlayers2.default.format.GeoJSON();
+                var newFeature = f.readFeature(fDatasGeoJson, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
                 newFeature.setId(resp.id);
                 _openlayers4.default.state.featureForm = newFeature;
-                _openlayers4.default.showFeaturesInformations(newFeature, false);
+
+                if ('Point' == typeFeature) {
+                    if (false == _openlayers4.default.isPointInZoneSubscribe(fDatasGeoJson)) {
+                        _openlayers4.default.getSelectedLayer().getSource().addFeature(newFeature);
+                    }
+                } else {
+                    var centroidPt = _openlayers4.default.getFeatureCentroid(fDatasGeoJson);
+                    if (false == _openlayers4.default.isPointInZoneSubscribe(centroidPt)) {
+                        _openlayers4.default.getSelectedLayer().getSource().addFeature(newFeature);
+                    }
+                }
+
+                _openlayers4.default.showFeaturesInformations(newFeature, true);
             } else {
                 console.log(err.message);
             }
@@ -70396,6 +70410,10 @@ exports.default = {
                             _openlayers4.default.getSelectedLayer().getSource().addFeature(feature);
                         }
                     }
+
+                    var updFeature = parser.readFeature(fDatasGeoJson, { featureProjection: _projections2.default.projectionFrom });
+                    _openlayers4.default.state.featureForm = updFeature;
+                    _openlayers4.default.showFeaturesInformations(updFeature, true);
                 }
             });
         } else {
@@ -70424,6 +70442,9 @@ exports.default = {
                             _openlayers4.default.showFeaturesInformations(feature, false);
                         }
                     }
+                    var updFeature = parser.readFeature(featureGeoJSON, { featureProjection: _projections2.default.projectionFrom });
+                    _openlayers4.default.state.featureForm = updFeature;
+                    _openlayers4.default.showFeaturesInformations(updFeature, true);
                 }
             });
         } else {
@@ -71004,7 +71025,7 @@ _openlayers2.default.control.ControlDrawButtons.prototype.drawEndFeature = funct
             var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
 
             if (undefined != this.element) {
-                _dataLayers2.default.addDocument(featureGeoJSON, feature);
+                _dataLayers2.default.addDocument(featureGeoJSON, feature.getGeometry().getType());
             } else {
                 console.error("Problem create new feature");
             }
@@ -71613,15 +71634,14 @@ exports.default = {
 
         var handleSubmit = this.handleSubmit = function (e) {
             e.preventDefault();
-            var featureForm = this_.state.featureForm;
+
             var objPropertiesFeature = new Object();
             (0, _from2.default)(e.target.elements).forEach(function (element) {
                 if ("text" == element.type && "undefined" != element.type) {
                     objPropertiesFeature[element.name] = element.value;
                 }
             });
-            console.log("Lancement sauvegarde de " + featureForm.getId());
-            _dataLayers2.default.updatePropertiesDocument(featureForm, objPropertiesFeature);
+            _dataLayers2.default.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
             jQuery('#toggle-properties').bootstrapToggle('off');
             return false;
         };
@@ -71698,7 +71718,7 @@ exports.default = {
             this.setCenterFeature(feature.getId());
         }
 
-        this.addPropertiesTab(fProperties, feature.getId());
+        this.addPropertiesTab(fProperties);
         this.addGeoJSONTab(fGeoJson);
         this.addGeometriesTab(feature.getGeometry());
 

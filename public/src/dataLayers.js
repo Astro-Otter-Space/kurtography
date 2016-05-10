@@ -127,7 +127,7 @@ export default {
      * @param datas
      * @param newFeature
      */
-    addDocument(fDatasGeoJson, newFeature)
+    addDocument(fDatasGeoJson, typeFeature)
     {
         var this_ = this;
         var layer = olMap.getSelectedLayer().get('title');
@@ -136,12 +136,12 @@ export default {
 
         // Create location point for subscribe zone
         // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
-        if ('Point' == newFeature.getGeometry().getType()) {
+        if ('Point' == typeFeature) {
             fDatasGeoJson.location = {
                 lon: fDatasGeoJson.geometry.coordinates[0],
                 lat : fDatasGeoJson.geometry.coordinates[1]
             };
-        } else if ('LineString' == newFeature.getGeometry().getType() || ('Polygon' == newFeature.getGeometry().getType())) {
+        } else if ('LineString' == typeFeature || 'Polygon' == typeFeature) {
 
             var fCentroid = olMap.getFeatureCentroid(fDatasGeoJson);
             fDatasGeoJson.location = {
@@ -153,9 +153,24 @@ export default {
         kuzzle.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
             if (!err) {
                 // Setting of Kuzzle Document Identifier to identifier of the feature
+                var f = new ol.format.GeoJSON();
+                var newFeature = f.readFeature(fDatasGeoJson, {dataProjection:Projection.projectionTo, featureProjection: Projection.projectionFrom});
                 newFeature.setId(resp.id);
                 olMap.state.featureForm = newFeature;
-                olMap.showFeaturesInformations(newFeature, false);
+
+
+                if ('Point' == typeFeature) {
+                    if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
+                        olMap.getSelectedLayer().getSource().addFeature(newFeature);
+                    }
+                } else {
+                    var centroidPt = olMap.getFeatureCentroid(fDatasGeoJson);
+                    if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
+                        olMap.getSelectedLayer().getSource().addFeature(newFeature);
+                    }
+                }
+
+                olMap.showFeaturesInformations(newFeature, true);
             } else {
                 console.log(err.message)
             }
@@ -205,6 +220,10 @@ export default {
                             olMap.getSelectedLayer().getSource().addFeature(feature);
                         }
                     }
+
+                    var updFeature = parser.readFeature(fDatasGeoJson, {featureProjection: Projection.projectionFrom});
+                    olMap.state.featureForm = updFeature;
+                    olMap.showFeaturesInformations(updFeature, true);
                 }
             });
 
@@ -245,7 +264,9 @@ export default {
                             olMap.showFeaturesInformations(feature, false);
                         }
                     }
-
+                    var updFeature = parser.readFeature(featureGeoJSON, {featureProjection: Projection.projectionFrom});
+                    olMap.state.featureForm = updFeature;
+                    olMap.showFeaturesInformations(updFeature, true);
                 }
             });
 
@@ -350,6 +371,7 @@ export default {
 
                         olMap.getSelectedLayer().getSource().addFeature(newFeature);
 
+                        // Utile ? permet de voir les infos de la nouvelle feature
                         olMap.showFeaturesInformations(newFeature, false);
 
                         document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been " +  this_.action + "d in Kuzzle in your subscribe area.";
@@ -419,28 +441,6 @@ export default {
                 from: 0,
                 size: 10
             };
-
-            //var filterSearchAS =
-            //{
-            //    query: {
-            //        filtered: {
-            //            filter: {
-            //                geo_distance: {
-            //                    distance: 10000,
-            //                    location: {
-            //                        lat: coordonatesWGS84[1],
-            //                        lon: coordonatesWGS84[0]
-            //                    }
-            //                }
-            //            },
-            //            query: {
-            //                prefix: {
-            //                    "properties.name": searchItem
-            //                }
-            //            }
-            //        }
-            //    }
-            //};
 
             kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearch, (err, resp) => {
                 if(!err) {
