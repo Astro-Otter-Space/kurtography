@@ -70490,7 +70490,7 @@ exports.default = {
 
         var filter = {
             geoDistance: {
-                distance: _openlayers4.default.state.distance,
+                distance: _openlayers4.default.state.distance + "m",
                 location: {
                     lon: coordonatesWGS84[0],
                     lat: coordonatesWGS84[1]
@@ -70555,7 +70555,7 @@ exports.default = {
             var filterSearch = {
                 filter: {
                     geo_distance: {
-                        distance: _openlayers4.default.state.distance,
+                        distance: _openlayers4.default.state.distance + "m",
                         location: {
                             lon: coordonatesWGS84[0],
                             lat: coordonatesWGS84[1]
@@ -70567,11 +70567,19 @@ exports.default = {
                         "properties.name": searchItem
                     }
                 },
-                sort: ['properties.name'],
+                sort: [{
+                    "_geo_distance": {
+                        "location": {
+                            lon: coordonatesWGS84[0],
+                            lat: coordonatesWGS84[1]
+                        },
+                        "order": "asc",
+                        "unit": "m"
+                    }
+                }],
                 from: 0,
                 size: 10
             };
-
             _kuzzle2.default.dataCollectionFactory(layer).advancedSearch(filterSearch, function (err, resp) {
                 if (!err) {
                     if (1 > resp.total) {

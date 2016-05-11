@@ -333,7 +333,7 @@ export default {
         var filter =
         {
             geoDistance: {
-                distance: olMap.state.distance,
+                distance: olMap.state.distance + "m",
                 location: {
                     lon: coordonatesWGS84[0],
                     lat: coordonatesWGS84[1]
@@ -419,13 +419,12 @@ export default {
             //});
             //or: filterMapping
 
-            // Filter search on name of items with a geoDistance filter
-            // TEST AVEC FILTER AND
+            // Filter search on name of items with a geoDistance filter, sorting by geodistance asc
             var filterSearch =
             {
                 filter: {
                     geo_distance: {
-                        distance: olMap.state.distance,
+                        distance: olMap.state.distance + "m",
                         location: {
                             lon: coordonatesWGS84[0],
                             lat: coordonatesWGS84[1]
@@ -437,11 +436,21 @@ export default {
                         "properties.name": searchItem
                     }
                 },
-                sort: ['properties.name'],
+                sort: [
+                    {
+                        "_geo_distance" : {
+                            "location" : {
+                                lon: coordonatesWGS84[0],
+                                lat: coordonatesWGS84[1]
+                            },
+                            "order"    : "asc",
+                            "unit"     : "m"
+                        }
+                    }
+                ],
                 from: 0,
                 size: 10
             };
-
             kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearch, (err, resp) => {
                 if(!err) {
                     if (1 > resp.total) {

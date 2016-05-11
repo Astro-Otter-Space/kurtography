@@ -118,15 +118,20 @@ Features
   - Create a reference point (for polygons an lines, the reference point is the centroid) for the subscribe room
   - Subscribe room : zone from geolocation with 10km radius
   - Search items
+  - Search only in subscribe area
+  - Edit subscribe zone by changing radius
 
 Features in progress
 -------------
-  - Search only in subscribe area
-  - Edit subscribe zone by changing radius
+  - Fix on geo_distance precision
 
 Features will be avalaible soon:
 -------------
   - Change of subscribe zone by geolocalisation
+  - Export datas
+  - Register user
+  - Authentification
+  - Filtering features by user authorisation
   - Design refactoring with Material-Ui and React
 
 Author(s)
