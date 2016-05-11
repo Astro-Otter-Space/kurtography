@@ -123,7 +123,7 @@ export default {
         });
 
         /**
-         * Callback on submit
+         * Feature editing : Callback on submit
          * @param e
          * @returns {boolean}
          */
@@ -215,6 +215,9 @@ export default {
 
                     // Not sure if correct but it's working :|
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);
+
+                    // Set the export links
+                    this_.editExportLinks();
                 }
             });
         });
@@ -500,6 +503,37 @@ export default {
 
         tabG.appendChild(tbody);
         return tabG;
+    },
+
+    editExportLinks()
+    {
+        var links = document.getElementsByClassName('export');
+        Array.filter(links, link => {
+
+            var serialized = ""; // "?";
+            var tabParams = {
+                type: link.dataset.type,
+                layer: this.getSelectedLayer().get('title')
+            };
+
+            var serialiseObject = function(obj) {
+                var pairs = [];
+                for (var prop in obj) {
+                    if (!obj.hasOwnProperty(prop)) {
+                        continue;
+                    }
+                    //pairs.push(prop + '=' + encodeURIComponent(obj[prop]));
+                    pairs.push('/' + encodeURIComponent(obj[prop]));
+                }
+                return pairs.join(''); //('&');
+            };
+
+            serialized += serialiseObject(tabParams);
+            link.href += serialized;
+            link.setAttribute('disabled', false)
+            console.log(serialized);
+        });
+
     },
 
     /**

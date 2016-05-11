@@ -18,15 +18,15 @@ nav.navbar.navbar-inverse.navbar-fixed-top
                         span.caret
                     ul.dropdown-menu
                         li
-                            a(href="/export?type=geojson", disabled) GeoJSON
+                            a(href="/export", data-type='geojson', disabled) GeoJSON
                         li
-                            a(href="/export?type=csv", disabled) CSV
+                            a(href="/export", data-type='csv', disabled) CSV
                         li
-                            a(href="/export?type=kml", disabled) KML
+                            a(href="/export", data-type='gml', disabled) GML
                         li
-                            a(href="/export?type=wkt", disabled) WKT
+                            a(href="/export", data-type='mapinfo', disabled) MapInfo
                         li
-                            a(href="/export?type=shape", disabled) Shapefile
+                            a(href="/export", data-type='shape', disabled) Shapefile
             form.navbar-form.navbar-right(name='formSearch', role='search')
                 .form-group
                     input.form-control(type='text', name="search", placeholder='Search')

@@ -37,11 +37,12 @@
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Export <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="/export?type=geojson" disabled>GeoJSON</a></li>
-                                    <li><a href="/export?type=csv" disabled>CSV</a></li>
-                                    <li><a href="/export?type=kml" disabled>KML</a></li>
-                                    <li><a href="/export?type=wkt" disabled>WKT</a></li>
-                                    <li><a href="/export?type=shape" disabled>Shapefile</a></li>
+                                    <li><a class="export" href="/export" data-type="geojson" disabled>GeoJSON</a></li>
+                                    <li><a class="export" href="/export" data-type="csv" disabled>CSV</a></li>
+                                    <li><a class="export" href="/export" data-type="gml" disabled>GML</a></li>
+                                    <li><a class="export" href="/export" data-type="mapinfo" disabled>Map Info</a></li>
+                                    <!--<li><a class="export" href="/export" data-type="wkt" disabled>WKT</a></li>-->
+                                    <li><a class="export" href="/export" data-type="shape" disabled>Shapefile</a></li>
                                     <!--<li role="separator" class="divider"></li>-->
                                     <!--<li><a href="#">Separated link</a></li>-->
                                 </ul>

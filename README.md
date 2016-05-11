@@ -8,13 +8,13 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.6.8
+Beta stage of development : v. 0.7.0
 
 Requirements
 -------------
  - [NodeJS and NPM](https://nodejs.org/en/)
  - [A Kuzzle instance](http://kuzzle.io/guide/), [installation](https://github.com/kuzzleio/kuzzle#installation)
-
+ - If exports, install [GDAL/OGR Binaries](http://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries), [ogr2ogr](https://www.npmjs.com/package/ogr2ogr)
 
 Installation
 -------------
@@ -124,11 +124,11 @@ Features
 Features in progress
 -------------
   - Fix on geo_distance precision
+  - Export datas
 
 Features will be avalaible soon:
 -------------
   - Change of subscribe zone by geolocalisation
-  - Export datas
   - Register user
   - Authentification
   - Filtering features by user authorisation
