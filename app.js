@@ -28,7 +28,7 @@ app.use(express.static(__dirname + '/node_modules'));
 // Main page
 app.get('/', function(req, res) {
     res.header("Access-Control-Allow-Origin", "http://localhost:7511");
-    res.render('pages/map', {
+    res.render('pages/map-ui', {
         title: 'Kurtography - webmapping application supported by Kuzzle'
     });
 

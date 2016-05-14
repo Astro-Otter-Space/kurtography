@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "beefy app-map.js:bundle.js --live",
-    "bundle": "browserify -e app-map.js -o ./public/js/bundle.js",
+    "build-map": "browserify -e app-map.js -o ./public/js/bundle.js",
     "start": "node app.js"
   },
   "dependencies": {

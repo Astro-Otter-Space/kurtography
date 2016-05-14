@@ -137,7 +137,7 @@ export default {
                 }
             });
             dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
-            jQuery('#toggle-properties').bootstrapToggle('off');
+            //jQuery('#toggle-properties').bootstrapToggle('off');
             return false;
         };
 
@@ -166,16 +166,16 @@ export default {
         var this_ = this;
 
         // Adding Layer switcher
-        this.state.layerSwitcher = new ol.control.LayerSwitcher();
-        this.state.map.addControl(this.state.layerSwitcher);
+        //this.state.layerSwitcher = new ol.control.LayerSwitcher();
+        //this.state.map.addControl(this.state.layerSwitcher);
 
         // Adding subscribe zone control
         var optionsEditLayer = {
             defaultUnit: 'm',
             distance: this.state.distance
         };
-        this.state.subscribeZoneCtrl = new ol.control.SubscribeZone(optionsEditLayer);
-        this.state.map.addControl(this.state.subscribeZoneCtrl);
+        //this.state.subscribeZoneCtrl = new ol.control.SubscribeZone(optionsEditLayer);
+        //this.state.map.addControl(this.state.subscribeZoneCtrl);
 
         // Adding draw controls
         var optionsControlDraw = {
