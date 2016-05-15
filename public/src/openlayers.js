@@ -2,7 +2,7 @@ import Projection from '../services/projections'
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
-import SubscribeZone from './ol3-subscribeRoom'
+//import SubscribeZone from './ol3-subscribeRoom'
 import ControlDrawButtons from './ol3-controldrawbuttons'
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
@@ -26,7 +26,7 @@ export default {
         zoom: null,
         buttonsDrawControls: null,
         layerSwitcher: null,
-        subscribeZoneCtrl: null,
+        //subscribeZoneCtrl: null,
         groupKuzzleLayers:null,
         featureForm: null,
         selectedLayer: null,

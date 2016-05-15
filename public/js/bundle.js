@@ -13,7 +13,7 @@ String.prototype.capitalizeFirstLetter = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
-},{"./public/src/dataLayers":415}],2:[function(require,module,exports){
+},{"./public/src/dataLayers":416}],2:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/array/filter"), __esModule: true };
 },{"core-js/library/fn/array/filter":8}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/array/from"), __esModule: true };
@@ -69966,6 +69966,10 @@ var _config = require('./config');
 
 var _config2 = _interopRequireDefault(_config);
 
+var _notification = require('./notification');
+
+var _notification2 = _interopRequireDefault(_notification);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var optConnect = {
@@ -69979,14 +69983,40 @@ var optConnect = {
 
 var kuzzle = new _kuzzleSdk2.default(_config2.default.kuzzleUrl, optConnect, function (err, res) {
     if (err) {
-        console.error(err.message);
-        document.getElementById('msgDangerKuzzle').innerHTML = "Can't connect to Kuzzle.";
-        $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+        _notification2.default.init({
+            type: 'error',
+            class: 'mdl-color--red-400',
+            message: 'Can\'t connect to Kuzzle',
+            icon: 'error'
+        });
     }
 });
 exports.default = kuzzle;
 
-},{"./config":412,"kuzzle-sdk":397}],414:[function(require,module,exports){
+},{"./config":412,"./notification":414,"kuzzle-sdk":397}],414:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = {
+    init: function init(obj) {
+        this.objConst = {
+            class: obj.class,
+            message: obj.message.toString(),
+            type: obj.type,
+            icon: obj.icon,
+            timeout: 5000,
+            actionHandler: function actionHandler(event) {},
+            actionText: 'Ok'
+        };
+
+        var snackbarContainer = document.querySelector('.mdl-js-snackbar');
+        snackbarContainer.MaterialSnackbar.showSnackbar(this.objConst);
+    }
+};
+
+},{}],415:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -69997,7 +70027,7 @@ exports.default = {
     projectionTo: 'EPSG:4326'
 };
 
-},{}],415:[function(require,module,exports){
+},{}],416:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -70019,6 +70049,10 @@ var _config2 = _interopRequireDefault(_config);
 var _projections = require('../services/projections');
 
 var _projections2 = _interopRequireDefault(_projections);
+
+var _notification = require('../services/notification');
+
+var _notification2 = _interopRequireDefault(_notification);
 
 var _openlayers = require('openlayers');
 
@@ -70069,8 +70103,12 @@ exports.default = {
                         result.push(kDoc.content);
                     });
                 } else {
-                    document.getElementById('msgWarnKuzzle').innerHTML = "There is no data for the collection " + collection;
-                    $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    _notification2.default.init({
+                        type: 'warning',
+                        class: 'mdl-color--amber-400',
+                        message: "There is no data for the collection " + collection,
+                        icon: 'warning'
+                    });
                 }
 
                 var dataGeoJSON = {
@@ -70150,11 +70188,9 @@ exports.default = {
                         _openlayers4.default.getSelectedLayer().getSource().addFeature(newFeature);
                     }
                 }
-
-                _openlayers4.default.showFeaturesInformations(newFeature, true);
             } else {
-                console.log(err.message);
-            }
+                    console.log(err.message);
+                }
         });
     },
     updateGeodatasDocument: function updateGeodatasDocument(fDatasGeoJson, feature) {
@@ -70197,12 +70233,11 @@ exports.default = {
 
                     var updFeature = parser.readFeature(fDatasGeoJson, { featureProjection: _projections2.default.projectionFrom });
                     _openlayers4.default.state.featureForm = updFeature;
-                    _openlayers4.default.showFeaturesInformations(updFeature, true);
                 }
             });
         } else {
-            console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
-        }
+                console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
+            }
     },
     updatePropertiesDocument: function updatePropertiesDocument(feature, propertiesDatas) {
         var layer = _openlayers4.default.getSelectedLayer().get('title');
@@ -70228,18 +70263,25 @@ exports.default = {
                     }
                     var updFeature = parser.readFeature(featureGeoJSON, { featureProjection: _projections2.default.projectionFrom });
                     _openlayers4.default.state.featureForm = updFeature;
-                    _openlayers4.default.showFeaturesInformations(updFeature, true);
                 }
             });
         } else {
-            document.getElementById('msgDangerKuzzle').innerHTML = "Sorry impossible to edit this kuzzle document, there is no identifier.";
-            $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
-        }
+                _notification2.default.init({
+                    type: 'error',
+                    class: 'mdl-color--red-400',
+                    message: "Sorry impossible to edit this kuzzle document, there is no identifier",
+                    icon: 'error'
+                });
+            }
     },
     deleteDocument: function deleteDocument(feature) {
         if (!feature.getId()) {
-            document.getElementById('msgDangerKuzzle').innerHTML = "Can't delete the kuzzle document.";
-            $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+            _notification2.default.init({
+                type: 'error',
+                class: 'mdl-color--red-400',
+                message: "Can't delete the kuzzle document.",
+                icon: 'error'
+            });
             return false;
         } else {
             _kuzzle2.default.dataCollectionFactory(_openlayers4.default.getSelectedLayer().get('title')).deleteDocument(feature.getId(), function (err, res) {
@@ -70311,17 +70353,23 @@ exports.default = {
 
                         _openlayers4.default.getSelectedLayer().getSource().addFeature(newFeature);
 
-                        _openlayers4.default.showFeaturesInformations(newFeature, false);
-
-                        document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been " + this_.action + "d in Kuzzle in your subscribe area.";
-                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                        _notification2.default.init({
+                            type: 'notice',
+                            class: 'mdl-color--green-400',
+                            message: "A document have been " + this_.action + "d in Kuzzle in your subscribe area.",
+                            icon: 'notice'
+                        });
                     });
                 } else if ('out' == resp.scope) {
                         var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                         _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
 
-                        document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
-                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                        _notification2.default.init({
+                            type: 'notice',
+                            class: 'mdl-color--green-400',
+                            message: "A document have been deleted from Kuzzle in your subscribe area.",
+                            icon: 'notice'
+                        });
                     }
             } else {
                 console.error(err.message);
@@ -70380,22 +70428,29 @@ exports.default = {
                     }
                 } else {
                     console.error(err);
-                    document.getElementById('msgDangerKuzzle').innerHTML = "Research error.";
-                    $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    _notification2.default.init({
+                        type: 'error',
+                        class: 'mdl-color--red-400',
+                        message: "Research error",
+                        icon: 'error'
+                    });
                 }
             });
         } else {
-            document.getElementById('msgWarnKuzzle').innerHTML = "Please, select a layer to the right.";
-            $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+            _notification2.default.init({
+                type: 'warning',
+                class: 'mdl-color--amber-400',
+                message: "Please, select a layer to the right.",
+                icon: 'warning'
+            });
         }
     },
     setCenterKuzzleDoc: function setCenterKuzzleDoc(kdocId) {
         var kFeature = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kdocId);
-        _openlayers4.default.showFeaturesInformations(kFeature);
     }
 };
 
-},{"../services/config":412,"../services/kuzzle":413,"../services/projections":414,"./openlayers":419,"babel-runtime/core-js/object/keys":5,"openlayers":407}],416:[function(require,module,exports){
+},{"../services/config":412,"../services/kuzzle":413,"../services/notification":414,"../services/projections":415,"./openlayers":419,"babel-runtime/core-js/object/keys":5,"openlayers":407}],417:[function(require,module,exports){
 'use strict';
 
 var _openlayers = require('openlayers');
@@ -70575,7 +70630,7 @@ _openlayers2.default.control.LayerSwitcher.isTouchDevice_ = function () {
     }
 };
 
-},{"openlayers":407}],417:[function(require,module,exports){
+},{"openlayers":407}],418:[function(require,module,exports){
 'use strict';
 
 var _stringify = require('babel-runtime/core-js/json/stringify');
@@ -71147,128 +71202,7 @@ var ol3buttons = {
     }
 };
 
-},{"../services/projections":414,"./dataLayers":415,"babel-runtime/core-js/json/stringify":4,"openlayers":407}],418:[function(require,module,exports){
-'use strict';
-
-var _keys = require('babel-runtime/core-js/object/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
-
-var _openlayers = require('openlayers');
-
-var _openlayers2 = _interopRequireDefault(_openlayers);
-
-var _openlayers3 = require('./openlayers');
-
-var _openlayers4 = _interopRequireDefault(_openlayers3);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-_openlayers2.default.control.SubscribeZone = function (opt_options) {
-
-    var options = this.options = opt_options || {};
-    var unity = this.unity = 'm';
-
-    var divTarget = document.getElementById("mainRoom");
-    var container = document.getElementById("subscribeZone");
-
-    this.panel = document.createElement('div');
-    this.panel.className = 'input-group form-control';
-
-    container.appendChild(this.panel);
-
-    this.renderPanel();
-    _openlayers2.default.control.Control.call(this, {
-        element: container,
-        target: divTarget
-    });
-};
-
-_openlayers2.default.inherits(_openlayers2.default.control.SubscribeZone, _openlayers2.default.control.Control);
-
-_openlayers2.default.control.SubscribeZone.prototype.renderPanel = function () {
-
-    var this_ = this;
-    var tabValues = {
-        'm': 'Meters',
-        'km': 'Kilometers'
-    };
-
-    var divNumber = document.createElement('div');
-    divNumber.className = 'input-group-btn';
-
-    var btnSelect = document.createElement('button');
-    btnSelect.type = 'button';
-    btnSelect.className = 'btn btn-default dropdown-toggle';
-    btnSelect.setAttribute("data-toggle", "dropdown");
-    btnSelect.setAttribute("aria-haspopup", "true");
-    btnSelect.setAttribute("aria-expanded", "false");
-    btnSelect.innerHTML = 'Unit <span class="caret"></span>';
-
-    var ulSelect = document.createElement('ul');
-    ulSelect.className = 'dropdown-menu';
-    ulSelect.addEventListener('click', function (e) {
-        this_.unity = e.target.dataset.id;
-        var distance = document.getElementById('zoneRadius').value;
-
-        if (undefined != _openlayers4.default.state.zoneSubscriptionLayer) {
-            var newDistance = 'km' == this_.unity ? distance * 1000 : distance;
-            var lblDistance = distance + ' ' + this_.unity;
-
-            _openlayers4.default.state.distance = parseInt(newDistance);
-            _openlayers4.default.state.map.removeLayer(_openlayers4.default.state.zoneSubscriptionLayer);
-            _openlayers4.default.createZoneSubscription(_openlayers4.default.state.distance);
-
-            document.getElementById('valueDistance').innerHTML = lblDistance;
-        }
-    }, false);
-
-    (0, _keys2.default)(tabValues).forEach(function (value, key) {
-        var li = document.createElement("li");
-        var a = document.createElement("a");
-        a.innerHTML = tabValues[value];
-        a.setAttribute('data-id', value);
-        li.appendChild(a);
-        ulSelect.appendChild(li);
-    });
-
-    divNumber.appendChild(btnSelect);
-    divNumber.appendChild(ulSelect);
-
-    var inputNumber = document.createElement('input');
-    inputNumber.type = 'range';
-    inputNumber.id = 'zoneRadius';
-    inputNumber.className = 'form-control';
-    inputNumber.min = 1;
-    inputNumber.max = 10000;
-    inputNumber.value = this.options.distance;
-    inputNumber.addEventListener('change', function (evt) {
-        evt.preventDefault();
-
-        if (undefined != _openlayers4.default.state.zoneSubscriptionLayer) {
-            var distance = evt.target.value;
-            var newDistance = 'km' == this_.unity ? distance * 1000 : distance;
-            var lblDistance = distance + ' ' + this_.unity;
-
-            _openlayers4.default.state.distance = parseInt(newDistance);
-            _openlayers4.default.state.map.removeLayer(_openlayers4.default.state.zoneSubscriptionLayer);
-            _openlayers4.default.createZoneSubscription(_openlayers4.default.state.distance);
-
-            document.getElementById('valueDistance').innerHTML = lblDistance;
-        }
-    }, false);
-
-    var valueNumber = document.createElement('span');
-    valueNumber.className = 'input-group-addon';
-    valueNumber.id = 'valueDistance';
-    valueNumber.innerHTML = this.options.distance + ' ' + this.unity;
-
-    this.panel.appendChild(divNumber);
-    this.panel.appendChild(inputNumber);
-    this.panel.appendChild(valueNumber);
-};
-
-},{"./openlayers":419,"babel-runtime/core-js/object/keys":5,"openlayers":407}],419:[function(require,module,exports){
+},{"../services/projections":415,"./dataLayers":416,"babel-runtime/core-js/json/stringify":4,"openlayers":407}],419:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -71303,10 +71237,6 @@ var _layerSwitcher = require('./layerSwitcher');
 
 var _layerSwitcher2 = _interopRequireDefault(_layerSwitcher);
 
-var _ol3SubscribeRoom = require('./ol3-subscribeRoom');
-
-var _ol3SubscribeRoom2 = _interopRequireDefault(_ol3SubscribeRoom);
-
 var _ol3Controldrawbuttons = require('./ol3-controldrawbuttons');
 
 var _ol3Controldrawbuttons2 = _interopRequireDefault(_ol3Controldrawbuttons);
@@ -71340,7 +71270,7 @@ exports.default = {
         zoom: null,
         buttonsDrawControls: null,
         layerSwitcher: null,
-        subscribeZoneCtrl: null,
+
         groupKuzzleLayers: null,
         featureForm: null,
         selectedLayer: null,
@@ -71855,4 +71785,4 @@ exports.default = {
     }
 };
 
-},{"../services/projections":414,"./dataLayers":415,"./layerSwitcher":416,"./ol3-controldrawbuttons":417,"./ol3-subscribeRoom":418,"babel-runtime/core-js/array/filter":2,"babel-runtime/core-js/array/from":3,"babel-runtime/helpers/typeof":7,"jsoneditor":284,"openlayers":407,"turf-centroid":408,"turf-inside":411}]},{},[1]);
+},{"../services/projections":415,"./dataLayers":416,"./layerSwitcher":417,"./ol3-controldrawbuttons":418,"babel-runtime/core-js/array/filter":2,"babel-runtime/core-js/array/from":3,"babel-runtime/helpers/typeof":7,"jsoneditor":284,"openlayers":407,"turf-centroid":408,"turf-inside":411}]},{},[1]);

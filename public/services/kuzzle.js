@@ -1,5 +1,6 @@
 import Kuzzle from 'kuzzle-sdk'
 import Config from './config'
+import notification from './notification';
 
 var optConnect = {
     defaultIndex: Config.defaultIndex,
@@ -12,9 +13,12 @@ var optConnect = {
 
 var kuzzle = new Kuzzle(Config.kuzzleUrl, optConnect, function (err, res) {
         if(err) {
-            console.error(err.message);
-            document.getElementById('msgDangerKuzzle').innerHTML = "Can't connect to Kuzzle.";
-            $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+            notification.init({
+                type: 'error',
+                class: 'mdl-color--red-400',
+                message: 'Can\'t connect to Kuzzle',
+                icon: 'error'
+            });
         }
     }
 );

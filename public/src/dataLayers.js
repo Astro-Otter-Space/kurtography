@@ -1,8 +1,10 @@
 import kuzzle from '../services/kuzzle'
 import Config from '../services/config'
 import Projection from '../services/projections'
+import notification from '../services/notification';
 import ol from 'openlayers';
 import olMap from './openlayers'
+
 
 let subscription = null;
 
@@ -58,8 +60,12 @@ export default {
                         result.push(kDoc.content);
                     });
                 } else {
-                    document.getElementById('msgWarnKuzzle').innerHTML = "There is no data for the collection " + collection;
-                    $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    notification.init({
+                        type: 'warning',
+                        class: 'mdl-color--amber-400',
+                        message:  "There is no data for the collection " + collection,
+                        icon: 'warning'
+                    });
                 }
 
                 var dataGeoJSON = {
@@ -158,7 +164,6 @@ export default {
                 newFeature.setId(resp.id);
                 olMap.state.featureForm = newFeature;
 
-
                 if ('Point' == typeFeature) {
                     if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
                         olMap.getSelectedLayer().getSource().addFeature(newFeature);
@@ -170,7 +175,7 @@ export default {
                     }
                 }
 
-                olMap.showFeaturesInformations(newFeature, true);
+                //olMap.showFeaturesInformations(newFeature, true);
             } else {
                 console.log(err.message)
             }
@@ -223,7 +228,7 @@ export default {
 
                     var updFeature = parser.readFeature(fDatasGeoJson, {featureProjection: Projection.projectionFrom});
                     olMap.state.featureForm = updFeature;
-                    olMap.showFeaturesInformations(updFeature, true);
+                    //olMap.showFeaturesInformations(updFeature, true);
                 }
             });
 
@@ -266,13 +271,17 @@ export default {
                     }
                     var updFeature = parser.readFeature(featureGeoJSON, {featureProjection: Projection.projectionFrom});
                     olMap.state.featureForm = updFeature;
-                    olMap.showFeaturesInformations(updFeature, true);
+                    //olMap.showFeaturesInformations(updFeature, true);
                 }
             });
 
         } else {
-            document.getElementById('msgDangerKuzzle').innerHTML = "Sorry impossible to edit this kuzzle document, there is no identifier.";
-            $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+            notification.init({
+                type: 'error',
+                class: 'mdl-color--red-400',
+                message:  "Sorry impossible to edit this kuzzle document, there is no identifier",
+                icon: 'error'
+            });
         }
     },
 
@@ -286,8 +295,12 @@ export default {
     deleteDocument(feature)
     {
         if (!feature.getId()) {
-            document.getElementById('msgDangerKuzzle').innerHTML = "Can't delete the kuzzle document.";
-            $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+            notification.init({
+                type: 'error',
+                class: 'mdl-color--red-400',
+                message: "Can't delete the kuzzle document.",
+                icon: 'error'
+            });
             return false;
 
         } else {
@@ -372,12 +385,15 @@ export default {
                         olMap.getSelectedLayer().getSource().addFeature(newFeature);
 
                         // Utile ? permet de voir les infos de la nouvelle feature
-                        olMap.showFeaturesInformations(newFeature, false);
+                        //olMap.showFeaturesInformations(newFeature, false);
 
-                        document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been " +  this_.action + "d in Kuzzle in your subscribe area.";
-                        $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                        notification.init({
+                            type: 'notice',
+                            class: 'mdl-color--green-400',
+                            message: "A document have been " +  this_.action + "d in Kuzzle in your subscribe area.",
+                            icon: 'notice'
+                        });
                     });
-
 
                 /**
                  * Suppression
@@ -386,8 +402,13 @@ export default {
                     var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
 
-                    document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been deleted from Kuzzle in your subscribe area.";
-                    $("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    notification.init({
+                        type: 'notice',
+                        class: 'mdl-color--green-400',
+                        message: "A document have been deleted from Kuzzle in your subscribe area.",
+                        icon: 'notice'
+                    });
+
                 }
             } else {
                 console.error(err.message);
@@ -467,14 +488,22 @@ export default {
                     }
                 } else {
                     console.error(err);
-                    document.getElementById('msgDangerKuzzle').innerHTML = "Research error.";
-                    $("#alertDangerKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                    notification.init({
+                        type: 'error',
+                        class: 'mdl-color--red-400',
+                        message: "Research error",
+                        icon: 'error'
+                    });
                 }
 
             });
         } else {
-            document.getElementById('msgWarnKuzzle').innerHTML = "Please, select a layer to the right.";
-            $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+            notification.init({
+                type: 'warning',
+                class: 'mdl-color--amber-400',
+                message: "Please, select a layer to the right.",
+                icon: 'warning'
+            });
         }
     },
 
@@ -486,6 +515,6 @@ export default {
     setCenterKuzzleDoc(kdocId)
     {
         var kFeature = olMap.getSelectedLayer().getSource().getFeatureById(kdocId);
-        olMap.showFeaturesInformations(kFeature);
+        //olMap.showFeaturesInformations(kFeature);
     }
 };
