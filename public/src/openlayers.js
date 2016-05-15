@@ -20,6 +20,7 @@ export default {
         projectionTo: Projection.projectionTo,
         osm: null,
         distance: 10000,
+        unity: 'm',
         zoneSubscriptionLayer: null,
         view: null,
         zoom: null,
@@ -122,6 +123,7 @@ export default {
 
         });
 
+
         /**
          * Feature editing : Callback on submit
          * @param e
@@ -137,7 +139,6 @@ export default {
                 }
             });
             dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
-            //jQuery('#toggle-properties').bootstrapToggle('off');
             return false;
         };
 
@@ -151,7 +152,7 @@ export default {
             );
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-                this_.showFeaturesInformations(feature);
+                //this_.showFeaturesInformations(feature);
             }
         });
         this.initControls();
@@ -174,6 +175,50 @@ export default {
             defaultUnit: 'm',
             distance: this.state.distance
         };
+
+        /**
+         *
+         * @type {initControls.handleChangeUnity}
+         */
+        var handleChangeUnity = this.handleChangeUnity = function(e) {
+
+            this_.state.unity = (e.target.checked) ? 'km' : 'm';
+            var distance = document.getElementById('zoneRadius').value;
+
+            if (undefined != this_.state.zoneSubscriptionLayer) {
+                var newDistance = ('km' == this_.state.unity) ? distance * 1000 : distance;
+                var lblDistance = distance + ' ' + this_.state.unity;
+
+                this_.state.distance = parseInt(newDistance);
+                this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
+                this_.createZoneSubscription(this_.state.distance);
+
+                document.getElementById('valueDistance').innerHTML = lblDistance;
+            }
+        };
+        /**
+         *
+         * @type {initControls.handleChangeDistance}
+         */
+        var handleChangeDistance = this.handleChangeDistance = function(e) {
+            e.preventDefault();
+
+            // If chane, remove and rebuild the subscribe zone
+            if (undefined != this_.state.zoneSubscriptionLayer) {
+                var distance = e.target.value;
+                var newDistance = ('km' == this_.state.unity) ? distance * 1000 : distance;
+                var lblDistance = distance + ' ' + this_.state.unity;
+
+                this_.state.distance = parseInt(newDistance);
+                this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
+                this_.createZoneSubscription(this_.state.distance);
+
+                document.getElementById('valueDistance').innerHTML = lblDistance;
+            }
+        };
+
+        document.getElementById('unity').addEventListener('change', this.handleChangeUnity, false);
+        document.getElementById('zoneRadius').addEventListener('change', this.handleChangeDistance, false);
         //this.state.subscribeZoneCtrl = new ol.control.SubscribeZone(optionsEditLayer);
         //this.state.map.addControl(this.state.subscribeZoneCtrl);
 
@@ -204,6 +249,8 @@ export default {
                     }
                     // Creation couche zone subscribe
                     this_.createZoneSubscription(this_.state.distance);
+                    document.getElementById('unity').disabled = false;
+                    document.getElementById('zoneRadius').disabled = false;
 
                     // Load datas and Mapping
                     dataLayers.loadDatasFromCollection(lyr.get('title'));

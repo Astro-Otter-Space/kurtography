@@ -137,7 +137,7 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
             spanInput.className = "mdl-list__item-secondary-action";
 
             var labelInput = document.createElement('label');
-            labelInput.className = "mdl-radio mdl-js-radio mdl-js-ripple-effect";
+            labelInput.className = "inline-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect";
             labelInput.setAttribute("for", lyrId);
 
             var input = document.createElement('input');
@@ -146,10 +146,10 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
             input.className = "mdl-radio__button";
             input.id = lyrId;
 
-            //input.checked = lyr.get('visible');
-            //input.onchange = function(e) {
-            //    this_.setVisible_(lyr, e.target.checked);
-            //};
+            input.checked = lyr.get('visible');
+            input.onchange = function(e) {
+                this_.setVisible_(lyr, e.target.checked);
+            };
 
             labelInput.appendChild(input);
             spanInput.appendChild(labelInput);

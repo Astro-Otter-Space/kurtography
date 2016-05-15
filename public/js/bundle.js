@@ -70499,7 +70499,7 @@ _openlayers2.default.control.LayerSwitcher.prototype.renderLayer_ = function (ly
             spanInput.className = "mdl-list__item-secondary-action";
 
             var labelInput = document.createElement('label');
-            labelInput.className = "mdl-radio mdl-js-radio mdl-js-ripple-effect";
+            labelInput.className = "inline-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect";
             labelInput.setAttribute("for", lyrId);
 
             var input = document.createElement('input');
@@ -70507,6 +70507,11 @@ _openlayers2.default.control.LayerSwitcher.prototype.renderLayer_ = function (ly
             input.name = 'base';
             input.className = "mdl-radio__button";
             input.id = lyrId;
+
+            input.checked = lyr.get('visible');
+            input.onchange = function (e) {
+                this_.setVisible_(lyr, e.target.checked);
+            };
 
             labelInput.appendChild(input);
             spanInput.appendChild(labelInput);
@@ -71329,6 +71334,7 @@ exports.default = {
         projectionTo: _projections2.default.projectionTo,
         osm: null,
         distance: 10000,
+        unity: 'm',
         zoneSubscriptionLayer: null,
         view: null,
         zoom: null,
@@ -71418,7 +71424,6 @@ exports.default = {
                 }
             });
             _dataLayers2.default.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
-
             return false;
         };
 
@@ -71427,9 +71432,7 @@ exports.default = {
                 return feature;
             });
 
-            if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-                this_.showFeaturesInformations(feature);
-            }
+            if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {}
         });
         this.initControls();
     },
@@ -71443,6 +71446,42 @@ exports.default = {
             defaultUnit: 'm',
             distance: this.state.distance
         };
+
+        var handleChangeUnity = this.handleChangeUnity = function (e) {
+
+            this_.state.unity = e.target.checked ? 'km' : 'm';
+            var distance = document.getElementById('zoneRadius').value;
+
+            if (undefined != this_.state.zoneSubscriptionLayer) {
+                var newDistance = 'km' == this_.state.unity ? distance * 1000 : distance;
+                var lblDistance = distance + ' ' + this_.state.unity;
+
+                this_.state.distance = parseInt(newDistance);
+                this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
+                this_.createZoneSubscription(this_.state.distance);
+
+                document.getElementById('valueDistance').innerHTML = lblDistance;
+            }
+        };
+
+        var handleChangeDistance = this.handleChangeDistance = function (e) {
+            e.preventDefault();
+
+            if (undefined != this_.state.zoneSubscriptionLayer) {
+                var distance = e.target.value;
+                var newDistance = 'km' == this_.state.unity ? distance * 1000 : distance;
+                var lblDistance = distance + ' ' + this_.state.unity;
+
+                this_.state.distance = parseInt(newDistance);
+                this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
+                this_.createZoneSubscription(this_.state.distance);
+
+                document.getElementById('valueDistance').innerHTML = lblDistance;
+            }
+        };
+
+        document.getElementById('unity').addEventListener('change', this.handleChangeUnity, false);
+        document.getElementById('zoneRadius').addEventListener('change', this.handleChangeDistance, false);
 
         var optionsControlDraw = {
             "style_buttons": null,
@@ -71468,6 +71507,8 @@ exports.default = {
                     }
 
                     this_.createZoneSubscription(this_.state.distance);
+                    document.getElementById('unity').disabled = false;
+                    document.getElementById('zoneRadius').disabled = false;
 
                     _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
                     _dataLayers2.default.getPropertiesMapping(lyr.get('title'));

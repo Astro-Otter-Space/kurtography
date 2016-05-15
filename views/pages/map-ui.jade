@@ -3,51 +3,10 @@ extend ../layout-ui
 block content
     div.mdl-layout.mdl-js-layout.mdl-layout--fixed-header
         //Header
-        header.mdl-layout__header.mdl-layout__header--transparent
-            div.mdl-layout__header-row
-                span.mdl-layout-title Kurtography
-                div.mdl-layout-spacer
-                nav.mdl-navigation.mdl-layout--large-screen-only
-                //    <a class="mdl-navigation__link" href="">Link</a>
-                //    <a class="mdl-navigation__link" href="">Link</a>
-                //    <a class="mdl-navigation__link" href="">Link</a>
-                //    <a class="mdl-navigation__link" href="">Link</a>
+        include ../components/navbar
 
-                form(action="#")
-                    div.mdl-textfield.mdl-js-textfield.mdl-textfield--expandable
-                        label.mdl-button.mdl-js-button.mdl-button--icon(for="sample6")
-                            i.material-icons search>
-                        div.mdl-textfield__expandable-holder
-                            input.mdl-textfield__input#sample6(type="text")
-                            label.mdl-textfield__label(for="sample-expandable") Expandable Input
-
-                button#demo-menu-lower-right.mdl-button.mdl-js-button.mdl-button--icon
-                    i.material-icons more_vert
-
-                ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="demo-menu-lower-right")
-                    li.mdl-menu__item
-                        a.export(href="/export", data-type='geojson', disabled) GeoJSON
-                    li.mdl-menu__item
-                        a.export(href="/export", data-type='csv', disabled) CSV
-                    li.mdl-menu__item
-                        a.export(href="/export", data-type='gml', disabled) GML
-                    li.mdl-menu__item
-                        a.export(href="/export", data-type='mapinfo', disabled) MapInfo
-                    li.mdl-menu__item
-                        a.export(href="/export", data-type='shape', disabled) Shapefile
         //Sidebar
-        div.mdl-layout__drawer
-            span.mdl-layout-title
-                i.material-icons collections
-                | Layers
-            hr.style-two
-            div#mainLayer
-                ul.mdl-list#layers
-
-            span.mdl-layout-title
-                i.material-icons location_searching
-                | Subscribe zone
-            hr.style-two
+        include ../components/sidebar
 
         //Content
         main.mdl-layout__content#map

@@ -8,7 +8,7 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.7.0
+Beta stage of development : v. 0.8.2
 
 Requirements
 -------------
@@ -65,7 +65,7 @@ npm test
 
 Run the app with the following command which compile modifications using browserify and babelify :
 ```
-npm run bundle
+npm run build-map
 ```
 A script bundle.js will be compiled, and after run with
 ```

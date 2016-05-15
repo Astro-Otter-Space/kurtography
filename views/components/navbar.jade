@@ -1,32 +1,32 @@
-nav.navbar.navbar-inverse.navbar-fixed-top
-    .container-fluid
-        .navbar-header
-            button.navbar-toggle.collapsed(type='button', data-toggle='collapse', data-target='#bs-example-navbar-collapse-1', aria-expanded='false')
-                span.sr-only Toggle navigation
-                span.icon-bar
-                span.icon-bar
-                span.icon-bar
-            a.navbar-brand(href='#') Kurtography : webmapping by Kuzzle
-        div#bs-example-navbar-collapse-1.collapse.navbar-collapse
-            ul.nav.navbar-nav.navbar-right
-                li
-                    a(href="/login", disabled) Log in
-                li
-                    a(href="/register", disabled) Register
-                li.dropdown
-                    a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-haspopup="true", aria-expanded="false") Export
-                        span.caret
-                    ul.dropdown-menu
-                        li
-                            a.export(href="/export", data-type='geojson', disabled) GeoJSON
-                        li
-                            a.export(href="/export", data-type='csv', disabled) CSV
-                        li
-                            a.export(href="/export", data-type='gml', disabled) GML
-                        li
-                            a.export(href="/export", data-type='mapinfo', disabled) MapInfo
-                        li
-                            a.export(href="/export", data-type='shape', disabled) Shapefile
-            form.navbar-form.navbar-right(name='formSearch', role='search')
-                .form-group
-                    input.form-control(type='text', name="search", placeholder='Search')
+header.mdl-layout__header.mdl-layout__header--transparent
+    div.mdl-layout__header-row
+        span.mdl-layout-title Kurtography
+        div.mdl-layout-spacer
+        nav.mdl-navigation.mdl-layout--large-screen-only
+        //    <a class="mdl-navigation__link" href="">Link</a>
+        //    <a class="mdl-navigation__link" href="">Link</a>
+        //    <a class="mdl-navigation__link" href="">Link</a>
+        //    <a class="mdl-navigation__link" href="">Link</a>
+
+        form(action="#")
+            div.mdl-textfield.mdl-js-textfield.mdl-textfield--expandable
+                label.mdl-button.mdl-js-button.mdl-button--icon(for="sample6")
+                    i.material-icons search>
+                div.mdl-textfield__expandable-holder
+                    input.mdl-textfield__input#sample6(type="text")
+                    label.mdl-textfield__label(for="sample-expandable") Expandable Input
+
+        button#demo-menu-lower-right.mdl-button.mdl-js-button.mdl-button--icon
+            i.material-icons more_vert
+
+        ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="demo-menu-lower-right")
+            li.mdl-menu__item
+                a.export(href="/export", data-type='geojson', disabled) GeoJSON
+            li.mdl-menu__item
+                a.export(href="/export", data-type='csv', disabled) CSV
+            li.mdl-menu__item
+                a.export(href="/export", data-type='gml', disabled) GML
+            li.mdl-menu__item
+                a.export(href="/export", data-type='mapinfo', disabled) MapInfo
+            li.mdl-menu__item
+                a.export(href="/export", data-type='shape', disabled) Shapefile
