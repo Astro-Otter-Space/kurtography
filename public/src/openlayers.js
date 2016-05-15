@@ -166,8 +166,8 @@ export default {
         var this_ = this;
 
         // Adding Layer switcher
-        //this.state.layerSwitcher = new ol.control.LayerSwitcher();
-        //this.state.map.addControl(this.state.layerSwitcher);
+        this.state.layerSwitcher = new ol.control.LayerSwitcher();
+        this.state.map.addControl(this.state.layerSwitcher);
 
         // Adding subscribe zone control
         var optionsEditLayer = {
@@ -204,14 +204,13 @@ export default {
                     }
                     // Creation couche zone subscribe
                     this_.createZoneSubscription(this_.state.distance);
-                    //dataLayers.subscribeCollection(lyr, this_.geolocation.getPosition(), this_.state.distance);
 
                     // Load datas and Mapping
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
                     dataLayers.getPropertiesMapping(lyr.get('title'));
 
                     // Add form edit subscribe room
-                    document.getElementById("mainRoom").style.display = "block";
+                    //document.getElementById("mainRoom").style.display = "block";
 
                     // Not sure if correct but it's working :|
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);

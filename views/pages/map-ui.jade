@@ -13,11 +13,13 @@ block content
                 //    <a class="mdl-navigation__link" href="">Link</a>
                 //    <a class="mdl-navigation__link" href="">Link</a>
 
-                div.mdl-textfield.mdl-js-textfield.mdl-textfield--expandable.mdl-textfield--floating-label.mdl-textfield--align-right
-                    label.mdl-button.mdl-js-button.mdl-button--icon(for=fixed-header-drawer-exp)
-                        i.material-icons search
-                    div.mdl-textfield__expandable-holder
-                        input.mdl-textfield__input(type="text", name="sample")#fixed-header-drawer-exp
+                form(action="#")
+                    div.mdl-textfield.mdl-js-textfield.mdl-textfield--expandable
+                        label.mdl-button.mdl-js-button.mdl-button--icon(for="sample6")
+                            i.material-icons search>
+                        div.mdl-textfield__expandable-holder
+                            input.mdl-textfield__input#sample6(type="text")
+                            label.mdl-textfield__label(for="sample-expandable") Expandable Input
 
                 button#demo-menu-lower-right.mdl-button.mdl-js-button.mdl-button--icon
                     i.material-icons more_vert
@@ -35,11 +37,17 @@ block content
                         a.export(href="/export", data-type='shape', disabled) Shapefile
         //Sidebar
         div.mdl-layout__drawer
-            span.mdl-layout-title Layers
-            nav.mdl-navigation
-                //<a class="mdl-navigation__link" href="">Link</a>
-                //<a class="mdl-navigation__link" href="">Link</a>
-                //<a class="mdl-navigation__link" href="">Link</a>
-                //<a class="mdl-navigation__link" href="">Link</a>
+            span.mdl-layout-title
+                i.material-icons collections
+                | Layers
+            hr.style-two
+            div#mainLayer
+                ul.mdl-list#layers
+
+            span.mdl-layout-title
+                i.material-icons location_searching
+                | Subscribe zone
+            hr.style-two
+
         //Content
         main.mdl-layout__content#map

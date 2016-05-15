@@ -183,11 +183,6 @@ body{
     /*width: 70%;*/
 /*}*/
 /*****************************************************************/
-.mdl-layout__drawer.is-visible {
-    width: 20%;
-    /*z-index: 50;*/
-}
-
-.mdl-layout__header, .mdl-layout__drawer-button {
-    color: white;
-}
+/*.mdl-layout__drawer.is-visible {*/
+    /*width: 20%;*/
+/*}*/

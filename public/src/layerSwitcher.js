@@ -10,38 +10,19 @@ import ol from 'openlayers';
  */
 ol.control.LayerSwitcher = function(opt_options) {
 
+    var this_ = this;
     var options = opt_options || {};
-
-    var tipLabel = options.tipLabel ?
-        options.tipLabel : 'Legend';
+    var tipLabel = options.tipLabel ? options.tipLabel : 'Legend';
 
     this.mapListeners = [];
 
-    var element = document.getElementById("layers");
+    var element = this.element = document.getElementById("layers");
+    //this.panel = document.createElement('ul');
+    //this.panel.className = "mdl-list";
+    //element.appendChild(this.panel);
 
-    this.panel = document.createElement('div');
-    this.panel.className = 'panel-body list-group'; // 'panel'
-    element.appendChild(this.panel);
+    //ol.control.LayerSwitcher.enableTouchScroll_(this.panel);
 
-    ol.control.LayerSwitcher.enableTouchScroll_(this.panel);
-    var this_ = this;
-
-    //button.onmouseover = function(e) {
-    //    this_.showPanel();
-    //};
-    //
-    //button.onclick = function(e) {
-    //    e = e || window.event;
-    //    this_.showPanel();
-    //    e.preventDefault();
-    //};
-    //
-    //this_.panel.onmouseout = function(e) {
-    //    e = e || window.event;
-    //    if (!this_.panel.contains(e.toElement || e.relatedTarget)) {
-    //        this_.hidePanel();
-    //    }
-    //};
     var divTarget = document.getElementById("mainLayer");
 
     ol.control.Control.call(this, {
@@ -54,36 +35,17 @@ ol.control.LayerSwitcher = function(opt_options) {
 ol.inherits(ol.control.LayerSwitcher, ol.control.Control);
 
 /**
- * Show the layer panel.
- */
-//ol.control.LayerSwitcher.prototype.showPanel = function() {
-//    if (this.element.className != this.shownClassName) {
-//        this.element.className = this.shownClassName;
-//        this.renderPanel();
-//    }
-//};
-//
-///**
-// * Hide the layer panel.
-// */
-//ol.control.LayerSwitcher.prototype.hidePanel = function() {
-//    if (this.element.className != this.hiddenClassName) {
-//        this.element.className = this.hiddenClassName;
-//    }
-//};
-
-/**
  * Re-draw the layer panel to represent the current state of the layers.
  */
 ol.control.LayerSwitcher.prototype.renderPanel = function() {
 
     this.ensureTopVisibleBaseLayerShown_();
 
-    while(this.panel.firstChild) {
-        this.panel.removeChild(this.panel.firstChild);
+    while(this.element.firstChild) {
+        this.element.removeChild(this.element.firstChild);
     }
 
-    this.renderLayers_(this.getMap(), this.panel);
+    this.renderLayers_(this.getMap(), this.element);
 };
 
 /**
@@ -152,42 +114,58 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
     var this_ = this;
 
     if (lyr.getLayers) {
-        this.renderLayers_(lyr, this.panel);
+        this.renderLayers_(lyr, this.element);
     } else {
 
-        var a = document.createElement('a');
-        a.className = "list-group-item";
+        var li = document.createElement('li');
+        li.className = "mdl-list__item";
 
-        var lyrTitle = ' ' + lyr.get('title');
+        var lyrTitle = document.createTextNode(lyr.get('title')); ;
         var lyrId = lyr.get('title').replace(/\s+/g, '-') + '_' + idx;
 
-        var label = document.createElement('label');
+        var span = document.createElement('span');
+        span.className = "mdl-list__item-primary-content";
+
+        var iLabel = document.createElement('i');
+        iLabel.className = "material-icons mdl-list__item-icon";
 
         if (lyr.get('type') === 'base') {
+
+            iLabel.innerHTML = "timeline";
+
+            var spanInput = document.createElement('span');
+            spanInput.className = "mdl-list__item-secondary-action";
+
+            var labelInput = document.createElement('label');
+            labelInput.className = "mdl-radio mdl-js-radio mdl-js-ripple-effect";
+            labelInput.setAttribute("for", lyrId);
+
             var input = document.createElement('input');
             input.type = 'radio';
             input.name = 'base';
-
+            input.className = "mdl-radio__button";
             input.id = lyrId;
-            input.checked = lyr.get('visible');
-            input.onchange = function(e) {
 
-                this_.setVisible_(lyr, e.target.checked);
-                //console.log("set de la couche " + lyr.get('title'));
-                //olMap.setSelectedLayer(lyr);
-            };
+            //input.checked = lyr.get('visible');
+            //input.onchange = function(e) {
+            //    this_.setVisible_(lyr, e.target.checked);
+            //};
 
-            a.appendChild(input);
+            labelInput.appendChild(input);
+            spanInput.appendChild(labelInput);
         } else {
-            var iGlobe = document.createElement('i');
-            iGlobe.className = "fa fa-globe";
-            a.appendChild(iGlobe);
+            iLabel.innerHTML = "public";
         }
 
-        label.innerHTML = '&nbsp;' + lyrTitle;
-        label.htmlFor = lyrId;
-        a.appendChild(label);
-        return a;
+        span.appendChild(iLabel);
+        span.appendChild(lyrTitle);
+
+        li.appendChild(span);
+        if (undefined != spanInput){
+            li.appendChild(spanInput);
+        }
+
+        return li;
     }
 };
 
