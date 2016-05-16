@@ -1,4 +1,4 @@
-extend ../layout-ui
+extends ../layout-ui
 
 block content
     div.mdl-layout.mdl-js-layout.mdl-layout--fixed-header
@@ -10,6 +10,20 @@ block content
 
         //Content
         main.mdl-layout__content#map
+
+        // External zoom buttons
+        div#external_control_zoom
+            div#panel
+
+        // dialog
+        dialog.mdl-dialog
+            h4.mdl-dialog__title#featureTitle
+            div.mdl-dialog__content
+                form(name="form-edit-properties")
+                table.mdl-data-table.mdl-js-data-table#tabFGeometry
+            div.mdl-dialog__actions
+                button(type="button").mdl-button.mdl-js-button.mdl-button--raised.mdl-js-ripple-effect.mdl-button--accent Edit
+                button(type="button").mdl-button.close Close
 
         // snackbar
         div(aria-live="assertive", aria-atomic="true", aria-relevant="text").mdl-snackbar.mdl-js-snackbar

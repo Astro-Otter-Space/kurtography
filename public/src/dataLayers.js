@@ -5,7 +5,6 @@ import notification from '../services/notification';
 import ol from 'openlayers';
 import olMap from './openlayers'
 
-
 let subscription = null;
 
 export default {
@@ -27,7 +26,6 @@ export default {
     listCollections() {
         var this_ = this;
 
-        // Ex avec Mock : https://github.com/HamHamFonFon/kurtogaphy/blob/827b82fdfda3dc2d918fd44cbfd0fca3223a8ef5/public/src/openlayers.js
         kuzzle.listCollections(Config.defaultIndex, { type: "all"}, function (err, collections) {
             if (!err) {
                 // Push collections in array
@@ -175,7 +173,7 @@ export default {
                     }
                 }
 
-                //olMap.showFeaturesInformations(newFeature, true);
+                olMap.showFeaturesInformations(newFeature, true);
             } else {
                 console.log(err.message)
             }
@@ -228,7 +226,7 @@ export default {
 
                     var updFeature = parser.readFeature(fDatasGeoJson, {featureProjection: Projection.projectionFrom});
                     olMap.state.featureForm = updFeature;
-                    //olMap.showFeaturesInformations(updFeature, true);
+                    olMap.showFeaturesInformations(updFeature, true);
                 }
             });
 
@@ -271,7 +269,7 @@ export default {
                     }
                     var updFeature = parser.readFeature(featureGeoJSON, {featureProjection: Projection.projectionFrom});
                     olMap.state.featureForm = updFeature;
-                    //olMap.showFeaturesInformations(updFeature, true);
+                    olMap.showFeaturesInformations(updFeature, true);
                 }
             });
 
@@ -308,7 +306,6 @@ export default {
                 if (err) {
                     console.error(err.message);
                 } else {
-                    console.log("Suppression de Kuzzle OK");
                     var parser = new ol.format.GeoJSON();
                     var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
@@ -346,7 +343,7 @@ export default {
         var filter =
         {
             geoDistance: {
-                distance: olMap.state.distance + "m",
+                distance: olMap.state.distance,
                 location: {
                     lon: coordonatesWGS84[0],
                     lat: coordonatesWGS84[1]
@@ -362,11 +359,11 @@ export default {
             state: 'done'
         };
 
+        //console.log(JSON.stringify(filter, '', false);
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 var kDoc = this.loadDataById(resp.result._id);
-                console.log(resp.scope);
-                console.log(resp.action);
+                console.log(resp.action + ' ' + resp.result._id + '/' + kDoc.id);
                 if ('in' == resp.scope) {
                     this_.action = resp.action;
                     kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, (err, resp) => {
@@ -399,6 +396,7 @@ export default {
                  * Suppression
                  */
                 } else if ('out' == resp.scope) {
+                    console.log("Suppresion de la feature");
                     var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
 
@@ -445,7 +443,7 @@ export default {
             {
                 filter: {
                     geo_distance: {
-                        distance: olMap.state.distance + "m",
+                        distance: olMap.state.distance,
                         location: {
                             lon: coordonatesWGS84[0],
                             lat: coordonatesWGS84[1]
@@ -515,6 +513,6 @@ export default {
     setCenterKuzzleDoc(kdocId)
     {
         var kFeature = olMap.getSelectedLayer().getSource().getFeatureById(kdocId);
-        //olMap.showFeaturesInformations(kFeature);
+        olMap.showFeaturesInformations(kFeature);
     }
 };

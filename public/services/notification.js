@@ -4,10 +4,11 @@ export default {
     {
         this.objConst = {
             class: obj.class,
-            message: obj.message.toString(),
             type: obj.type,
             icon: obj.icon,
-            timeout: 5000,
+
+            message: obj.message.toString(),
+            timeout: 3000,
             actionHandler: function(event) {},
             actionText: 'Ok'
         };

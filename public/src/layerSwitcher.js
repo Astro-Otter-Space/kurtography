@@ -145,6 +145,7 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
             input.name = 'base';
             input.className = "mdl-radio__button";
             input.id = lyrId;
+            input.value = lyrId;
 
             input.checked = lyr.get('visible');
             input.onchange = function(e) {

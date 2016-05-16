@@ -402,16 +402,6 @@ ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt)
     }
 };
 
-/**
- * Formulary to adding or edit properties
- */
-ol.control.ControlDrawButtons.prototype.formulary = function(properties)
-{
-    var form = document.createElement('form');
-
-    return form;
-};
-
 
 /**
  * Styles of selected layer

@@ -2,8 +2,8 @@ import Projection from '../services/projections'
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
-//import SubscribeZone from './ol3-subscribeRoom'
 import ControlDrawButtons from './ol3-controldrawbuttons'
+import ZoomControl from './ol3-zoomuibuttons';
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
 import jsoneditor from 'jsoneditor';
@@ -88,11 +88,7 @@ export default {
                     collapsible: false
                 })
             }).extend([
-                new ol.control.ScaleLine(), // Scale
-                new ol.control.Zoom(), // Zoom
-                //new ol.control.ZoomSlider(), // Zoom slide
-                //new ol.control.OverviewMap(), // Overviewmap
-                // get coordinates of mouse position
+                new ol.control.ZoomUiButtons(), // Zoom
                 new ol.control.MousePosition({
                     coordinateFormat:  function(coordinate) {
                         return ol.coordinate.format(coordinate, 'Lat : {y} / Long : {x}', 4);
@@ -102,7 +98,6 @@ export default {
             ]),
             view: this.state.view
         });
-
 
         // Centrage sur la carte en recuperant la position
         this.geolocation = new ol.Geolocation({
@@ -152,7 +147,7 @@ export default {
             );
 
             if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-                //this_.showFeaturesInformations(feature);
+                this_.showFeaturesInformations(feature);
             }
         });
         this.initControls();
@@ -165,6 +160,9 @@ export default {
     initControls()
     {
         var this_ = this;
+
+        //var externalZoom = new ol.control.ZoomUiButtons();
+        //this.state.map.addControl(externalZoom);
 
         // Adding Layer switcher
         this.state.layerSwitcher = new ol.control.LayerSwitcher();
@@ -219,8 +217,6 @@ export default {
 
         document.getElementById('unity').addEventListener('change', this.handleChangeUnity, false);
         document.getElementById('zoneRadius').addEventListener('change', this.handleChangeDistance, false);
-        //this.state.subscribeZoneCtrl = new ol.control.SubscribeZone(optionsEditLayer);
-        //this.state.map.addControl(this.state.subscribeZoneCtrl);
 
         // Adding draw controls
         var optionsControlDraw = {
@@ -256,9 +252,6 @@ export default {
                     dataLayers.loadDatasFromCollection(lyr.get('title'));
                     dataLayers.getPropertiesMapping(lyr.get('title'));
 
-                    // Add form edit subscribe room
-                    //document.getElementById("mainRoom").style.display = "block";
-
                     // Not sure if correct but it's working :|
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);
 
@@ -277,6 +270,7 @@ export default {
      */
     showFeaturesInformations(feature, centerTofeature = true)
     {
+
         var parser = new ol.format.GeoJSON();
 
         var fProperties = feature.getProperties();
@@ -286,12 +280,27 @@ export default {
             this.setCenterFeature(feature.getId());
         }
 
-        //this.addSubscribeRoomTab();
-        this.addPropertiesTab(fProperties);
-        this.addGeoJSONTab(fGeoJson);
-        this.addGeometriesTab(feature.getGeometry());
+        // Gestion dialog box
+        var dialog = document.querySelector('dialog');
+        if (! dialog.showModal) {
+            dialogPolyfill.registerDialog(dialog);
+        }
 
-        document.getElementById("mainProperties").style.display = "block";
+        if (0 < fProperties.name.length) {
+            document.getElementById("featureTitle").innerHTML = (typeof fProperties.name == "string") ? fProperties.name.capitalizeFirstLetter() : fProperties.name;
+        } else {
+            document.getElementById("featureTitle").innerHTML = "No name";
+        }
+
+        dialog.showModal();
+
+        dialog.querySelector('.close').addEventListener('click', function() {
+            dialog.close();
+        });
+
+        this.addPropertiesTab(fProperties);
+        //this.addGeoJSONTab(fGeoJson);
+        this.addGeometriesTab(feature.getGeometry());
 
         // Retrieve datas from Form Edit Properties
         var form = document.getElementsByName("form-edit-properties")[0];
@@ -375,9 +384,6 @@ export default {
      */
     getFeatureCentroid(featureGeoJSON)
     {
-        //var parser = new ol.format.GeoJSON();
-        //var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-
         var centroidPt = turfCentroid(featureGeoJSON);
         return centroidPt;
     },
@@ -388,7 +394,7 @@ export default {
      */
     setCenterFeature(featureId)
     {
-        if (featureId) {
+        if (undefined != featureId && null != featureId) {
             var feature = this.getSelectedLayer().getSource().getFeatureById(featureId);
             var extFeature = feature.getGeometry().getExtent();
             var centerFeature = ol.extent.getCenter(extFeature);
@@ -405,69 +411,50 @@ export default {
      */
     addPropertiesTab(properties)
     {
-        var tabP = document.getElementById('tabFProperties');
-        if (tabP.childElementCount > 0) {
-            while (tabP.firstChild) tabP.removeChild(tabP.firstChild);
-        }
-
+        //console.log(dataLayers.state.dataProperties);
         // Delete geometry if exist
         if (properties.geometry) {
             delete properties.geometry;
         }
 
-        var tbody = document.createElement('tbody');
-
+        var form = document.forms['form-edit-properties'];
+        if (form.childElementCount > 0) {
+            while (form.firstChild) form.removeChild(form.firstChild);
+        }
         for (var key in properties) {
             if (typeof properties[key] != 'object' || properties[key] != undefined) {
 
-                var tr = document.createElement('tr');
-
-                var tdKey = document.createElement('td');
-                tdKey.innerHTML = (typeof key == "string") ? key.capitalizeFirstLetter() : key;
-
-                var tdValue = document.createElement('td');
+                var div = document.createElement('div');
+                div.className = "mdl-textfield mdl-js-textfield";
 
                 // Label
-                var label = document.createElement('span');
-                label.className = "properties-read";
-                label.name = 'span_' + key;
-                label.innerHTML = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
+                var label = document.createElement('label');
+                label.className = "mdl-textfield__label";
+                if (0 < properties[key].length) {
+                    var labelValue = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
+                } else {
+                    var labelValue = key.capitalizeFirstLetter();
+                }
+                label.innerHTML = labelValue;
+                label.setAttribute("for", key);
 
                 // Input for edit propertie
                 var input = document.createElement('input');
                 input.type = 'text';
-                input.className = 'form-control properties-edit';
+                input.className = 'mdl-textfield__input ';//properties-edit';
                 input.name = key;
-                input.setAttribute('disabled', 'disabled');
+                input.id = key;
+
                 input.value = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
-                input.setAttribute('placeholder', properties[key]);
+                //input.setAttribute('disabled', 'disabled');
+                //input.setAttribute('placeholder', labelValue);
 
-                tdValue.appendChild(label);
-                tdValue.appendChild(input);
+                div.appendChild(input);
+                div.appendChild(label);
 
-
-                tr.appendChild(tdKey);
-                tr.appendChild(tdValue);
-                tbody.appendChild(tr);
+                form.appendChild(div);
             }
         }
-
-        // Add edit button
-        var btnEdit = document.createElement('button');
-        btnEdit.className = 'btn btn-primary properties-edit';
-        btnEdit.innerHTML = "Edit properties";
-        btnEdit.type = 'submit';
-
-        var trBtnEdit = document.createElement('tr');
-        var tdBtnEdit = document.createElement('td');
-        tdBtnEdit.setAttribute('colspan', 2);
-
-        tdBtnEdit.appendChild(btnEdit);
-        trBtnEdit.appendChild(tdBtnEdit);
-        tbody.appendChild(trBtnEdit);
-
-        tabP.appendChild(tbody);
-        return tabP;
     },
 
 
@@ -508,6 +495,7 @@ export default {
 
                 var trLon = document.createElement('tr');
                 var tdLonLabel = document.createElement('td'); tdLonLabel.innerHTML = 'Longitude';
+                tdLonLabel.className = "mdl-data-table__cell--non-numeric";
                 var tdLonValue = document.createElement('td'); tdLonValue.innerHTML = coordinates[0];
 
                 trLon.appendChild(tdLonLabel);
@@ -515,6 +503,7 @@ export default {
 
                 var trLat = document.createElement('tr');
                 var tdLatLabel = document.createElement('td'); tdLatLabel.innerHTML = 'Lattitude';
+                tdLatLabel.className = "mdl-data-table__cell--non-numeric";
                 var tdLatValue = document.createElement('td'); tdLatValue.innerHTML = coordinates[1];
 
                 trLat.appendChild(tdLatLabel);
@@ -527,6 +516,7 @@ export default {
             case 'LineString':
                 var trLong = document.createElement('tr');
                 var tdLongLabelM = document.createElement('td'); tdLongLabelM.innerHTML = 'Length';
+                tdLongLabelM.className = "mdl-data-table__cell--non-numeric";
                 var tdLongValueM = document.createElement('td'); tdLongValueM.innerHTML = this.formatLength(fGeometry, true);
 
                 trLong.appendChild(tdLongLabelM);
@@ -538,6 +528,7 @@ export default {
             case 'Polygon':
                 var trSq = document.createElement('tr');
                 var tdSqLabel = document.createElement('td'); tdSqLabel.innerHTML = 'Area';
+                tdSqLabel.className = "mdl-data-table__cell--non-numeric";
                 var tdSqValue = document.createElement('td'); tdSqValue.innerHTML = this.formatArea(fGeometry, false);
 
                 trSq.appendChild(tdSqLabel);
@@ -555,8 +546,9 @@ export default {
     {
         var links = document.getElementsByClassName('export');
         Array.filter(links, link => {
+            link.href = "";
 
-            var serialized = ""; // "?";
+            var serialized = "export";
             var tabParams = {
                 type: link.dataset.type,
                 layer: this.getSelectedLayer().get('title')
@@ -576,8 +568,7 @@ export default {
 
             serialized += serialiseObject(tabParams);
             link.href += serialized;
-            link.setAttribute('disabled', false)
-            console.log(serialized);
+            link.setAttribute('disabled', false);
         });
 
     },

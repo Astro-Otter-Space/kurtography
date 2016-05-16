@@ -10,7 +10,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _dataLayers2.default.listCollections();
 
 String.prototype.capitalizeFirstLetter = function () {
-    return this.charAt(0).toUpperCase() + this.slice(1);
+  return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
 },{"./public/src/dataLayers":416}],2:[function(require,module,exports){
@@ -70003,10 +70003,11 @@ exports.default = {
     init: function init(obj) {
         this.objConst = {
             class: obj.class,
-            message: obj.message.toString(),
             type: obj.type,
             icon: obj.icon,
-            timeout: 5000,
+
+            message: obj.message.toString(),
+            timeout: 3000,
             actionHandler: function actionHandler(event) {},
             actionText: 'Ok'
         };
@@ -70188,9 +70189,11 @@ exports.default = {
                         _openlayers4.default.getSelectedLayer().getSource().addFeature(newFeature);
                     }
                 }
+
+                _openlayers4.default.showFeaturesInformations(newFeature, true);
             } else {
-                    console.log(err.message);
-                }
+                console.log(err.message);
+            }
         });
     },
     updateGeodatasDocument: function updateGeodatasDocument(fDatasGeoJson, feature) {
@@ -70233,11 +70236,12 @@ exports.default = {
 
                     var updFeature = parser.readFeature(fDatasGeoJson, { featureProjection: _projections2.default.projectionFrom });
                     _openlayers4.default.state.featureForm = updFeature;
+                    _openlayers4.default.showFeaturesInformations(updFeature, true);
                 }
             });
         } else {
-                console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
-            }
+            console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
+        }
     },
     updatePropertiesDocument: function updatePropertiesDocument(feature, propertiesDatas) {
         var layer = _openlayers4.default.getSelectedLayer().get('title');
@@ -70263,16 +70267,17 @@ exports.default = {
                     }
                     var updFeature = parser.readFeature(featureGeoJSON, { featureProjection: _projections2.default.projectionFrom });
                     _openlayers4.default.state.featureForm = updFeature;
+                    _openlayers4.default.showFeaturesInformations(updFeature, true);
                 }
             });
         } else {
-                _notification2.default.init({
-                    type: 'error',
-                    class: 'mdl-color--red-400',
-                    message: "Sorry impossible to edit this kuzzle document, there is no identifier",
-                    icon: 'error'
-                });
-            }
+            _notification2.default.init({
+                type: 'error',
+                class: 'mdl-color--red-400',
+                message: "Sorry impossible to edit this kuzzle document, there is no identifier",
+                icon: 'error'
+            });
+        }
     },
     deleteDocument: function deleteDocument(feature) {
         if (!feature.getId()) {
@@ -70288,7 +70293,6 @@ exports.default = {
                 if (err) {
                     console.error(err.message);
                 } else {
-                    console.log("Suppression de Kuzzle OK");
                     var parser = new _openlayers2.default.format.GeoJSON();
                     var featureGeoJSON = parser.writeFeatureObject(feature, { dataProjection: _projections2.default.projectionTo, featureProjection: _projections2.default.projectionFrom });
 
@@ -70316,7 +70320,7 @@ exports.default = {
 
         var filter = {
             geoDistance: {
-                distance: _openlayers4.default.state.distance + "m",
+                distance: _openlayers4.default.state.distance,
                 location: {
                     lon: coordonatesWGS84[0],
                     lat: coordonatesWGS84[1]
@@ -70334,8 +70338,7 @@ exports.default = {
         subscription = _kuzzle2.default.dataCollectionFactory(layer.get('title')).subscribe(filter, options, function (err, resp) {
             if (!err) {
                 var kDoc = _this.loadDataById(resp.result._id);
-                console.log(resp.scope);
-                console.log(resp.action);
+                console.log(resp.action + ' ' + resp.result._id + '/' + kDoc.id);
                 if ('in' == resp.scope) {
                     this_.action = resp.action;
                     _kuzzle2.default.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, function (err, resp) {
@@ -70361,6 +70364,7 @@ exports.default = {
                         });
                     });
                 } else if ('out' == resp.scope) {
+                        console.log("Suppresion de la feature");
                         var featureDel = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kDoc.id);
                         _openlayers4.default.getSelectedLayer().getSource().removeFeature(featureDel);
 
@@ -70387,7 +70391,7 @@ exports.default = {
             var filterSearch = {
                 filter: {
                     geo_distance: {
-                        distance: _openlayers4.default.state.distance + "m",
+                        distance: _openlayers4.default.state.distance,
                         location: {
                             lon: coordonatesWGS84[0],
                             lat: coordonatesWGS84[1]
@@ -70447,10 +70451,11 @@ exports.default = {
     },
     setCenterKuzzleDoc: function setCenterKuzzleDoc(kdocId) {
         var kFeature = _openlayers4.default.getSelectedLayer().getSource().getFeatureById(kdocId);
+        _openlayers4.default.showFeaturesInformations(kFeature);
     }
 };
 
-},{"../services/config":412,"../services/kuzzle":413,"../services/notification":414,"../services/projections":415,"./openlayers":419,"babel-runtime/core-js/object/keys":5,"openlayers":407}],417:[function(require,module,exports){
+},{"../services/config":412,"../services/kuzzle":413,"../services/notification":414,"../services/projections":415,"./openlayers":420,"babel-runtime/core-js/object/keys":5,"openlayers":407}],417:[function(require,module,exports){
 'use strict';
 
 var _openlayers = require('openlayers');
@@ -70562,6 +70567,7 @@ _openlayers2.default.control.LayerSwitcher.prototype.renderLayer_ = function (ly
             input.name = 'base';
             input.className = "mdl-radio__button";
             input.id = lyrId;
+            input.value = lyrId;
 
             input.checked = lyr.get('visible');
             input.onchange = function (e) {
@@ -70963,12 +70969,6 @@ _openlayers2.default.control.ControlDrawButtons.prototype.controlDelOnMap = func
     }
 };
 
-_openlayers2.default.control.ControlDrawButtons.prototype.formulary = function (properties) {
-    var form = document.createElement('form');
-
-    return form;
-};
-
 _openlayers2.default.control.ControlDrawButtons.prototype.styleAdd = function () {
     var style = new _openlayers2.default.style.Style({
         fill: new _openlayers2.default.style.Fill({
@@ -71205,6 +71205,87 @@ var ol3buttons = {
 },{"../services/projections":415,"./dataLayers":416,"babel-runtime/core-js/json/stringify":4,"openlayers":407}],419:[function(require,module,exports){
 'use strict';
 
+var _openlayers = require('openlayers');
+
+var _openlayers2 = _interopRequireDefault(_openlayers);
+
+var _openlayers3 = require('./openlayers');
+
+var _openlayers4 = _interopRequireDefault(_openlayers3);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_openlayers2.default.control.ZoomUiButtons = function () {
+
+    var this_ = this;
+
+    var delta = this.delta = 1;
+    var duration = this.duration_ = 250;
+
+    var divTarget = document.getElementById("external_control_zoom");
+    var divElement = document.getElementById("panel");
+
+    var buttonIn = document.createElement('button');
+    buttonIn.setAttribute('title', 'Zoom in');
+    buttonIn.className = "mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--mini-fab mdl-button--colored";
+    buttonIn.onclick = function (event) {
+        event.preventDefault();
+        this_.zoomByDelta_(delta);
+    };
+
+    var iIn = document.createElement('i');
+    iIn.className = "material-icons";
+    iIn.innerHTML = "add";
+
+    var buttonOut = document.createElement('button');
+    buttonOut.setAttribute('title', 'Zoom out');
+    buttonOut.className = "mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--mini-fab mdl-button--colored";
+    buttonOut.onclick = function (event) {
+        event.preventDefault();
+        this_.zoomByDelta_(-delta);
+    };
+
+    var iOut = document.createElement('i');
+    iOut.className = "material-icons";
+    iOut.innerHTML = "remove";
+
+    buttonIn.appendChild(iIn);
+    buttonOut.appendChild(iOut);
+
+    divElement.appendChild(buttonIn);
+    divElement.appendChild(buttonOut);
+
+    _openlayers2.default.control.Control.call(this, {
+        element: divElement,
+        target: divTarget
+    });
+};
+
+_openlayers2.default.inherits(_openlayers2.default.control.ZoomUiButtons, _openlayers2.default.control.Control);
+
+_openlayers2.default.control.ZoomUiButtons.prototype.zoomByDelta_ = function (delta) {
+    var map = _openlayers4.default.state.map;
+    var view = map.getView();
+    if (!view) {
+        var view = _openlayers4.default.state.view;
+    }
+    var currentResolution = view.getResolution();
+    if (currentResolution) {
+        if (this.duration_ > 0) {
+            map.beforeRender(_openlayers2.default.animation.zoom({
+                resolution: currentResolution,
+                duration: _openlayers2.default.control.ZoomUiButtons.duration_,
+                easing: _openlayers2.default.easing.easeOut
+            }));
+        }
+        var newResolution = view.constrainResolution(currentResolution, delta);
+        view.setResolution(newResolution);
+    }
+};
+
+},{"./openlayers":420,"openlayers":407}],420:[function(require,module,exports){
+'use strict';
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -71240,6 +71321,10 @@ var _layerSwitcher2 = _interopRequireDefault(_layerSwitcher);
 var _ol3Controldrawbuttons = require('./ol3-controldrawbuttons');
 
 var _ol3Controldrawbuttons2 = _interopRequireDefault(_ol3Controldrawbuttons);
+
+var _ol3Zoomuibuttons = require('./ol3-zoomuibuttons');
+
+var _ol3Zoomuibuttons2 = _interopRequireDefault(_ol3Zoomuibuttons);
 
 var _turfInside = require('turf-inside');
 
@@ -71319,7 +71404,7 @@ exports.default = {
                 attributionOptions: {
                     collapsible: false
                 }
-            }).extend([new _openlayers2.default.control.ScaleLine(), new _openlayers2.default.control.Zoom(), new _openlayers2.default.control.MousePosition({
+            }).extend([new _openlayers2.default.control.ZoomUiButtons(), new _openlayers2.default.control.MousePosition({
                 coordinateFormat: function coordinateFormat(coordinate) {
                     return _openlayers2.default.coordinate.format(coordinate, 'Lat : {y} / Long : {x}', 4);
                 },
@@ -71362,7 +71447,9 @@ exports.default = {
                 return feature;
             });
 
-            if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {}
+            if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
+                this_.showFeaturesInformations(feature);
+            }
         });
         this.initControls();
     },
@@ -71454,6 +71541,7 @@ exports.default = {
     showFeaturesInformations: function showFeaturesInformations(feature) {
         var centerTofeature = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
 
+
         var parser = new _openlayers2.default.format.GeoJSON();
 
         var fProperties = feature.getProperties();
@@ -71463,11 +71551,26 @@ exports.default = {
             this.setCenterFeature(feature.getId());
         }
 
-        this.addPropertiesTab(fProperties);
-        this.addGeoJSONTab(fGeoJson);
-        this.addGeometriesTab(feature.getGeometry());
+        var dialog = document.querySelector('dialog');
+        if (!dialog.showModal) {
+            dialogPolyfill.registerDialog(dialog);
+        }
 
-        document.getElementById("mainProperties").style.display = "block";
+        if (0 < fProperties.name.length) {
+            document.getElementById("featureTitle").innerHTML = typeof fProperties.name == "string" ? fProperties.name.capitalizeFirstLetter() : fProperties.name;
+        } else {
+            document.getElementById("featureTitle").innerHTML = "No name";
+        }
+
+        dialog.showModal();
+
+        dialog.querySelector('.close').addEventListener('click', function () {
+            dialog.close();
+        });
+
+        this.addPropertiesTab(fProperties);
+
+        this.addGeometriesTab(feature.getGeometry());
 
         var form = document.getElementsByName("form-edit-properties")[0];
         form.removeEventListener('submit', this.handleSubmit);
@@ -71522,12 +71625,11 @@ exports.default = {
         return (0, _turfInside2.default)(featureGeoJSON, zsGeoJSON);
     },
     getFeatureCentroid: function getFeatureCentroid(featureGeoJSON) {
-
         var centroidPt = (0, _turfCentroid2.default)(featureGeoJSON);
         return centroidPt;
     },
     setCenterFeature: function setCenterFeature(featureId) {
-        if (featureId) {
+        if (undefined != featureId && null != featureId) {
             var feature = this.getSelectedLayer().getSource().getFeatureById(featureId);
             var extFeature = feature.getGeometry().getExtent();
             var centerFeature = _openlayers2.default.extent.getCenter(extFeature);
@@ -71536,66 +71638,47 @@ exports.default = {
         }
     },
     addPropertiesTab: function addPropertiesTab(properties) {
-        var tabP = document.getElementById('tabFProperties');
-        if (tabP.childElementCount > 0) {
-            while (tabP.firstChild) {
-                tabP.removeChild(tabP.firstChild);
-            }
-        }
-
         if (properties.geometry) {
             delete properties.geometry;
         }
 
-        var tbody = document.createElement('tbody');
-
+        var form = document.forms['form-edit-properties'];
+        if (form.childElementCount > 0) {
+            while (form.firstChild) {
+                form.removeChild(form.firstChild);
+            }
+        }
         for (var key in properties) {
             if ((0, _typeof3.default)(properties[key]) != 'object' || properties[key] != undefined) {
 
-                var tr = document.createElement('tr');
+                var div = document.createElement('div');
+                div.className = "mdl-textfield mdl-js-textfield";
 
-                var tdKey = document.createElement('td');
-                tdKey.innerHTML = typeof key == "string" ? key.capitalizeFirstLetter() : key;
-
-                var tdValue = document.createElement('td');
-
-                var label = document.createElement('span');
-                label.className = "properties-read";
-                label.name = 'span_' + key;
-                label.innerHTML = typeof properties[key] == "string" ? properties[key].capitalizeFirstLetter() : properties[key];
+                var label = document.createElement('label');
+                label.className = "mdl-textfield__label";
+                if (0 < properties[key].length) {
+                    var labelValue = typeof properties[key] == "string" ? properties[key].capitalizeFirstLetter() : properties[key];
+                } else {
+                    var labelValue = key.capitalizeFirstLetter();
+                }
+                label.innerHTML = labelValue;
+                label.setAttribute("for", key);
 
                 var input = document.createElement('input');
                 input.type = 'text';
-                input.className = 'form-control properties-edit';
+                input.className = 'mdl-textfield__input ';
                 input.name = key;
-                input.setAttribute('disabled', 'disabled');
+                input.id = key;
+
                 input.value = typeof properties[key] == "string" ? properties[key].capitalizeFirstLetter() : properties[key];
-                input.setAttribute('placeholder', properties[key]);
 
-                tdValue.appendChild(label);
-                tdValue.appendChild(input);
 
-                tr.appendChild(tdKey);
-                tr.appendChild(tdValue);
-                tbody.appendChild(tr);
+                div.appendChild(input);
+                div.appendChild(label);
+
+                form.appendChild(div);
             }
         }
-
-        var btnEdit = document.createElement('button');
-        btnEdit.className = 'btn btn-primary properties-edit';
-        btnEdit.innerHTML = "Edit properties";
-        btnEdit.type = 'submit';
-
-        var trBtnEdit = document.createElement('tr');
-        var tdBtnEdit = document.createElement('td');
-        tdBtnEdit.setAttribute('colspan', 2);
-
-        tdBtnEdit.appendChild(btnEdit);
-        trBtnEdit.appendChild(tdBtnEdit);
-        tbody.appendChild(trBtnEdit);
-
-        tabP.appendChild(tbody);
-        return tabP;
     },
     addGeoJSONTab: function addGeoJSONTab(fGeoJson) {
         var container = document.getElementById("jsoneditor");
@@ -71625,6 +71708,7 @@ exports.default = {
 
                 var trLon = document.createElement('tr');
                 var tdLonLabel = document.createElement('td');tdLonLabel.innerHTML = 'Longitude';
+                tdLonLabel.className = "mdl-data-table__cell--non-numeric";
                 var tdLonValue = document.createElement('td');tdLonValue.innerHTML = coordinates[0];
 
                 trLon.appendChild(tdLonLabel);
@@ -71632,6 +71716,7 @@ exports.default = {
 
                 var trLat = document.createElement('tr');
                 var tdLatLabel = document.createElement('td');tdLatLabel.innerHTML = 'Lattitude';
+                tdLatLabel.className = "mdl-data-table__cell--non-numeric";
                 var tdLatValue = document.createElement('td');tdLatValue.innerHTML = coordinates[1];
 
                 trLat.appendChild(tdLatLabel);
@@ -71644,6 +71729,7 @@ exports.default = {
             case 'LineString':
                 var trLong = document.createElement('tr');
                 var tdLongLabelM = document.createElement('td');tdLongLabelM.innerHTML = 'Length';
+                tdLongLabelM.className = "mdl-data-table__cell--non-numeric";
                 var tdLongValueM = document.createElement('td');tdLongValueM.innerHTML = this.formatLength(fGeometry, true);
 
                 trLong.appendChild(tdLongLabelM);
@@ -71655,6 +71741,7 @@ exports.default = {
             case 'Polygon':
                 var trSq = document.createElement('tr');
                 var tdSqLabel = document.createElement('td');tdSqLabel.innerHTML = 'Area';
+                tdSqLabel.className = "mdl-data-table__cell--non-numeric";
                 var tdSqValue = document.createElement('td');tdSqValue.innerHTML = this.formatArea(fGeometry, false);
 
                 trSq.appendChild(tdSqLabel);
@@ -71672,8 +71759,9 @@ exports.default = {
 
         var links = document.getElementsByClassName('export');
         (0, _filter2.default)(links, function (link) {
+            link.href = "";
 
-            var serialized = "";
+            var serialized = "export";
             var tabParams = {
                 type: link.dataset.type,
                 layer: _this.getSelectedLayer().get('title')
@@ -71694,7 +71782,6 @@ exports.default = {
             serialized += serialiseObject(tabParams);
             link.href += serialized;
             link.setAttribute('disabled', false);
-            console.log(serialized);
         });
     },
     formatLength: function formatLength(line, geodesic) {
@@ -71785,4 +71872,4 @@ exports.default = {
     }
 };
 
-},{"../services/projections":415,"./dataLayers":416,"./layerSwitcher":417,"./ol3-controldrawbuttons":418,"babel-runtime/core-js/array/filter":2,"babel-runtime/core-js/array/from":3,"babel-runtime/helpers/typeof":7,"jsoneditor":284,"openlayers":407,"turf-centroid":408,"turf-inside":411}]},{},[1]);
+},{"../services/projections":415,"./dataLayers":416,"./layerSwitcher":417,"./ol3-controldrawbuttons":418,"./ol3-zoomuibuttons":419,"babel-runtime/core-js/array/filter":2,"babel-runtime/core-js/array/from":3,"babel-runtime/helpers/typeof":7,"jsoneditor":284,"openlayers":407,"turf-centroid":408,"turf-inside":411}]},{},[1]);
