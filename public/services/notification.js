@@ -9,7 +9,7 @@ export default {
             actionText: 'Ok'
         };
 
-        var cssClass = obj.class;
+        var cssClass = obj.cssClass;
         var type = obj.type;
         var icon = obj.icon;
         var snackbarContainer = document.querySelector('.mdl-js-snackbar');

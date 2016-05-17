@@ -60,7 +60,7 @@ export default {
                 } else {
                     notification.init({
                         type: 'warning',
-                        class: 'mdl-color--amber-400',
+                        cssClass: 'mdl-color--amber-400',
                         message:  "There is no data for the collection " + collection,
                         icon: 'warning'
                     });
@@ -276,7 +276,7 @@ export default {
         } else {
             notification.init({
                 type: 'error',
-                class: 'mdl-color--red-400',
+                cssClass: 'mdl-color--red-400',
                 message:  "Sorry impossible to edit this kuzzle document, there is no identifier",
                 icon: 'error'
             });
@@ -295,7 +295,7 @@ export default {
         if (!feature.getId()) {
             notification.init({
                 type: 'error',
-                class: 'mdl-color--red-400',
+                cssClass: 'mdl-color--red-400',
                 message: "Can't delete the kuzzle document.",
                 icon: 'error'
             });
@@ -340,10 +340,11 @@ export default {
             subscription.unsubscribe();
         }
 
+        var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 10000;
         var filter =
         {
             geoDistance: {
-                distance: olMap.state.distance,
+                distance: distanceValue,
                 location: {
                     lon: coordonatesWGS84[0],
                     lat: coordonatesWGS84[1]
@@ -386,7 +387,7 @@ export default {
 
                         notification.init({
                             type: 'notice',
-                            class: 'mdl-color--green-400',
+                            cssClass: 'mdl-color--green-400',
                             message: "A document have been " +  this_.action + "d in Kuzzle in your subscribe area.",
                             icon: 'notice'
                         });
@@ -402,7 +403,7 @@ export default {
 
                     notification.init({
                         type: 'notice',
-                        class: 'mdl-color--green-400',
+                        cssClass: 'mdl-color--green-400',
                         message: "A document have been deleted from Kuzzle in your subscribe area.",
                         icon: 'notice'
                     });
@@ -439,11 +440,12 @@ export default {
             //or: filterMapping
 
             // Filter search on name of items with a geoDistance filter, sorting by geodistance asc
+            var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 10000;
             var filterSearch =
             {
                 filter: {
                     geo_distance: {
-                        distance: olMap.state.distance,
+                        distance: distanceValue,
                         location: {
                             lon: coordonatesWGS84[0],
                             lat: coordonatesWGS84[1]
@@ -470,15 +472,23 @@ export default {
                 from: 0,
                 size: 10
             };
+
+            //console.log(JSON.stringify(filterSearch, null, '\t'));
+
             kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearch, (err, resp) => {
                 if(!err) {
+                    console.log(resp.total, "results");
                     if (1 > resp.total) {
-                        document.getElementById('msgWarnKuzzle').innerHTML = "No document find, retry with another term.";
-                        $("#alertWarningKuzzle").slideDown('slow').delay(3000).slideUp('slow');
+                        notification.init({
+                            type: 'warning',
+                            cssClass: 'mdl-color--amber-400',
+                            message: "No document find, retry with another term.",
+                            icon: 'warning'
+                        });
                     } else {
                         var respAutoComplete = resp.documents.map(kDoc => {
                             return {
-                                id: kDoc.id,
+                                value: kDoc.id,
                                 label: kDoc.content.properties.name
                             }
                         });
@@ -488,7 +498,7 @@ export default {
                     console.error(err);
                     notification.init({
                         type: 'error',
-                        class: 'mdl-color--red-400',
+                        cssClass: 'mdl-color--red-400',
                         message: "Research error",
                         icon: 'error'
                     });
@@ -498,7 +508,7 @@ export default {
         } else {
             notification.init({
                 type: 'warning',
-                class: 'mdl-color--amber-400',
+                cssClass: 'mdl-color--amber-400',
                 message: "Please, select a layer to the right.",
                 icon: 'warning'
             });

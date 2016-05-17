@@ -344,7 +344,7 @@ export default {
             style: [
                 new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: color,
+                        color: '#8BC34A',
                         width: 2
                     }),
                     fill: null
@@ -634,7 +634,7 @@ export default {
 
             'Point': [new ol.style.Style({
                 image: new ol.style.Circle({
-                    fill: new ol.style.Fill({ color: [254,170,1,1] }), // interieur
+                    fill: new ol.style.Fill({ color: [255,110,1,64] }), // interieur // rgb(255,110,64)
                     stroke: new ol.style.Stroke({ color: [255,102,0,1] }), // bordure
                     radius: 5
                 })
@@ -642,14 +642,14 @@ export default {
 
             'LineString': [new ol.style.Style({
                 stroke: new ol.style.Stroke({
-                    color: [254,170,1,1],
+                    color: [255,110,1,64,1],
                     width: 4
                 })
             })],
 
             'Polygon': [new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color : [254,170,1,0.4]
+                    color : [255,110,1,64,0.4]
                 }),
                 stroke: new ol.style.Stroke({
                     color: [255,102,0,1],
@@ -659,7 +659,7 @@ export default {
 
             'Circle': [new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color: [254,170,1,0.4]
+                    color: [255,110,1,64,0.4]
                 }),
                 stroke: new ol.style.Stroke({
                     color: [255,102,0, 1],

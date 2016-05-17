@@ -2,9 +2,21 @@ import dataLayers from './public/src/dataLayers';
 dataLayers.listCollections();
 
 /**
- * Ajax request for search
+ * Search request with result in autocompletion
  * @returns {string}
  */
+var searchInput = document.querySelector('#kuzzleSearch');
+import Awesomplete from 'awesomplete';
+var awesomplete = new Awesomplete(searchInput, {
+    maxItems: 10
+});
+searchInput.addEventListener('keyup', function(e) {
+    // TODO : reset the list
+    dataLayers.searchDocuments(e.target.value);
+    awesomplete.list = dataLayers.state.rstAdvancedSearch
+}, false);
+
+
 //$(function(){
 //    $('form[name="formSearch"]').on('submit', function (e) {
 //        e.preventDefault();
@@ -29,4 +41,8 @@ dataLayers.listCollections();
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
+Array.prototype.valueOf = function(){
+    console.log(JSON.stringify(this, null, '\t'));
 };

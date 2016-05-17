@@ -15,7 +15,7 @@ var kuzzle = new Kuzzle(Config.kuzzleUrl, optConnect, function (err, res) {
         if(err) {
             notification.init({
                 type: 'error',
-                class: 'mdl-color--red-400',
+                cssClass: 'mdl-color--red-400',
                 message: 'Can\'t connect to Kuzzle',
                 icon: 'error'
             });

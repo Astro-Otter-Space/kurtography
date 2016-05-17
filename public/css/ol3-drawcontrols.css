@@ -32,7 +32,7 @@
 .toggle-control {
     position: absolute;
     top: 4em;
-    left: 0.5em;
+    left: 1em;
     background-color: rgba(255, 255, 255, 0.46);
     border: 1px solid rgba(0, 0, 0, 0.9);
     border-radius: 4px;
