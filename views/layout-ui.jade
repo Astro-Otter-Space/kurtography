@@ -2,6 +2,19 @@ doctype html
 html(lang="fr")
     include components/header
     body
+        // dialog /!\ must be children of body
+        dialog.mdl-dialog
+            h4.mdl-dialog__title#featureTitle
+            div.mdl-dialog__content
+                form(name="form-edit-properties")
+                table.mdl-data-table.mdl-js-data-table#tabFGeometry
+            div.mdl-dialog__actions
+                button(type="button").mdl-button.mdl-js-button.mdl-button--raised.mdl-js-ripple-effect.mdl-button--accent Edit
+                button(type="button").mdl-button.close Close
+        // Content
         block content
-        script(src='https://code.getmdl.io/1.1.3/material.min.js', defer)
-        script(src='/js/bundle.js', defer)
+
+        // Javascript scripts
+        script(src='https://code.getmdl.io/1.1.3/material.min.js')
+        script(src='/dialog-polyfill/dialog-polyfill.js')
+        script(src='/js/bundle.js')

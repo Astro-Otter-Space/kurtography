@@ -115,7 +115,6 @@ export default {
             if (undefined != this.getSelectedLayer) {
                 this_.createZoneSubscription(this.state.distance);
             }
-
         });
 
 
@@ -140,13 +139,13 @@ export default {
         // Show feature data + listener
         this.state.map.on('click', function(evt) {
             // When we select a feature, it's become the featureForm
-            var feature = this_.state.featureForm = this_.state.map.forEachFeatureAtPixel(evt.pixel,
+            var feature = this_.state.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
                     return feature;
                 }
             );
-
-            if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
+            if (undefined != feature && undefined != feature.getId() && this_.state.buttonsDrawControls.getFlagDraw() == false) {
+                this_.state.featureForm = feature;
                 this_.showFeaturesInformations(feature);
             }
         });

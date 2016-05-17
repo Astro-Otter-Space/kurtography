@@ -70002,16 +70002,15 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = {
     init: function init(obj) {
         this.objConst = {
-            class: obj.class,
-            type: obj.type,
-            icon: obj.icon,
-
             message: obj.message.toString(),
             timeout: 3000,
             actionHandler: function actionHandler(event) {},
             actionText: 'Ok'
         };
 
+        var cssClass = obj.class;
+        var type = obj.type;
+        var icon = obj.icon;
         var snackbarContainer = document.querySelector('.mdl-js-snackbar');
         snackbarContainer.MaterialSnackbar.showSnackbar(this.objConst);
     }
@@ -71443,11 +71442,11 @@ exports.default = {
         };
 
         this.state.map.on('click', function (evt) {
-            var feature = this_.state.featureForm = this_.state.map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+            var feature = this_.state.map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                 return feature;
             });
-
-            if (feature && this_.state.buttonsDrawControls.getFlagDraw() == false) {
+            if (undefined != feature && undefined != feature.getId() && this_.state.buttonsDrawControls.getFlagDraw() == false) {
+                this_.state.featureForm = feature;
                 this_.showFeaturesInformations(feature);
             }
         });

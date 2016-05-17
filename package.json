@@ -11,6 +11,7 @@
   "dependencies": {
     "bootstrap": "^3.3.6",
     "bootstrap-toggle": "^2.2.2",
+    "dialog-polyfill": "^0.4.3",
     "express": "^4.13.4",
     "jade": "^1.11.0",
     "jsoneditor": "^5.5.2",
