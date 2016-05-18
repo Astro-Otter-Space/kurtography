@@ -1,17 +1,9 @@
 div.mdl-layout__drawer
+    span.mdl-layout-title#headSidebar Panel
+
     // Layer switcher
     include switcherlayer
 
     // Subscribe zone
-    span.mdl-layout-title
-        //i.material-icons location_searching
-        | Subscribe zone
     hr.style-two
-
-    | Select unity (m/km)
-    div.pull-right
-        label.mdl-switch.mdl-js-switch.mdl-js-ripple-effect(for="unity")
-            input(type="checkbox", disabled)#unity.mdl-switch__input
-            span.mdl-switch__label
-        input.mdl-slider.mdl-js-slider#zoneRadius(type="range", min="1", max="10000", value="10000", tabindex="0", disabled)
-    span#valueDistance
+    include subscribeZone

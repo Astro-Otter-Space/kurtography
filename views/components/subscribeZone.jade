@@ -1,0 +1,32 @@
+span.mdl-layout-title
+    //i.material-icons location_searching
+    | Subscribe zone
+
+    | Scale
+    u.demo-list-control.mdl-list
+        li.mdl-list__item
+            span.mdl-list__item-primary-content
+                //i.material-icons.mdl-list__item-avatar person
+                Quartier
+            span.mdl-list__item-secondary-action
+                label.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="list-checkbox-1")
+                    input(type="radio", name="scale")#list-checkbox-1.mdl-radio__button
+
+        li.mdl-list__item
+            span.mdl-list__item-primary-content
+                //i.material-icons.mdl-list__item-avatar person
+                Ville
+            span.mdl-list__item-secondary-action
+                label.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="list-checkbox-2")
+                    input(type="radio", name="scale")#list-checkbox-2.mdl-radio__button
+
+        li.mdl-list__item
+            span.mdl-list__item-primary-content
+                //i.material-icons.mdl-list__item-avatar person
+                Pays
+            span.mdl-list__item-secondary-action
+                label.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="list-checkbox-3")
+                    input(type="radio", name="scale")#list-checkbox-3.mdl-radio__button
+
+    input.mdl-slider.mdl-js-slider#zoneRadius(type="range", min="1", max="10000", value="10000", tabindex="0", disabled)
+    span#valueDistance

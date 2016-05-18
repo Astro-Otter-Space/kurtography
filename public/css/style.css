@@ -154,3 +154,9 @@ body{
     background: inherit;
     left: 20px;
 }
+
+#headSidebar {
+    background: #8BC34A;
+    color: white;
+}
+
