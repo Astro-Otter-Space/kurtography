@@ -1,11 +1,12 @@
 {
   "name": "Kurtography",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "description": "Cartography application supported by Kuzzle",
   "main": "app.js",
   "scripts": {
     "test": "beefy app-map.js:bundle.js --live",
     "build-map": "browserify -e app-map.js -o ./public/js/bundle.js",
+    "build-css": "browserify -e app-map.js -o ./public/js/bundle.js",
     "start": "node app.js"
   },
   "dependencies": {

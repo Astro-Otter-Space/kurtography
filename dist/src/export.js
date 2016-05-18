@@ -2,7 +2,7 @@
 // https://github.com/wavded/ogre/blob/master/index.js
 // https://github.com/wavded/ogr2ogr/blob/master/test/drivers-test.js
 
-import kuzzle from '../services/kuzzle'
+import kuzzle from 'kuzzle'
 import ogr2ogr from 'ogr2ogr';
 
 export default {

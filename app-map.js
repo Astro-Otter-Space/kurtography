@@ -1,4 +1,4 @@
-import dataLayers from './public/src/dataLayers';
+import dataLayers from './dist/src/dataLayers';
 dataLayers.listCollections();
 
 /**
