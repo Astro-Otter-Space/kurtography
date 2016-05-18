@@ -163,12 +163,6 @@ export default {
         this.state.layerSwitcher = new ol.control.LayerSwitcher();
         this.state.map.addControl(this.state.layerSwitcher);
 
-        // Adding subscribe zone control
-        var optionsEditLayer = {
-            defaultUnit: 'm',
-            distance: this.state.distance
-        };
-
         /**
          *
          * @type {initControls.handleChangeUnity}
@@ -178,13 +172,13 @@ export default {
             var min = parseInt(this.dataset.min);
             var max = parseInt(this.dataset.max);
             var factorScale = parseInt(this.value);
+            var zoom = parseInt(this.dataset.zoom);
 
             if (undefined != this_.state.zoneSubscriptionLayer) {
 
                 var inputZoneRadius = document.getElementById('zoneRadius');
                 var distanceUpdate = max/2; // we set to the middle
 
-                console.log("Radius de " + min + " a " + max);
                 inputZoneRadius.setAttribute("min", min);
                 inputZoneRadius.setAttribute("max", max);
                 inputZoneRadius.value = distanceUpdate;
@@ -195,6 +189,8 @@ export default {
 
                 this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                 this_.createZoneSubscription(this_.state.distance);
+
+                this_.state.map.getView().setZoom(zoom);
 
                 document.getElementById('valueDistance').innerHTML = lblDistance;
             }

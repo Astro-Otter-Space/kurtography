@@ -70570,7 +70570,7 @@ exports.default = {
                 this_.state.collections = collections.stored.map(function (layer) {
                     return layer;
                 });
-                _openlayers4.default.initMap(13);
+                _openlayers4.default.initMap(10);
             } else {
                 console.error(err.message);
             }
@@ -71935,23 +71935,18 @@ exports.default = {
         this.state.layerSwitcher = new _openlayers2.default.control.LayerSwitcher();
         this.state.map.addControl(this.state.layerSwitcher);
 
-        var optionsEditLayer = {
-            defaultUnit: 'm',
-            distance: this.state.distance
-        };
-
         var handleChangeScale = this.handleChangeScale = function (e) {
 
             var min = parseInt(this.dataset.min);
             var max = parseInt(this.dataset.max);
             var factorScale = parseInt(this.value);
+            var zoom = parseInt(this.dataset.zoom);
 
             if (undefined != this_.state.zoneSubscriptionLayer) {
 
                 var inputZoneRadius = document.getElementById('zoneRadius');
                 var distanceUpdate = max / 2;
 
-                console.log("Radius de " + min + " a " + max);
                 inputZoneRadius.setAttribute("min", min);
                 inputZoneRadius.setAttribute("max", max);
                 inputZoneRadius.value = distanceUpdate;
@@ -71961,6 +71956,8 @@ exports.default = {
 
                 this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                 this_.createZoneSubscription(this_.state.distance);
+
+                this_.state.map.getView().setZoom(zoom);
 
                 document.getElementById('valueDistance').innerHTML = lblDistance;
             }
