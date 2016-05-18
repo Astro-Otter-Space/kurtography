@@ -23,7 +23,6 @@ app.set('view engine', 'jade');
 app.options('/export', enableCors, optionsHandler('GET'))
 
 app.use(express.static(__dirname + '/public'));
-app.use(express.static(__dirname + '/dist')); // FOR CSS until minify NPM
 app.use(express.static(__dirname + '/node_modules'));
 
 // Main page

@@ -29,7 +29,7 @@ export default {
             // Je réalise mon test
             var result = re.test(currentClass);
             // Trace pour voir si je matche ma regex
-            console.log('Je traite : ', currentClass, ' resultat ', result);
+            console.log('Je veux supprimer : ', currentClass, ' resultat ', result);
             if (result === true) {
                 snackbarContainer.classList.remove(currentClass);
             }

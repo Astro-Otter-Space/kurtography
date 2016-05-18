@@ -6,12 +6,13 @@
   "scripts": {
     "test": "beefy app-map.js:bundle.js --live",
     "build-map": "browserify -e app-map.js -o ./public/js/bundle.js",
-    "build-css": "browserify -e app-map.js -o ./public/js/bundle.js",
+    "build-css": "cleancss ./dist/css/material.min.css ./dist/css/ol3-drawcontrols.css ./dist/css/style.css -o ./public/css/bundle.css",
     "start": "node app.js"
   },
   "dependencies": {
     "awesomplete": "^1.1.0",
     "bloodhound-js": "^1.2.1",
+    "clean-css": "^3.4.12",
     "dialog-polyfill": "^0.4.3",
     "express": "^4.13.4",
     "jade": "^1.11.0",
