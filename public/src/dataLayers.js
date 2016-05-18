@@ -60,9 +60,7 @@ export default {
                 } else {
                     notification.init({
                         type: 'warning',
-                        cssClass: 'mdl-color--amber-400',
-                        message:  "There is no data for the collection " + collection,
-                        icon: 'warning'
+                        message:  'There is no data for the collection "' + collection + '"',
                     });
                 }
 
@@ -276,9 +274,7 @@ export default {
         } else {
             notification.init({
                 type: 'error',
-                cssClass: 'mdl-color--red-400',
-                message:  "Sorry impossible to edit this kuzzle document, there is no identifier",
-                icon: 'error'
+                message:  "Sorry impossible to edit this kuzzle document, there is no identifier"
             });
         }
     },
@@ -295,9 +291,7 @@ export default {
         if (!feature.getId()) {
             notification.init({
                 type: 'error',
-                cssClass: 'mdl-color--red-400',
-                message: "Can't delete the kuzzle document.",
-                icon: 'error'
+                message: "Can't delete the kuzzle document."
             });
             return false;
 
@@ -387,9 +381,7 @@ export default {
 
                         notification.init({
                             type: 'notice',
-                            cssClass: 'mdl-color--green-400',
-                            message: "A document have been " +  this_.action + "d in Kuzzle in your subscribe area.",
-                            icon: 'notice'
+                            message: "A document have been " +  this_.action + "d in Kuzzle in your subscribe area."
                         });
                     });
 
@@ -403,9 +395,7 @@ export default {
 
                     notification.init({
                         type: 'notice',
-                        cssClass: 'mdl-color--green-400',
-                        message: "A document have been deleted from Kuzzle in your subscribe area.",
-                        icon: 'notice'
+                        message: "A document have been deleted from Kuzzle in your subscribe area."
                     });
 
                 }
@@ -481,9 +471,7 @@ export default {
                     if (1 > resp.total) {
                         notification.init({
                             type: 'warning',
-                            cssClass: 'mdl-color--amber-400',
-                            message: "No document find, retry with another term.",
-                            icon: 'warning'
+                            message: "No document find, retry with another term."
                         });
                     } else {
                         var respAutoComplete = resp.documents.map(kDoc => {
@@ -498,9 +486,7 @@ export default {
                     console.error(err);
                     notification.init({
                         type: 'error',
-                        cssClass: 'mdl-color--red-400',
-                        message: "Research error",
-                        icon: 'error'
+                        message: "Research error"
                     });
                 }
 
@@ -508,9 +494,7 @@ export default {
         } else {
             notification.init({
                 type: 'warning',
-                cssClass: 'mdl-color--amber-400',
-                message: "Please, select a layer to the right.",
-                icon: 'warning'
+                message: "Please, select a layer to the right."
             });
         }
     },
