@@ -155,7 +155,7 @@ body{
     left: 20px;
 }
 
-#headSidebar {
+.headSidebar {
     background: #8BC34A;
     color: white;
 }

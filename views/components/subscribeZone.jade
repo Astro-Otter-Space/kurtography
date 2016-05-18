@@ -1,14 +1,14 @@
 span.mdl-layout-title Subscribe zone
     //i.material-icons location_searching
 
-u.mdl-list
+ul.mdl-list
     li.mdl-list__item
         span.mdl-list__item-primary-content
-            i.material-icons.mdl-list__item-icon person
-            | Quarter
+            i.material-icons.mdl-list__item-icon home
+            | District
         span.mdl-list__item-secondary-action
-            label.inline-list-radio.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="scaleQuarter")
-                input(type="radio", name="scale")#scaleQuarter.mdl-radio__button
+            label.inline-list-radio.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="scaleDistrict")
+                input(type="radio", name="scale", value="1", data-min="1", data-max="1000", data-zoom="", disabled)#scaleDistrict.mdl-radio__button
 
     li.mdl-list__item
         span.mdl-list__item-primary-content
@@ -16,16 +16,24 @@ u.mdl-list
             | City
         span.mdl-list__item-secondary-action
             label.inline-list-radio.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="scaleTown")
-                input(type="radio", name="scale")#scaleTown.mdl-radio__button
+                input(type="radio", name="scale", value="10", data-min="1000", data-max="10000", data-zoom="",disabled)#scaleTown.mdl-radio__button
 
     li.mdl-list__item
         span.mdl-list__item-primary-content
             i.material-icons.mdl-list__item-icon terrain
-            | Land
+            | Region
+        span.mdl-list__item-secondary-action
+            label.inline-list-radio.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="scaleRegion")
+                input(type="radio", name="scale", value="100", data-min="10000", data-max="100000", data-zoom="", disabled)#scaleRegion.mdl-radio__button
+
+    li.mdl-list__item
+        span.mdl-list__item-primary-content
+            i.material-icons.mdl-list__item-icon public
+            | Country
         span.mdl-list__item-secondary-action
             label.inline-list-radio.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="scaleCountry")
-                input(type="radio", name="scale")#scaleCountry.mdl-radio__button
+                input(type="radio", name="scale", value="1000", data-min="100000", data-max="1000000", data-zoom="", disabled)#scaleCountry.mdl-radio__button
 
 
-input.mdl-slider.mdl-js-slider#zoneRadius(type="range", min="1", max="10000", value="10000", tabindex="0", disabled)
+input.mdl-slider.mdl-js-slider#zoneRadius(type="range", tabindex="0", min="1000", max="10000", value="5000" disabled)
 span#valueDistance

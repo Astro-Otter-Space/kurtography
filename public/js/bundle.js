@@ -23,7 +23,6 @@ var awesomplete = new _awesomplete2.default(searchInput, {
     maxItems: 10
 });
 searchInput.addEventListener('keyup', function (e) {
-    awesomplete.list = [];
     _dataLayers2.default.searchDocuments(e.target.value);
     awesomplete.list = _dataLayers2.default.state.rstAdvancedSearch;
 }, false);
@@ -70449,33 +70448,54 @@ var kuzzle = new _kuzzleSdk2.default(_config2.default.kuzzleUrl, optConnect, fun
     if (err) {
         _notification2.default.init({
             type: 'error',
-            cssClass: 'mdl-color--red-400',
-            message: 'Can\'t connect to Kuzzle',
-            icon: 'error'
+            message: 'Can\'t connect to Kuzzle'
         });
     }
 });
 exports.default = kuzzle;
 
 },{"./config":413,"./notification":415,"kuzzle-sdk":398}],415:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.default = {
+
+    state: {
+        classCss: {
+            notice: "mdl-color--green-500",
+            warning: "mdl-color--orange-500",
+            error: "mdl-color--red-500"
+        }
+    },
+
     init: function init(obj) {
         this.objConst = {
             message: obj.message.toString(),
             timeout: 3000,
             actionHandler: function actionHandler(event) {},
-            actionText: 'Ok'
+            actionText: 'Undo'
         };
 
-        var cssClass = obj.cssClass;
-        var type = obj.type;
-        var icon = obj.icon;
         var snackbarContainer = document.querySelector('.mdl-js-snackbar');
+
+        var cssClass = this.state.classCss[obj.type];
+        var type = obj.type;
+
+        var re = new RegExp(/(^|\s)mdl-color--\S+/, "gi");
+        for (var i = 0, len = snackbarContainer.classList.length; i < len; i++) {
+            var currentClass = snackbarContainer.classList[i];
+
+            var result = re.test(currentClass);
+
+            console.log('Je traite : ', currentClass, ' resultat ', result);
+            if (result === true) {
+                snackbarContainer.classList.remove(currentClass);
+            }
+        }
+
+        snackbarContainer.classList.add(cssClass);
         snackbarContainer.MaterialSnackbar.showSnackbar(this.objConst);
     }
 };
@@ -70569,9 +70589,7 @@ exports.default = {
                 } else {
                     _notification2.default.init({
                         type: 'warning',
-                        cssClass: 'mdl-color--amber-400',
-                        message: "There is no data for the collection " + collection,
-                        icon: 'warning'
+                        message: 'There is no data for the collection "' + collection + '"'
                     });
                 }
 
@@ -70736,9 +70754,7 @@ exports.default = {
         } else {
             _notification2.default.init({
                 type: 'error',
-                cssClass: 'mdl-color--red-400',
-                message: "Sorry impossible to edit this kuzzle document, there is no identifier",
-                icon: 'error'
+                message: "Sorry impossible to edit this kuzzle document, there is no identifier"
             });
         }
     },
@@ -70746,9 +70762,7 @@ exports.default = {
         if (!feature.getId()) {
             _notification2.default.init({
                 type: 'error',
-                cssClass: 'mdl-color--red-400',
-                message: "Can't delete the kuzzle document.",
-                icon: 'error'
+                message: "Can't delete the kuzzle document."
             });
             return false;
         } else {
@@ -70822,9 +70836,7 @@ exports.default = {
 
                         _notification2.default.init({
                             type: 'notice',
-                            cssClass: 'mdl-color--green-400',
-                            message: "A document have been " + this_.action + "d in Kuzzle in your subscribe area.",
-                            icon: 'notice'
+                            message: "A document have been " + this_.action + "d in Kuzzle in your subscribe area."
                         });
                     });
                 } else if ('out' == resp.scope) {
@@ -70834,9 +70846,7 @@ exports.default = {
 
                         _notification2.default.init({
                             type: 'notice',
-                            cssClass: 'mdl-color--green-400',
-                            message: "A document have been deleted from Kuzzle in your subscribe area.",
-                            icon: 'notice'
+                            message: "A document have been deleted from Kuzzle in your subscribe area."
                         });
                     }
             } else {
@@ -70888,9 +70898,7 @@ exports.default = {
                     if (1 > resp.total) {
                         _notification2.default.init({
                             type: 'warning',
-                            cssClass: 'mdl-color--amber-400',
-                            message: "No document find, retry with another term.",
-                            icon: 'warning'
+                            message: "No document find, retry with another term."
                         });
                     } else {
                         var respAutoComplete = resp.documents.map(function (kDoc) {
@@ -70905,18 +70913,14 @@ exports.default = {
                     console.error(err);
                     _notification2.default.init({
                         type: 'error',
-                        cssClass: 'mdl-color--red-400',
-                        message: "Research error",
-                        icon: 'error'
+                        message: "Research error"
                     });
                 }
             });
         } else {
             _notification2.default.init({
                 type: 'warning',
-                cssClass: 'mdl-color--amber-400',
-                message: "Please, select a layer to the right.",
-                icon: 'warning'
+                message: "Please, select a layer to the right."
             });
         }
     },
@@ -71761,13 +71765,13 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _filter = require('babel-runtime/core-js/array/filter');
-
-var _filter2 = _interopRequireDefault(_filter);
-
 var _typeof2 = require('babel-runtime/helpers/typeof');
 
 var _typeof3 = _interopRequireDefault(_typeof2);
+
+var _filter = require('babel-runtime/core-js/array/filter');
+
+var _filter2 = _interopRequireDefault(_filter);
 
 var _from = require('babel-runtime/core-js/array/from');
 
@@ -71819,8 +71823,7 @@ exports.default = {
         projectionFrom: _projections2.default.projectionFrom,
         projectionTo: _projections2.default.projectionTo,
         osm: null,
-        distance: 10000,
-        unity: 'm',
+        distance: 5000,
         zoneSubscriptionLayer: null,
         view: null,
         zoom: null,
@@ -71925,6 +71928,8 @@ exports.default = {
         this.initControls();
     },
     initControls: function initControls() {
+        var _this = this;
+
         var this_ = this;
 
         this.state.layerSwitcher = new _openlayers2.default.control.LayerSwitcher();
@@ -71935,16 +71940,25 @@ exports.default = {
             distance: this.state.distance
         };
 
-        var handleChangeUnity = this.handleChangeUnity = function (e) {
+        var handleChangeScale = this.handleChangeScale = function (e) {
 
-            this_.state.unity = e.target.checked ? 'km' : 'm';
-            var distance = document.getElementById('zoneRadius').value;
+            var min = parseInt(this.dataset.min);
+            var max = parseInt(this.dataset.max);
+            var factorScale = parseInt(this.value);
 
             if (undefined != this_.state.zoneSubscriptionLayer) {
-                var newDistance = 'km' == this_.state.unity ? distance * 1000 : distance;
-                var lblDistance = distance + ' ' + this_.state.unity;
 
-                this_.state.distance = parseInt(newDistance);
+                var inputZoneRadius = document.getElementById('zoneRadius');
+                var distanceUpdate = max / 2;
+
+                console.log("Radius de " + min + " a " + max);
+                inputZoneRadius.setAttribute("min", min);
+                inputZoneRadius.setAttribute("max", max);
+                inputZoneRadius.value = distanceUpdate;
+
+                var lblDistance = 10000 > distanceUpdate ? distanceUpdate + ' m' : distanceUpdate / 1000 + ' km';
+                this_.state.distance = parseInt(distanceUpdate);
+
                 this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                 this_.createZoneSubscription(this_.state.distance);
 
@@ -71957,10 +71971,9 @@ exports.default = {
 
             if (undefined != this_.state.zoneSubscriptionLayer) {
                 var distance = e.target.value;
-                var newDistance = 'km' == this_.state.unity ? distance * 1000 : distance;
-                var lblDistance = distance + ' ' + this_.state.unity;
 
-                this_.state.distance = parseInt(newDistance);
+                this_.state.distance = parseInt(distance);
+                var lblDistance = 10000 > distance ? distance + ' m' : distance / 1000 + ' km';
                 this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                 this_.createZoneSubscription(this_.state.distance);
 
@@ -71968,7 +71981,10 @@ exports.default = {
             }
         };
 
-        document.getElementById('unity').addEventListener('change', this.handleChangeUnity, false);
+        var scaleList = document.getElementsByName('scale');
+        (0, _filter2.default)(scaleList, function (radio) {
+            radio.addEventListener('change', _this.handleChangeScale, false);
+        });
         document.getElementById('zoneRadius').addEventListener('change', this.handleChangeDistance, false);
 
         var optionsControlDraw = {
@@ -71995,7 +72011,9 @@ exports.default = {
                     }
 
                     this_.createZoneSubscription(this_.state.distance);
-                    document.getElementById('unity').disabled = false;
+                    (0, _filter2.default)(scaleList, function (radio) {
+                        radio.disabled = false;
+                    });
                     document.getElementById('zoneRadius').disabled = false;
 
                     _dataLayers2.default.loadDatasFromCollection(lyr.get('title'));
@@ -72226,7 +72244,7 @@ exports.default = {
         return tabG;
     },
     editExportLinks: function editExportLinks() {
-        var _this = this;
+        var _this2 = this;
 
         var links = document.getElementsByClassName('export');
         (0, _filter2.default)(links, function (link) {
@@ -72235,7 +72253,7 @@ exports.default = {
             var serialized = "export";
             var tabParams = {
                 type: link.dataset.type,
-                layer: _this.getSelectedLayer().get('title')
+                layer: _this2.getSelectedLayer().get('title')
             };
 
             var serialiseObject = function serialiseObject(obj) {

@@ -19,8 +19,7 @@ export default {
         projectionFrom: Projection.projectionFrom,
         projectionTo: Projection.projectionTo,
         osm: null,
-        distance: 10000,
-        unity: 'm',
+        distance: 5000,
         zoneSubscriptionLayer: null,
         view: null,
         zoom: null,
@@ -160,9 +159,6 @@ export default {
     {
         var this_ = this;
 
-        //var externalZoom = new ol.control.ZoomUiButtons();
-        //this.state.map.addControl(externalZoom);
-
         // Adding Layer switcher
         this.state.layerSwitcher = new ol.control.LayerSwitcher();
         this.state.map.addControl(this.state.layerSwitcher);
@@ -177,16 +173,26 @@ export default {
          *
          * @type {initControls.handleChangeUnity}
          */
-        var handleChangeUnity = this.handleChangeUnity = function(e) {
+        var handleChangeScale = this.handleChangeScale = function(e) {
 
-            this_.state.unity = (e.target.checked) ? 'km' : 'm';
-            var distance = document.getElementById('zoneRadius').value;
+            var min = parseInt(this.dataset.min);
+            var max = parseInt(this.dataset.max);
+            var factorScale = parseInt(this.value);
 
             if (undefined != this_.state.zoneSubscriptionLayer) {
-                var newDistance = ('km' == this_.state.unity) ? distance * 1000 : distance;
-                var lblDistance = distance + ' ' + this_.state.unity;
 
-                this_.state.distance = parseInt(newDistance);
+                var inputZoneRadius = document.getElementById('zoneRadius');
+                var distanceUpdate = max/2; // we set to the middle
+
+                console.log("Radius de " + min + " a " + max);
+                inputZoneRadius.setAttribute("min", min);
+                inputZoneRadius.setAttribute("max", max);
+                inputZoneRadius.value = distanceUpdate;
+
+            //    var newDistance = ('km' == this_.state.unity) ? distance * 1000 : distance;
+                var lblDistance = (10000 > distanceUpdate)? distanceUpdate + ' m' : (distanceUpdate/1000) + ' km';
+                this_.state.distance = parseInt(distanceUpdate);
+
                 this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                 this_.createZoneSubscription(this_.state.distance);
 
@@ -203,10 +209,12 @@ export default {
             // If chane, remove and rebuild the subscribe zone
             if (undefined != this_.state.zoneSubscriptionLayer) {
                 var distance = e.target.value;
-                var newDistance = ('km' == this_.state.unity) ? distance * 1000 : distance;
-                var lblDistance = distance + ' ' + this_.state.unity;
 
-                this_.state.distance = parseInt(newDistance);
+            //    var newDistance = ('km' == this_.state.unity) ? distance * 1000 : distance;
+            //    var lblDistance = distance + ' ' + this_.state.unity;
+            //
+                this_.state.distance = parseInt(distance);
+                var lblDistance = (10000 > distance)? distance + ' m' : (distance/1000) + ' km';
                 this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
                 this_.createZoneSubscription(this_.state.distance);
 
@@ -214,7 +222,10 @@ export default {
             }
         };
 
-        document.getElementById('unity').addEventListener('change', this.handleChangeUnity, false);
+        var scaleList = document.getElementsByName('scale');
+        Array.filter(scaleList, radio => {
+            radio.addEventListener('change', this.handleChangeScale, false);
+        });
         document.getElementById('zoneRadius').addEventListener('change', this.handleChangeDistance, false);
 
         // Adding draw controls
@@ -244,7 +255,9 @@ export default {
                     }
                     // Creation couche zone subscribe
                     this_.createZoneSubscription(this_.state.distance);
-                    document.getElementById('unity').disabled = false;
+                    Array.filter(scaleList, radio => {
+                        radio.disabled = false;
+                    });
                     document.getElementById('zoneRadius').disabled = false;
 
                     // Load datas and Mapping
@@ -302,6 +315,7 @@ export default {
         this.addGeometriesTab(feature.getGeometry());
 
         // Retrieve datas from Form Edit Properties
+        // TODO : edit
         var form = document.getElementsByName("form-edit-properties")[0];
         form.removeEventListener('submit', this.handleSubmit);
         form.addEventListener('submit', this.handleSubmit, false);
