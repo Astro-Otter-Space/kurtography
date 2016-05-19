@@ -25,7 +25,7 @@ export default {
         zoom: null,
         buttonsDrawControls: null,
         layerSwitcher: null,
-        //subscribeZoneCtrl: null,
+        markerSource: null,
         groupKuzzleLayers:null,
         featureForm: null,
         selectedLayer: null,
@@ -98,7 +98,6 @@ export default {
             view: this.state.view
         });
 
-
         // Centrage sur la carte en recuperant la position
         this.geolocation = new ol.Geolocation({
             projection: ol.proj.get(this.state.projectionTo),
@@ -106,22 +105,27 @@ export default {
         });
 
         // If user blocking geolocalisation, set on default point
+        // TODO : probleme version OpenLayers 3.13 -> 3.15
         this.geolocation.on('error', function(){
             var lonDef = Projection.longDefault;
             var latDef = Projection.latDefault;
-            this_.geolocation.setProperties({
-                position: new ol.Coordinate([lonDef, latDef]),
+            this.setProperties({
+                position: [lonDef, latDef],
                 tracking: true
             });
-            console.log("Nouvelles position : " + this_.geolocation.getPosition());
             this_.initPosition(lonDef, latDef);
         });
 
         // Get change on geolocation (mobile use only)
         this.geolocation.on('change', function() {
+            console.log("detection changement");
             var lon = this_.geolocation.getPosition()[0];
             var lat =  this_.geolocation.getPosition()[1];
-            this_.initPosition(lonDef, latDef);
+            this_.initPosition(lon, lat);
+
+            if (undefined != this.getSelectedLayer) {
+                this.createZoneSubscription(this.state.distance);
+            }
         });
 
 
@@ -285,14 +289,90 @@ export default {
      */
     initPosition(lon, lat)
     {
+        if (undefined != this.markerPositionLayer) {
+            this.state.map.removeLayer(this.markerPositionLayer);
+        }
+
         var pointCenter = new ol.geom.Point([lon, lat]).transform(this.state.projectionTo, this.state.projectionFrom).getCoordinates();
         this.state.view.setCenter(pointCenter);
 
-        if (undefined != this.getSelectedLayer) {
-            this.createZoneSubscription(this.state.distance);
-        }
+        // Adding position marker
+        var iconFeature = new ol.Feature({
+            geometry: new ol.geom.Point([lon, lat]).transform(this.state.projectionTo, this.state.projectionFrom)
+        });
+
+        var markerSource = new ol.source.Vector({});
+        markerSource.addFeature(iconFeature);
+
+        this.markerPositionLayer = new ol.layer.Vector({
+            source: markerSource,
+            title: "Marker position",
+            visible: true,
+            style: new ol.style.Style({
+                image: new ol.style.Icon({
+                    anchor: [0, 20],
+                    anchorXUnits: 'fraction',
+                    anchorYUnits: 'pixels',
+                    opacity: 0.75,
+                    src: 'images/marker_position.png'
+                })
+            })
+        });
+
+        this.state.map.addLayer(this.markerPositionLayer);
     },
 
+    /**
+     * Create a zone where kuzzle subscription is active
+     * @param distance
+     */
+    createZoneSubscription(distance)
+    {
+        var coordonatesWGS84 = this.geolocation.getPosition();
+
+        var features = [];
+        // Transformation coordinates
+        var coordinatesTr = ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
+
+        // Creation of circle
+        var circle = new ol.geom.Circle([coordinatesTr[0], coordinatesTr[1]], distance);
+
+        // Create feature : we transform the circle into polygon for having a geJSON of this feature
+        features.push(new ol.Feature({
+            geometry: new ol.geom.Polygon.fromCircle(circle, 128)
+        }));
+
+        // Create Vector Source
+        var vectorSource = new ol.source.Vector({
+            features: features
+        });
+
+        // Random color #RRGGBB
+        var color = '#' + '0123456789abcdef'.split('').map(function(v,i,a){
+                return i>5 ? null : a[Math.floor(Math.random()*16)] }).join('');
+
+        // Create vector layer
+        this.state.zoneSubscriptionLayer = new ol.layer.Vector({
+            source: vectorSource,
+            title: "Subscribe zone",
+            visible: true,
+            style: [
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: '#8BC34A',
+                        width: 2
+                    }),
+                    fill: null
+                })
+            ]
+        });
+        this.state.zoneSubscriptionLayer.setZIndex(10);
+        // Ajout de la couche
+        this.state.map.addLayer(this.state.zoneSubscriptionLayer);
+
+        // Rebuild the subscribe zone
+        dataLayers.subscribeCollection(this.getSelectedLayer(), this.geolocation.getPosition(), this.state.distance);
+    },
 
     /**
      * Show feature information by feature
@@ -339,57 +419,6 @@ export default {
         form.addEventListener('submit', this.handleSubmit, false);
     },
 
-    /**
-     * Create a zone where kuzzle subscription is active
-     * @param distance
-     */
-    createZoneSubscription(distance)
-    {
-        var coordonatesWGS84 = this.geolocation.getPosition();
-
-        var features = [];
-        // Transformation coordinates
-        var coordinatesTr = ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
-
-        // Creation of circle
-        var circle = new ol.geom.Circle([coordinatesTr[0], coordinatesTr[1]], distance);
-
-        // Create feature : we transform the circle into polygon for having a geJSON of this feature
-        features.push(new ol.Feature({
-            geometry: new ol.geom.Polygon.fromCircle(circle, 128)
-        }));
-
-        // Create Vector Source
-        var vectorSource = new ol.source.Vector({
-            features: features
-        });
-
-        // Random color #RRGGBB
-        var color = '#' + '0123456789abcdef'.split('').map(function(v,i,a){
-            return i>5 ? null : a[Math.floor(Math.random()*16)] }).join('');
-
-        // Create vector layer
-        this.state.zoneSubscriptionLayer = new ol.layer.Vector({
-            source: vectorSource,
-            title: "Subscribe zone",
-            visible: true,
-            style: [
-                new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: '#8BC34A',
-                        width: 2
-                    }),
-                    fill: null
-                })
-            ]
-        });
-        this.state.zoneSubscriptionLayer.setZIndex(10);
-        // Ajout de la couche
-        this.state.map.addLayer(this.state.zoneSubscriptionLayer);
-
-        // Rebuild the subscribe zone
-        dataLayers.subscribeCollection(this.getSelectedLayer(), this.geolocation.getPosition(), this.state.distance);
-    },
 
     /**
      * Verify with turf-inside if a pint is inside or outside the subscribe zone
