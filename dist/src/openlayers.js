@@ -313,7 +313,7 @@ export default {
             visible: true,
             style: new ol.style.Style({
                 image: new ol.style.Icon({
-                    anchor: [0, 20],
+                    anchor: [0.5, 18.5],
                     anchorXUnits: 'fraction',
                     anchorYUnits: 'pixels',
                     opacity: 0.75,
