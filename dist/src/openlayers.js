@@ -4,6 +4,7 @@ import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
 import ControlDrawButtons from './ol3-controldrawbuttons'
 import ZoomControl from './ol3-zoomuibuttons';
+import SetPosition from './ol3-resetposition';
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
 import jsoneditor from 'jsoneditor';
@@ -176,7 +177,6 @@ export default {
         this.state.map.addControl(this.state.layerSwitcher);
 
         /**
-         *
          * @type {initControls.handleChangeUnity}
          */
         var handleChangeScale = this.handleChangeScale = function(e) {
@@ -281,6 +281,9 @@ export default {
             });
         });
         this.state.map.addControl(this.state.buttonsDrawControls);
+
+        var resetPosition = new ol.control.ResetPosition();
+        this.state.map.addControl(resetPosition);
     },
 
 
