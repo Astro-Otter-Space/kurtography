@@ -1,6 +1,6 @@
 import kuzzle from '../services/kuzzle'
 import Config from '../services/config'
-import Projection from '../services/projections'
+import Projection from '../services/geo-parameters'
 import notification from '../services/notification';
 import ol from 'openlayers';
 import olMap from './openlayers'

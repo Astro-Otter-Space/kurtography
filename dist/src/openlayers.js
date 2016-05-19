@@ -1,4 +1,4 @@
-import Projection from '../services/projections'
+import Projection from '../services/geo-parameters'
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
@@ -98,22 +98,30 @@ export default {
             view: this.state.view
         });
 
+
         // Centrage sur la carte en recuperant la position
         this.geolocation = new ol.Geolocation({
             projection: ol.proj.get(this.state.projectionTo),
             tracking: true
         });
 
+        // If user blocking geolocalisation, set on default point
+        this.geolocation.on('error', function(){
+            var lonDef = Projection.longDefault;
+            var latDef = Projection.latDefault;
+            this_.geolocation.setProperties({
+                position: new ol.Coordinate([lonDef, latDef]),
+                tracking: true
+            });
+            console.log("Nouvelles position : " + this_.geolocation.getPosition());
+            this_.initPosition(lonDef, latDef);
+        });
+
         // Get change on geolocation (mobile use only)
         this.geolocation.on('change', function() {
             var lon = this_.geolocation.getPosition()[0];
             var lat =  this_.geolocation.getPosition()[1];
-            var pointCenter = new ol.geom.Point([lon, lat]).transform(this_.state.projectionTo, this_.state.projectionFrom).getCoordinates();
-            this_.state.view.setCenter(pointCenter);
-
-            if (undefined != this.getSelectedLayer) {
-                this_.createZoneSubscription(this.state.distance);
-            }
+            this_.initPosition(lonDef, latDef);
         });
 
 
@@ -269,6 +277,20 @@ export default {
             });
         });
         this.state.map.addControl(this.state.buttonsDrawControls);
+    },
+
+
+    /**
+     * In progress...
+     */
+    initPosition(lon, lat)
+    {
+        var pointCenter = new ol.geom.Point([lon, lat]).transform(this.state.projectionTo, this.state.projectionFrom).getCoordinates();
+        this.state.view.setCenter(pointCenter);
+
+        if (undefined != this.getSelectedLayer) {
+            this.createZoneSubscription(this.state.distance);
+        }
     },
 
 

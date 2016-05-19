@@ -1,4 +1,4 @@
-import Projection from '../services/projections'
+import Projection from '../services/geo-parameters'
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 
