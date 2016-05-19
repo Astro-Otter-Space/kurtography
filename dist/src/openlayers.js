@@ -107,7 +107,8 @@ export default {
 
         // If user blocking geolocalisation, set on default point
         // TODO : probleme version OpenLayers 3.13 -> 3.15
-        this.geolocation.on('error', function(){
+        this.geolocation.on('error', function(error){
+            console.log(error.message);
             var lonDef = Projection.longDefault;
             var latDef = Projection.latDefault;
             this.setProperties({
@@ -120,6 +121,18 @@ export default {
         // Get change on geolocation (mobile use only)
         this.geolocation.on('change', function() {
             console.log("detection changement");
+            var lon = this_.geolocation.getPosition()[0];
+            var lat =  this_.geolocation.getPosition()[1];
+            this_.initPosition(lon, lat);
+
+            if (undefined != this.getSelectedLayer) {
+                this.createZoneSubscription(this.state.distance);
+            }
+        });
+
+        // Get change on geolocation (mobile use only)
+        this.geolocation.on('change:position', function() {
+            console.log("detection changement position");
             var lon = this_.geolocation.getPosition()[0];
             var lat =  this_.geolocation.getPosition()[1];
             this_.initPosition(lon, lat);
