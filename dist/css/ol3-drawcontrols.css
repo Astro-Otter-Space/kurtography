@@ -3,29 +3,29 @@
     color : #FFFFFF;
 }
 .glyphicon-vector-path-point {
-    background-image: url("../images/glyphicons-336-pushpin.png");
+    background-image: url("/images/glyphicons-336-pushpin.png");
 }
 .glyphicon-vector-path-line {
-    background-image: url("../images/glyphicons-302-vector-path-line.png");
+    background-image: url("/images/glyphicons-302-vector-path-line.png");
 }
 .glyphicon-vector-path-square {
-    background-image: url("../images/glyphicons-300-vector-path-square.png");
+    background-image: url("/images/glyphicons-300-vector-path-square.png");
 }
 .glyphicon-vector-path-circle {
-    background-image: url("../images/glyphicons-301-vector-path-circle.png");
+    background-image: url("/images/glyphicons-301-vector-path-circle.png");
 }
 .glyphicon-vector-path-polygon {
-    background-image: url("../images/glyphicons-305-vector-path-polygon.png");
+    background-image: url("/images/glyphicons-305-vector-path-polygon.png");
 }
 .glyphicon-vector-path-ok {
-    background-image: url("../images/glyphicons-207-ok.png");
+    background-image: url("/images/glyphicons-207-ok.png");
 }
 
 .glyphicon-vector-path-pencil {
-    background-image: url("../images/glyphicons-31-pencil.png");
+    background-image: url("/images/glyphicons-31-pencil.png");
 }
 .glyphicon-vector-path-trash {
-    background-image: url("../images/glyphicons-17-bin.png");
+    background-image: url("/images/glyphicons-17-bin.png");
 }
 
 
@@ -42,8 +42,6 @@
 }
 
 .toggle-control button {
-    /*width : 25px;*/
-    /*height: 25px;*/
     padding: 18px;
     background-repeat: no-repeat;
     background-position: center;
@@ -56,10 +54,8 @@
 
 .toggle-control button.progress:disabled {
     text-decoration: none;
-    /*background-color: rgba(44, 128, 27, 0.75);*/
     background-color: rgba(145, 196, 133, 0.7);
 }
-
 
 .toggle-control button:disabled {
     text-decoration: none;
