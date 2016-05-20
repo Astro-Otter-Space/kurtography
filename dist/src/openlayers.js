@@ -6,6 +6,7 @@ import LayerSwitcher from './layerSwitcher'
 import ControlDrawButtons from './ol3-controldrawbuttons'
 import ZoomControl from './ol3-zoomuibuttons';
 import SetPosition from './ol3-resetposition';
+import RedrawSubscribeZone from './ol3-editsubscribezone';
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
 import jsoneditor from 'jsoneditor';
@@ -114,7 +115,6 @@ export default {
 
         this.geolocation.set('position', [Projection.longDefault, Projection.latDefault]);
         this.initPosition(lonDef, latDef);
-        console.log("test : " + this.geolocation.getPosition());
 
         // If user blocking geolocalisation, set on default point and set default point as geolocation
         this.geolocation.on('error', function(error){
@@ -308,8 +308,13 @@ export default {
         });
         this.state.map.addControl(this.state.buttonsDrawControls);
 
+        // Reset to the position
         var resetPosition = new ol.control.ResetPosition();
         this.state.map.addControl(resetPosition);
+
+        // Redraw the subscribe zone
+        var RedrawSubscribeZone = new ol.control.EditSubscribeRoom();
+        this.state.map.addControl(RedrawSubscribeZone);
     },
 
 

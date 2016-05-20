@@ -321,7 +321,7 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
     }
 };
 
-/**
+/**geometryFctDraw
  * TODO : REPORT THIS IN REPOSITORY ol3-drawButtons
  * @param evt
  */

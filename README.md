@@ -8,7 +8,7 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.9.1
+Beta stage of development : v. 0.9.2
 
 Requirements
 -------------
@@ -72,6 +72,44 @@ A script bundle.js will be compiled, and after run with
 npm start
 ```
 
+Kuzzle mapping format
+-------------
+In Kuzzle-BO, when create a new collection, the mapping must be like :
+```
+{
+    "type": {
+        "type": "string"
+    },
+    "geometry": {
+        "properties": {
+            "coordinates": {
+                "type": "double"
+            },
+            "type": {
+                "type": "string"
+            }
+        }
+    },
+    "location": {
+        "type": "geo_point",
+        "lat_lon": true
+    },
+    "properties": {
+        "properties": {
+            "name": {
+                "type": "string"
+            }
+        }
+    }
+}
+```
+Item     | type | Information
+-------- | -------- | ----------
+type | "string" | store the value "feature"
+geometry | Object |
+location | geo_point | [See the doc](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/mapping-geo-point-type.html)
+properties | Object | Store fields
+
 
 Kuzzle data format
 -------------
@@ -106,6 +144,7 @@ type | "Feature" | default value, don't change it
 geometry | Object |
 properties | Object |
 location | Object |
+id | string | Kuzzle document identifier
 
 
 Features
@@ -116,23 +155,27 @@ Features
   - Create, edit and delete features with an [openlayers3 draw control plugin](https://github.com/HamHamFonFon/ol3-drawButtons)
   - Create and edit properties
   - Create a reference point (for polygons an lines, the reference point is the centroid) for the subscribe room
-  - Subscribe room : zone from geolocation with 10km radius
+  - Edit subscribe zone by changing radius
+  - Subscribe room : zone from geolocation with 5km radius
   - Search items
   - Search only in subscribe area
-  - Edit subscribe zone by changing radius
+  - Get default location if user blocking naviogator geolocation
+  - Graphic refactoring with Material Design Lite
+  - Reset map to geolocation position
 
 Features in progress
 -------------
   - Fix on geo_distance precision
+  - Change subscribe zone by geolocalisation
+  - Change subscribe zone and search by manual tool
   - Export datas
 
 Features will be avalaible soon:
 -------------
-  - Change of subscribe zone by geolocalisation
   - Register user
   - Authentification
   - Filtering features by user authorisation
-  - Design refactoring with Material-Ui and React
+  - User can subscribe to a specific item
 
 Author(s)
 -------------

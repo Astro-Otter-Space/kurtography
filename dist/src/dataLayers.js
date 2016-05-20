@@ -334,7 +334,7 @@ export default {
             subscription.unsubscribe();
         }
 
-        var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 10000;
+        var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 5000;
         var filter =
         {
             geoDistance: {
@@ -354,7 +354,7 @@ export default {
             state: 'done'
         };
 
-        //console.log(JSON.stringify(filter, '', false);
+        console.log(JSON.stringify(filter, '', false));
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 var kDoc = this.loadDataById(resp.result._id);
@@ -417,6 +417,7 @@ export default {
         if (null != olMap.getSelectedLayer()) {
 
             var layer = olMap.getSelectedLayer().get('title');
+            // TODO : EDIT, because when a user make a custom subscribe, it's not the good coordinates
             var coordonatesWGS84 = olMap.geolocation.getPosition();
             //var collMapping = this.state.dataProperties;
             //var filterMapping = Object.keys(collMapping).map(field => {
@@ -430,7 +431,7 @@ export default {
             //or: filterMapping
 
             // Filter search on name of items with a geoDistance filter, sorting by geodistance asc
-            var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 10000;
+            var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 5000;
             var filterSearch =
             {
                 filter: {
