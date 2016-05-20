@@ -417,8 +417,8 @@ export default {
         if (null != olMap.getSelectedLayer()) {
 
             var layer = olMap.getSelectedLayer().get('title');
-            // TODO : EDIT, because when a user make a custom subscribe, it's not the good coordinates
-            var coordonatesWGS84 = olMap.geolocation.getPosition();
+            var coordonatesWGS84 = olMap.state.coordinates; //olMap.geolocation.getPosition();
+            
             //var collMapping = this.state.dataProperties;
             //var filterMapping = Object.keys(collMapping).map(field => {
             //    var filterOr = {

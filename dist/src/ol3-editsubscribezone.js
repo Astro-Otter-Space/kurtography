@@ -133,6 +133,7 @@ ol.control.EditSubscribeRoom.prototype.drawEndFeature = function(evt)
     var centerWgs84 = ol.proj.transform([center[0], center[1]], Projection.projectionFrom, Projection.projectionTo);
 
     olMap.state.distance = parseInt(radius);
+    olMap.state.coordinates = centerWgs84;
     dataLayers.subscribeCollection(olMap.getSelectedLayer(), centerWgs84);
 };
 

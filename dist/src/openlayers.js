@@ -18,20 +18,22 @@ export default {
 
     state: {
         map: null,
-        tabLayersKuzzle: [],
-        projectionFrom: Projection.projectionFrom,
-        projectionTo: Projection.projectionTo,
         osm: null,
-        distance: 5000,
-        zoneSubscriptionLayer: null,
         view: null,
         zoom: null,
+        tabLayersKuzzle: [],
+        groupKuzzleLayers:null,
+        projectionFrom: Projection.projectionFrom,
+        projectionTo: Projection.projectionTo,
+        coordinates: [],
+        osm: null,
+        selectedLayer: null,
+        distance: 5000,
+        zoneSubscriptionLayer: null,
         buttonsDrawControls: null,
         layerSwitcher: null,
         markerSource: null,
-        groupKuzzleLayers:null,
         featureForm: null,
-        selectedLayer: null,
         tabStyles: null,
         acceptGeoloc : true
     },
@@ -114,6 +116,7 @@ export default {
         });
 
         this.geolocation.set('position', [Projection.longDefault, Projection.latDefault]);
+        this.state.coordinates = [lonDef, latDef];
         this.initPosition(lonDef, latDef);
 
         // If user blocking geolocalisation, set on default point and set default point as geolocation
@@ -148,6 +151,8 @@ export default {
             console.log("detection changement position");
             var lon = this.getPosition()[0];
             var lat =  this.getPosition()[1];
+            // Set of current coordonates
+            this_.state.coordinates = [lon, lat];
             this_.initPosition(lon, lat);
 
             if (undefined != this.getSelectedLayer) {
@@ -362,7 +367,7 @@ export default {
      */
     createZoneSubscription(distance)
     {
-        var coordonatesWGS84 = this.geolocation.getPosition();
+        var coordonatesWGS84 = this.state.coordinates = this.geolocation.getPosition();
 
         var features = [];
         // Transformation coordinates
