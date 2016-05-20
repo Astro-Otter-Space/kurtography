@@ -44,17 +44,20 @@ export default {
 
 #### <i class="icon-upload"></i> Geodatas projection
 
-Edit file public\services\projection.js and change value projectionTo
+Edit file dist\services\geo-parameters.js and change value projectionTo. You can specify default coordinates for people who block navigator geolocation
 ```
 export default {
     projectionFrom: 'EPSG:3857',
     projectionTo: 'EPSG:4326'
+    latDefault: 48.856614,
+    longDefault: 2.352222
 }
 ```
 
 > **Note:** Don't change "projectionFrom" value, it's the projection using by Openlayers. If you want to record yours datas in Kuzzle with an other projection,
 check the [spatial reference list](http://spatialreference.org/ref/epsg/) and edit "projectionTo" value. Default value is 'EPSG:4326' who is the WGS-84 projection (using in GPS, Google Map...)
 
+> **Note 2:** Default coordinates are from Paris, France
 
 #### <i class="icon-upload"></i> Developpement
 
@@ -63,17 +66,26 @@ Live test :
 npm test
 ```
 
+Compile and minify CSS files :
+```
+npm run build-css
+```
+A minify CSS will be create in "public/css/"
+
 Run the app with the following command which compile modifications using browserify and babelify :
 ```
 npm run build-map
 ```
-A script bundle.js will be compiled, and after run with
+A script bundle.js will be compiled in "public/js/", and after run with
 ```
 npm start
 ```
 
-Kuzzle mapping format
+Kuzzle Back-Office
 -------------
+
+#### <i class="icon-upload"></i> Collections mapping
+
 In Kuzzle-BO, when create a new collection, the mapping must be like :
 ```
 {
@@ -111,7 +123,7 @@ location | geo_point | [See the doc](https://www.elastic.co/guide/en/elasticsear
 properties | Object | Store fields
 
 
-Kuzzle data format
+#### <i class="icon-upload"></i> Data format
 -------------
 Datas are recording in [GeoJSON](http://geojson.org/) format in Kuzzle.
 Read [Kuzzle documentation](http://kuzzle.io/sdk-documentation/) for more information about KuzzleCollection and KuzzleDocument
