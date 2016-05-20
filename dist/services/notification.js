@@ -13,8 +13,8 @@ export default {
         this.objConst = {
             message: obj.message.toString(),
             timeout: 3000,
-            actionHandler: function(event) {},
-            actionText: 'Undo'
+            //actionHandler: function(event) {},
+            //actionText: 'Undo'
         };
 
         var snackbarContainer = document.querySelector('.mdl-js-snackbar');

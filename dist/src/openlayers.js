@@ -1,4 +1,5 @@
 import Projection from '../services/geo-parameters'
+import notification from '../services/notification';
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import LayerSwitcher from './layerSwitcher'
@@ -30,7 +31,8 @@ export default {
         groupKuzzleLayers:null,
         featureForm: null,
         selectedLayer: null,
-        tabStyles: null
+        tabStyles: null,
+        acceptGeoloc : true
     },
 
     /**
@@ -99,46 +101,57 @@ export default {
             view: this.state.view
         });
 
-        // Centrage sur la carte en recuperant la position
+
+        // If user block geolocation, set to default location
+        var lonDef = Projection.longDefault;
+        var latDef = Projection.latDefault;
+
+        // Retrieve geolocation with default values
         this.geolocation = new ol.Geolocation({
             projection: ol.proj.get(this.state.projectionTo),
             tracking: true
         });
 
-        // If user blocking geolocalisation, set on default point
-        // TODO : probleme version OpenLayers 3.13 -> 3.15
+        this.geolocation.set('position', [Projection.longDefault, Projection.latDefault]);
+        this.initPosition(lonDef, latDef);
+        console.log("test : " + this.geolocation.getPosition());
+
+        // If user blocking geolocalisation, set on default point and set default point as geolocation
         this.geolocation.on('error', function(error){
-            console.log(error.message);
-            var lonDef = Projection.longDefault;
-            var latDef = Projection.latDefault;
-            this.setProperties({
-                position: [lonDef, latDef],
-                tracking: true
+            this_.state.acceptGeoloc = false;
+            notification.init({
+                type: 'warning',
+                message : 'Will you accept geolocation :) ?'
             });
-            this_.initPosition(lonDef, latDef);
         });
 
         // Get change on geolocation (mobile use only)
-        this.geolocation.on('change', function() {
-            console.log("detection changement");
-            var lon = this_.geolocation.getPosition()[0];
-            var lat =  this_.geolocation.getPosition()[1];
-            this_.initPosition(lon, lat);
+        // TODO : verify if on mobile, changed position is detected
+        document.addEventListener("DOMContentLoaded", function(event) {
+            if(false != this_.state.acceptGeoloc) {
+                this.geolocation.on('change', function() {
+                    console.log("detection changement");
 
-            if (undefined != this.getSelectedLayer) {
-                this.createZoneSubscription(this.state.distance);
+                    var lon = this_.geolocation.getPosition()[0];
+                    var lat =  this_.geolocation.getPosition()[1];
+                    this_.initPosition(lon, lat);
+
+                    if (undefined != this_.getSelectedLayer) {
+                        this_.createZoneSubscription(this_.state.distance);
+                    }
+                });
             }
         });
 
         // Get change on geolocation (mobile use only)
         this.geolocation.on('change:position', function() {
             console.log("detection changement position");
-            var lon = this_.geolocation.getPosition()[0];
-            var lat =  this_.geolocation.getPosition()[1];
+            var lon = this.getPosition()[0];
+            var lat =  this.getPosition()[1];
             this_.initPosition(lon, lat);
 
             if (undefined != this.getSelectedLayer) {
-                this.createZoneSubscription(this.state.distance);
+                this_.createZoneSubscription(this_.state.distance);
             }
         });
 
