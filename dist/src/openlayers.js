@@ -347,6 +347,7 @@ export default {
             source: markerSource,
             title: "Marker position",
             visible: true,
+            type: 'hidden',
             style: new ol.style.Style({
                 image: new ol.style.Icon({
                     anchor: [0.5, 18.5],
@@ -395,6 +396,7 @@ export default {
             source: vectorSource,
             title: "Subscribe zone",
             visible: true,
+            type: 'hidden',
             style: [
                 new ol.style.Style({
                     stroke: new ol.style.Stroke({

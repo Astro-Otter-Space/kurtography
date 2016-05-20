@@ -406,6 +406,25 @@ export default {
     },
 
 
+    /**
+     * IN PROGRESS...
+     * get a subscribe room if user subscribe to any docs
+     */
+    subscribeDocumentsUser()
+    {
+        var filter =
+        {
+        };
+        var options = {
+            // We want created messages only
+            scope: 'all',
+            // We treate our messages as any other messages
+            subscribeToSelf: true,
+            // We want only messages once they are stored (and volatile are always done)
+            state: 'done'
+        };
+    },
+
 
     /**
      *
@@ -418,7 +437,7 @@ export default {
 
             var layer = olMap.getSelectedLayer().get('title');
             var coordonatesWGS84 = olMap.state.coordinates; //olMap.geolocation.getPosition();
-            
+
             //var collMapping = this.state.dataProperties;
             //var filterMapping = Object.keys(collMapping).map(field => {
             //    var filterOr = {
@@ -499,7 +518,6 @@ export default {
             });
         }
     },
-
 
     /**
      * Bridge between kuzzle search result and Map datas
