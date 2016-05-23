@@ -12,21 +12,26 @@ block content
         main.mdl-layout__content#map
 
         // http://codepen.io/tutsplus/pen/RWwypM
-        div.mdl-layout.mdl-js-layout.mdl-color--grey-100
+        div#infoKdoc.mdl-layout.mdl-js-layout.mdl-color--grey-100.hidden
             main.mdl-layout__content
                 div.mdl-grid
                     div.mdl-card.mdl-cell.mdl-cell--12-col.mdl-cell--8-col-tablet.mdl-shadow--2dp
+                        div.mdl-card__menu
+                            button#mdlClose.mdl-button.mdl-button--icon.mdl-js-button.mdl-js-ripple-effect
+                                i.material-icons close
                         figure.mdl-card__media
-                            img(src="http://tfirdaus.github.io/mdl/images/laptop.jpg", alt="")
+                            img#imgKdoc(src="http://tfirdaus.github.io/mdl/images/laptop.jpg", alt="")
                         div.mdl-card__title
-                            h1.mdl-card__title-text Isidore
+                            h1.mdl-card__title-text#nameKdoc
                         div.mdl-card__supporting-text
-                            p Perdu Isidore blablabla
+                            p#descriptionKdoc
+                            table.mdl-data-table.mdl-js-data-table#tabFGeometry
                         div.mdl-card__actions.mdl-card--border
                             div.mdl-layout-spacer
+                                span#dateKdoc
 
                             // TODO : si user connecté : inscription à cet item
-                            button(type="button").mdl-button.mdl-js-button.mdl-button--raised.mdl-js-ripple-effect.mdl-button--accent Edit
+                            //button(type="button").mdl-button.mdl-js-button.mdl-button--raised.mdl-js-ripple-effect.mdl-button--accent Edit
                             //button(type="button").mdl-button.close Close
                             button.mdl-button.mdl-button--iconmdl-button--colored
                                 i.material-icons exposure_plus_1

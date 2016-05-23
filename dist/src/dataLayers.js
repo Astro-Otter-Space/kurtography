@@ -113,7 +113,10 @@ export default {
                     });
                 } else {
                     // If no mapping in properties, we assign a default value
-                    mappingProperties["name"] = "";
+                    mappingProperties["name"] = "No name";
+                    mappingProperties["description"] = "";
+                    mappingProperties["date_publish"] = new Date().toISOString().slice(0, 10);
+                    mappingProperties["url_image"] = "";
                 }
 
                 this_.state.dataProperties = mappingProperties;
@@ -152,6 +155,11 @@ export default {
             };
         }
 
+        if (0 == fDatasGeoJson.properties.date_publish) {
+            var d = new Date().getTime();
+            fDatasGeoJson.properties.date_publish = new Date().toISOString().slice(0, 10);
+        }
+
         kuzzle.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
             if (!err) {
                 // Setting of Kuzzle Document Identifier to identifier of the feature
@@ -160,10 +168,12 @@ export default {
                 newFeature.setId(resp.id);
                 olMap.state.featureForm = newFeature;
 
+                // If point and not in subscribe zone
                 if ('Point' == typeFeature) {
                     if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
                         olMap.getSelectedLayer().getSource().addFeature(newFeature);
                     }
+                // If not point and centroid is not un subscribe zone
                 } else {
                     var centroidPt = olMap.getFeatureCentroid(fDatasGeoJson);
                     if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
@@ -376,8 +386,8 @@ export default {
 
                         olMap.getSelectedLayer().getSource().addFeature(newFeature);
 
-                        // Utile ? permet de voir les infos de la nouvelle feature
-                        //olMap.showFeaturesInformations(newFeature, false);
+                        // Show new feature
+                        olMap.showFeaturesInformations(newFeature, false);
 
                         notification.init({
                             type: 'notice',

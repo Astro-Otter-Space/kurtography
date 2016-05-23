@@ -8,7 +8,7 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.9.2
+Beta stage of development : v. 0.9.3
 
 Requirements
 -------------
@@ -109,6 +109,16 @@ In Kuzzle-BO, when create a new collection, the mapping must be like :
     "properties": {
         "properties": {
             "name": {
+                "type": "string"
+            },
+            "date_publish": {
+                "type": "date",
+                "format": "YYYY-MM-dd"
+            },
+            "description": {
+                "type": "string"
+            },
+            "url_image": {
                 "type": "string"
             }
         }

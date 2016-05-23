@@ -162,7 +162,7 @@ body{
 
 /* Card information */
 .mdl-grid {
-    max-width: 300px;
+    max-width: 400px;
 }
 .mdl-card__media {
     margin: 0;

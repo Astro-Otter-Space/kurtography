@@ -9,7 +9,7 @@ import SetPosition from './ol3-resetposition';
 import RedrawSubscribeZone from './ol3-editsubscribezone';
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
-import jsoneditor from 'jsoneditor';
+//import jsoneditor from 'jsoneditor';
 /**
  * Initialisation de la map
  * @returns {ol.Map|*}
@@ -26,7 +26,6 @@ export default {
         projectionFrom: Projection.projectionFrom,
         projectionTo: Projection.projectionTo,
         coordinates: [],
-        osm: null,
         selectedLayer: null,
         distance: 5000,
         zoneSubscriptionLayer: null,
@@ -189,7 +188,7 @@ export default {
             );
             if (undefined != feature && undefined != feature.getId() && this_.state.buttonsDrawControls.getFlagDraw() == false) {
                 this_.state.featureForm = feature;
-                this_.showFeaturesInformations(feature);
+                this_.showFeaturesInformations(feature, true);
             }
         });
         this.initControls();
@@ -427,37 +426,31 @@ export default {
         var fProperties = feature.getProperties();
         var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
+        // Show datas
+        document.getElementById("nameKdoc").innerHTML = fProperties.name;
+        document.getElementById("dateKdoc").innerHTML = fProperties.date_publish;
+
+        if (undefined != fProperties.description ) {
+            document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
+        }
+        if (undefined != fProperties.url_image) {
+            document.getElementById("imgKdoc").setAttribute("src", fProperties.url_image);
+            document.getElementById("imgKdoc").setAttribute("alt", fProperties.name);
+            document.getElementById("imgKdoc").setAttribute("title", fProperties.name);
+        }
+        this.addGeometriesTab(feature.getGeometry());
+
         if (true == centerTofeature) {
+            document.getElementById("infoKdoc").classList.toggle("hidden");
             this.setCenterFeature(feature.getId());
         }
-
-        // Gestion dialog box
-        var dialog = document.querySelector('dialog');
-        if (! dialog.showModal) {
-            dialogPolyfill.registerDialog(dialog);
-        }
-
-        if (0 < fProperties.name.length) {
-            document.getElementById("featureTitle").innerHTML = (typeof fProperties.name == "string") ? fProperties.name.capitalizeFirstLetter() : fProperties.name;
-        } else {
-            document.getElementById("featureTitle").innerHTML = "No name";
-        }
-
-        dialog.showModal();
-
-        dialog.querySelector('.close').addEventListener('click', function() {
-            dialog.close();
-        });
-
-        this.addPropertiesTab(fProperties);
-        //this.addGeoJSONTab(fGeoJson);
-        this.addGeometriesTab(feature.getGeometry());
+        //this.addPropertiesTab(fProperties);
 
         // Retrieve datas from Form Edit Properties
         // TODO : edit
-        var form = document.getElementsByName("form-edit-properties")[0];
-        form.removeEventListener('submit', this.handleSubmit);
-        form.addEventListener('submit', this.handleSubmit, false);
+        //var form = document.getElementsByName("form-edit-properties")[0];
+        //form.removeEventListener('submit', this.handleSubmit);
+        //form.addEventListener('submit', this.handleSubmit, false);
     },
 
 

@@ -1,9 +1,7 @@
 {
-    // Type, value : "Feature"
     "type": {
         "type": "string"
     },
-    // Geometry datas for openlayers
     "geometry": {
         "properties": {
             "coordinates": {
@@ -14,15 +12,23 @@
             }
         }
     },
-    // Location for Kuzzle, same value as geometry.coordinates
     "location": {
         "type": "geo_point",
         "lat_lon": true
     },
-    // Properties : list of fields, default : "name"
     "properties": {
         "properties": {
             "name": {
+                "type": "string"
+            },
+            "date_publish": {
+                "type": "date",
+                "format": "YYYY-MM-dd"
+            },
+            "description": {
+                "type": "string"
+            },
+            "url_image": {
                 "type": "string"
             }
         }

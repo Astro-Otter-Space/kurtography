@@ -16,6 +16,9 @@ searchInput.addEventListener('keyup', function(e) {
     awesomplete.list = dataLayers.state.rstAdvancedSearch
 }, false);
 
+document.querySelector('#mdlClose').addEventListener('click', function() {
+    document.getElementById("infoKdoc").classList.toggle("hidden");
+}, false);
 
 //$(function(){
 //    $('form[name="formSearch"]').on('submit', function (e) {
