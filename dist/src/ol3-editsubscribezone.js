@@ -36,6 +36,8 @@ ol.control.EditSubscribeRoom = function (opt_options) {
 
     var button = document.createElement('button');
     button.setAttribute('title', 'Redraw subscribe zone');
+    button.disabled = true;
+    button.id = "redraw_zone";
     button.className = "mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--mini-fab mdl-button--colored";
 
     button.addEventListener('click', handleButtonsClick, false);

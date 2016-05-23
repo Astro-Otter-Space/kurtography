@@ -106,6 +106,9 @@ body{
 /**********************
 * Material Design Lite surcharge
 **********************/
+.mdl-layout__header-row{
+    background-color: rgba(160,160,160, 0.4);
+}
 .inline-list-radio{
     display: inline;
 }
@@ -178,4 +181,8 @@ body{
 .mdl-card__actions > .mdl-button--icon {
     margin-right: 3px;
     margin-left: 3px;
+}
+
+#infoKdoc, #divAuth {
+    top: 5em;
 }

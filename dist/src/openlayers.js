@@ -287,6 +287,8 @@ export default {
                 if (lyr.getVisible() == true) {
                     this_.setSelectedLayer(lyr);
 
+                    document.getElementById("redraw_zone").removeAttribute('disabled');
+
                     // Subscribe and Retrieve datas
                     if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
                         this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);

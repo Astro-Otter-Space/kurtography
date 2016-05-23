@@ -1,6 +1,10 @@
 import dataLayers from './dist/src/dataLayers';
 dataLayers.listCollections();
 
+document.querySelector('a[data-link="auth"]').addEventListener('click', function() {
+    document.getElementById("divAuth").classList.toggle("hidden");
+}, false);
+
 /**
  * Search request with result in autocompletion
  * @returns {string}
@@ -16,6 +20,10 @@ searchInput.addEventListener('keyup', function(e) {
     awesomplete.list = dataLayers.state.rstAdvancedSearch
 }, false);
 
+// Hide cards
+document.querySelector('#mdlAuthClose').addEventListener('click', function() {
+    document.getElementById("divAuth").classList.toggle("hidden");
+}, false);
 document.querySelector('#mdlClose').addEventListener('click', function() {
     document.getElementById("infoKdoc").classList.toggle("hidden");
 }, false);
