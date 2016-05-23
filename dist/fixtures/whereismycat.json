@@ -5,14 +5,10 @@
       "type": "Feature",
       "properties": {
         "name": "Test",
-        "age": "",
-        "genre": "",
+        "description": "",
         "tattoo": "",
         "puce": "",
-        "race": "",
-        "colors": "",
-        "weight": "",
-        "other": ""
+        "date": ""
       },
       "geometry": {
         "type": "Point",
@@ -26,14 +22,10 @@
       "type": "Feature",
       "properties": {
         "name": "Lazerboom",
-        "age" : "4",
-        "genre": "male",
-        "tattoo": "Non",
-        "puce" : "Non",
-        "race": "Chat de goutiere",
-        "colors": "Gris",
-        "weight": "8.5kg",
-        "other" : "Un peu bête"
+        "description": "",
+        "tattoo": "",
+        "puce": "",
+        "date": ""
       },
       "geometry": {
         "type": "Point",
@@ -44,14 +36,10 @@
       "type": "Feature",
       "properties": {
         "name": "Bazookat",
-        "age" : "4",
-        "genre": "male",
+        "description": "",
         "tattoo": "",
-        "puce" : "",
-        "race": "",
-        "colors": "roux et blanc",
-        "weight": "6",
-        "other" : "Très peureux"
+        "puce": "",
+        "date": ""
       },
       "geometry": {
         "type": "Point",
@@ -62,14 +50,10 @@
       "type": "Feature",
       "properties": {
         "name": "Globule",
-        "age" : "",
-        "genre": "female",
+        "description": "",
         "tattoo": "",
-        "puce" : "",
-        "race": "",
-        "colors": "Grise et blanche",
-        "weight": "4.2",
-        "other" : "Yeux bleu"
+        "puce": "",
+        "date": ""
       },
       "geometry": {
         "type": "Point",
@@ -80,14 +64,10 @@
       "type": "Feature",
       "properties": {
         "name": "Isidore",
-        "age" : "",
-        "genre": "male",
+        "description": "",
         "tattoo": "",
-        "puce" : "",
-        "race": "",
-        "colors": "noir et blanc",
-        "weight": "",
-        "other" : "Il mord"
+        "puce": "",
+        "date": ""
       },
       "geometry": {
         "type": "Point",
@@ -98,14 +78,10 @@
       "type": "Feature",
       "properties": {
         "name": "Kiwi",
-        "age" : "",
-        "genre": "male",
+        "description": "",
         "tattoo": "",
-        "puce" : "",
-        "race": "",
-        "colors": "noir",
-        "weight": "",
-        "other" : "Lunatique"
+        "puce": "",
+        "date": ""
       },
       "geometry": {
         "type": "Point",
@@ -116,14 +92,10 @@
       "type": "Feature",
       "properties": {
         "name": "Kafi",
-        "age" : "",
-        "genre": "femelle",
+        "description": "",
         "tattoo": "",
-        "puce" : "",
-        "race": "",
-        "colors": "",
-        "weight": "",
-        "other" : ""
+        "puce": "",
+        "date": ""
       },
       "geometry": {
         "type": "Point",

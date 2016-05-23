@@ -129,7 +129,7 @@ export default {
         });
 
         // Get change on geolocation (mobile use only)
-        // TODO : verify if on mobile, changed position is detected
+        // TODO : verify if on mobile, changing position is detected
         document.addEventListener("DOMContentLoaded", function(event) {
             if(false != this_.state.acceptGeoloc) {
                 this.geolocation.on('change', function() {
