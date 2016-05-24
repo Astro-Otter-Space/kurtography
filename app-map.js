@@ -1,9 +1,12 @@
 import dataLayers from './dist/src/dataLayers';
 dataLayers.listCollections();
 
+// Liens
 document.querySelector('a[data-link="auth"]').addEventListener('click', function() {
     document.getElementById("divAuth").classList.toggle("hidden");
 }, false);
+
+// Formulaire d edito
 
 /**
  * Search request with result in autocompletion

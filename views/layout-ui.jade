@@ -2,10 +2,19 @@ doctype html
 html(lang="fr")
     include components/header
     body
+        // Dialog
+        dialog.mdl-dialog
+            h4.mdl-dialog__title Add document
+            div.mdl-dialog__content
+                form(name="form-edit-properties")
+            div.mdl-dialog__actions
+                button(type="button")#editForm.mdl-button.mdl-js-button.mdl-button--raised.mdl-js-ripple-effect.mdl-button--colored Edit
+                button(type="button").mdl-button.close Close
+
         // Content
         block content
 
-        // Dialog connexion / register
+        // cards connexion / register
         include components/authentification
 
         // http://codepen.io/tutsplus/pen/RWwypM

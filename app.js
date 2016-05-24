@@ -1,5 +1,6 @@
 // Express
 var express = require('express');
+var favicon = require('express-favicon');
 var app = express();
 
 function enableCors (req, res, next) {
@@ -22,6 +23,7 @@ app.set('view engine', 'jade');
 
 app.options('/export', enableCors, optionsHandler('GET'))
 
+app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/node_modules'));
 
@@ -29,15 +31,6 @@ app.use(express.static(__dirname + '/node_modules'));
 app.get('/', function(req, res) {
     res.header("Access-Control-Allow-Origin", "http://localhost:7511");
     res.render('pages/map-ui', {
-        title: 'Kurtography - webmapping application supported by Kuzzle'
-    });
-
-});
-
-// Register account
-app.get('/register', function(req, res) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:7511");
-    res.render('pages/register', {
         title: 'Kurtography - webmapping application supported by Kuzzle'
     });
 
