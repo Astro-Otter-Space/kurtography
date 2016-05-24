@@ -160,24 +160,6 @@ export default {
         });
 
 
-        /**
-         * Feature editing : Callback on submit
-         * @param e
-         * @returns {boolean}
-         */
-        var handleSubmit = this.handleSubmit = function(e) {
-            e.preventDefault();
-            //var featureForm = this_.state.featureForm;
-            var objPropertiesFeature = new Object();
-            Array.from(e.target.elements).forEach(element => {
-                if ("text" == element.type && "undefined" != element.type) {
-                    objPropertiesFeature[element.name] = element.value;
-                }
-            });
-            dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
-            return false;
-        };
-
         // Show feature data + listener
         this.state.map.on('click', function(evt) {
             // When we select a feature, it's become the featureForm
@@ -432,27 +414,20 @@ export default {
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
         document.getElementById("dateKdoc").innerHTML = fProperties.date_publish;
 
-        if (undefined != fProperties.description ) {
+        //if (undefined != fProperties.description ) {
             document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
-        }
-        if (undefined != fProperties.url_image) {
+        //}
+        //if (undefined != fProperties.url_image) {
             document.getElementById("imgKdoc").setAttribute("src", fProperties.url_image);
             document.getElementById("imgKdoc").setAttribute("alt", fProperties.name);
             document.getElementById("imgKdoc").setAttribute("title", fProperties.name);
-        }
+        //}
         this.addGeometriesTab(feature.getGeometry());
 
         if (true == centerTofeature) {
             document.getElementById("infoKdoc").classList.toggle("hidden");
             this.setCenterFeature(feature.getId());
         }
-        //this.addPropertiesTab(fProperties);
-
-        // Retrieve datas from Form Edit Properties
-        // TODO : edit
-        //var form = document.getElementsByName("form-edit-properties")[0];
-        //form.removeEventListener('submit', this.handleSubmit);
-        //form.addEventListener('submit', this.handleSubmit, false);
     },
 
 
@@ -505,52 +480,70 @@ export default {
      * @param properties
      * @returns {Element}
      */
-    addPropertiesTab(properties)
+    createEditDatasForm()
     {
-        //console.log(dataLayers.state.dataProperties);
-        // Delete geometry if exist
-        if (properties.geometry) {
-            delete properties.geometry;
-        }
+
+        var handleSubmit = this.handleSubmit = function(e) {
+            e.preventDefault();
+            //var featureForm = this_.state.featureForm;
+            var objPropertiesFeature = new Object();
+            Array.from(e.target.elements).forEach(element => {
+                if ("text" == element.type && "undefined" != element.type) {
+                    objPropertiesFeature[element.name] = element.value;
+                }
+            });
+            console.log(objPropertiesFeature)
+            //dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
+            return false;
+        };
 
         var form = document.forms['form-edit-properties'];
+        form.removeEventListener('submit', this.handleSubmit);
+        form.addEventListener('submit', this.handleSubmit, false);
+
         if (form.childElementCount > 0) {
             while (form.firstChild) form.removeChild(form.firstChild);
         }
-        for (var key in properties) {
-            if (typeof properties[key] != 'object' || properties[key] != undefined) {
 
-                var div = document.createElement('div');
-                div.className = "mdl-textfield mdl-js-textfield";
+        Object.keys(dataLayers.state.mappingCollection).forEach(key => {
 
-                // Label
-                var label = document.createElement('label');
-                label.className = "mdl-textfield__label";
-                if (0 < properties[key].length) {
-                    var labelValue = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
-                } else {
-                    var labelValue = key.capitalizeFirstLetter();
-                }
-                label.innerHTML = labelValue;
-                label.setAttribute("for", key);
+            var div = document.createElement('div');
+            div.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
 
-                // Input for edit propertie
+            // Label
+            var label = document.createElement('label');
+            label.className = "mdl-textfield__label";
+
+            label.innerHTML = key.capitalizeFirstLetter();
+            label.setAttribute("for", key);
+
+            // Input
+            if ("string" == dataLayers.state.mappingCollection[key].type) {
                 var input = document.createElement('input');
                 input.type = 'text';
-                input.className = 'mdl-textfield__input ';//properties-edit';
+                input.className = 'mdl-textfield__input';
                 input.name = key;
                 input.id = key;
 
-                input.value = (typeof properties[key] == "string") ? properties[key].capitalizeFirstLetter() : properties[key];
-                //input.setAttribute('disabled', 'disabled');
-                //input.setAttribute('placeholder', labelValue);
-
-                div.appendChild(input);
                 div.appendChild(label);
+                div.appendChild(input);
+                form.appendChild(div);
 
+            } else if ("string" == dataLayers.state.mappingCollection[key].type && "description" == key) {
+                var input = document.createElement('textarea');
+                input.className = 'mdl-textfield__input';
+                input.type= "text";
+                input.row = 3;
+                input.name = key;
+                input.id = key;
+
+                div.appendChild(label);
+                div.appendChild(input);
                 form.appendChild(div);
             }
-        }
+        });
+
+        document.getElementById("divAddDoc").classList.toggle("hidden");
     },
 
 

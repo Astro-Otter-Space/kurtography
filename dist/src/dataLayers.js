@@ -14,7 +14,7 @@ export default {
         tabLayersKuzzle: [], // Array contains layers
         newGJsonFeature: null,
         newFeature: null,
-        dataProperties: null, // data mapping of selected collection
+        mappingCollection: null, // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures(),
         rstAdvancedSearch: null
     },
@@ -29,14 +29,16 @@ export default {
         kuzzle.listCollections(Config.defaultIndex, { type: "all"}, function (err, collections) {
             if (!err) {
                 // Push collections in array
-                this_.state.collections = collections.stored.map(
-                    layer => {
-                        return layer;
-                    }
-                );
+                this_.state.collections = collections.stored.map(layer => {
+                    return layer;
+                });
                 olMap.initMap(13);
             } else {
                 console.error(err.message);
+                notification.init({
+                    type: 'error',
+                    message: 'Error listing collections'
+                });
             }
         });
     },
@@ -48,9 +50,14 @@ export default {
     loadDatasFromCollection(collection)
     {
         var this_ = this;
-        kuzzle.dataCollectionFactory(collection).fetchAllDocuments(function(err, res) {
+        var options = {
+            from: 10,
+            size: 10000
+        };
+        kuzzle.dataCollectionFactory(collection).fetchAllDocuments(options, function(err, res) {
             if (!err) {
                 var result = [];
+                console.log(res);
                 if(res.total > 0) {
                     res.documents.forEach(function (kDoc, index) {
                         // Push document identifier in feature data
@@ -78,7 +85,10 @@ export default {
                 olMap.getSelectedLayer().setZIndex(20);
 
             } else {
-                console.error(err);
+                notification.init({
+                    type: 'error',
+                    message: 'Error fetching documents from collection'
+                });
             }
         });
     },
@@ -103,25 +113,13 @@ export default {
     {
         var this_ = this;
         kuzzle.dataCollectionFactory(layer).getMapping(function (err, res) {
-            // res is a KuzzleDataMapping object
             if (!err) {
-                var mappingProperties = new Object();
-                if (undefined != res.mapping.properties) {
-                    var mapping = res.mapping.properties.properties;
-                    Object.keys(mapping).forEach(field => {
-                        mappingProperties[field] = "";
-                    });
-                } else {
-                    // If no mapping in properties, we assign a default value
-                    mappingProperties["name"] = "No name";
-                    mappingProperties["description"] = "";
-                    mappingProperties["date_publish"] = new Date().toISOString().slice(0, 10);
-                    mappingProperties["url_image"] = "";
-                }
-
-                this_.state.dataProperties = mappingProperties;
+                this_.state.mappingCollection = res.mapping.properties.properties;
             } else {
-                console.error(err.message);
+                notification.init({
+                    type: 'error',
+                    message: 'Error mapping collection'
+                });
             }
         });
     },
@@ -136,8 +134,17 @@ export default {
     {
         var this_ = this;
         var layer = olMap.getSelectedLayer().get('title');
-        // Create properties
-        fDatasGeoJson.properties = this.state.dataProperties;
+
+        // Create empty properties from mapping
+        fDatasGeoJson.properties = {};
+        Object.keys(this.state.mappingCollection).forEach(objectMapping => {
+            if ("string" == this.state.mappingCollection[objectMapping].type) {
+                fDatasGeoJson.properties[objectMapping] = "";
+
+            } else if ("date" == this.state.mappingCollection[objectMapping].type) {
+                fDatasGeoJson.properties[objectMapping] = new Date().toISOString().slice(0, 10);
+            }
+        });
 
         // Create location point for subscribe zone
         // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
@@ -153,11 +160,6 @@ export default {
                 lon: fCentroid.geometry.coordinates[0],
                 lat: fCentroid.geometry.coordinates[1]
             };
-        }
-
-        if (0 == fDatasGeoJson.properties.date_publish) {
-            var d = new Date().getTime();
-            fDatasGeoJson.properties.date_publish = new Date().toISOString().slice(0, 10);
         }
 
         kuzzle.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
@@ -180,8 +182,7 @@ export default {
                         olMap.getSelectedLayer().getSource().addFeature(newFeature);
                     }
                 }
-
-                olMap.showFeaturesInformations(newFeature, true);
+                olMap.createEditDatasForm();
             } else {
                 console.log(err.message)
             }
@@ -248,7 +249,7 @@ export default {
     /**
      * Update properties of a document
      * @param idKuzzleDoc
-     * @param dataProperties
+     * @param propertiesDatas
      */
     updatePropertiesDocument(feature, propertiesDatas)
     {
@@ -364,7 +365,7 @@ export default {
             state: 'done'
         };
 
-        console.log(JSON.stringify(filter, '', false));
+        //console.log(JSON.stringify(filter, '', false));
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 var kDoc = this.loadDataById(resp.result._id);
@@ -448,7 +449,7 @@ export default {
             var layer = olMap.getSelectedLayer().get('title');
             var coordonatesWGS84 = olMap.state.coordinates; //olMap.geolocation.getPosition();
 
-            //var collMapping = this.state.dataProperties;
+            //var collMapping = this.state.mappingCollection;
             //var filterMapping = Object.keys(collMapping).map(field => {
             //    var filterOr = {
             //        term :{

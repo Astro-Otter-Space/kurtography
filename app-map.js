@@ -6,7 +6,6 @@ document.querySelector('a[data-link="auth"]').addEventListener('click', function
     document.getElementById("divAuth").classList.toggle("hidden");
 }, false);
 
-// Formulaire d edito
 
 /**
  * Search request with result in autocompletion
@@ -29,6 +28,9 @@ document.querySelector('#mdlAuthClose').addEventListener('click', function() {
 }, false);
 document.querySelector('#mdlClose').addEventListener('click', function() {
     document.getElementById("infoKdoc").classList.toggle("hidden");
+}, false);
+document.querySelector('#mdlAddClose').addEventListener('click', function() {
+    document.getElementById("divAddDoc").classList.toggle("hidden");
 }, false);
 
 //$(function(){

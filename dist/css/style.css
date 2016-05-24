@@ -167,6 +167,10 @@ body{
 .mdl-grid {
     max-width: 400px;
 }
+.mdl-card__title {
+    background-color: #8BC34A;
+    color: white;
+}
 .mdl-card__media {
     margin: 0;
 }
@@ -183,6 +187,6 @@ body{
     margin-left: 3px;
 }
 
-#infoKdoc, #divAuth {
+#infoKdoc, #divAuth, #divAddDoc {
     top: 5em;
 }
