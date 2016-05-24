@@ -51,8 +51,8 @@ export default {
     {
         var this_ = this;
         var options = {
-            from: 10,
-            size: 10000
+            from: 0,
+            size: 100000
         };
         kuzzle.dataCollectionFactory(collection).fetchAllDocuments(options, function(err, res) {
             if (!err) {
