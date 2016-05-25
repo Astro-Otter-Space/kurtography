@@ -8,7 +8,7 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.9.3
+Beta stage of development : v. 0.9.4
 
 Requirements
 -------------
@@ -184,16 +184,17 @@ Features
   - Get default location if user blocking naviogator geolocation
   - Graphic refactoring with Material Design Lite
   - Reset map to geolocation position
+  - Change subscribe zone by geolocalisation
+  - Change subscribe zone and search by manual tool
 
 Features in progress
 -------------
   - Fix on geo_distance precision
-  - Change subscribe zone by geolocalisation
-  - Change subscribe zone and search by manual tool
   - Export datas
 
 Features will be avalaible soon:
 -------------
+  - Création d une feature (ligne ou polygone) à partir de la geolocalisation (ex : tracé)
   - Register user
   - Authentification
   - Filtering features by user authorisation

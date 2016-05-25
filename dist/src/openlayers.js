@@ -482,7 +482,7 @@ export default {
      */
     createEditDatasForm()
     {
-
+        var this_ = this;
         var handleSubmit = this.handleSubmit = function(e) {
             e.preventDefault();
             //var featureForm = this_.state.featureForm;
@@ -492,17 +492,19 @@ export default {
                     objPropertiesFeature[element.name] = element.value;
                 }
             });
-            console.log(objPropertiesFeature)
-            //dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
+            dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
             return false;
         };
 
+        // Submit listener
         var form = document.forms['form-edit-properties'];
         form.removeEventListener('submit', this.handleSubmit);
         form.addEventListener('submit', this.handleSubmit, false);
 
-        if (form.childElementCount > 0) {
-            while (form.firstChild) form.removeChild(form.firstChild);
+        var divForm = document.getElementById("divFormInput");
+
+        if (divForm.childElementCount > 0) {
+            while (divForm.firstChild) divForm.removeChild(divForm.firstChild);
         }
 
         Object.keys(dataLayers.state.mappingCollection).forEach(key => {
@@ -527,7 +529,7 @@ export default {
 
                 div.appendChild(label);
                 div.appendChild(input);
-                form.appendChild(div);
+                divForm.appendChild(div);
 
             } else if ("string" == dataLayers.state.mappingCollection[key].type && "description" == key) {
                 var input = document.createElement('textarea');
@@ -539,7 +541,7 @@ export default {
 
                 div.appendChild(label);
                 div.appendChild(input);
-                form.appendChild(div);
+                divForm.appendChild(div);
             }
         });
 
