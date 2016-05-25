@@ -493,6 +493,7 @@ export default {
                 }
             });
             dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
+            document.getElementById("divAddDoc").classList.toggle("hidden");
             return false;
         };
 
