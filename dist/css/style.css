@@ -106,7 +106,7 @@ body{
 /**********************
 * Material Design Lite surcharge
 **********************/
-.mdl-layout__header-row{
+#navbar > .mdl-layout__header-row {
     background-color: rgba(160,160,160, 0.4);
 }
 .inline-list-radio{

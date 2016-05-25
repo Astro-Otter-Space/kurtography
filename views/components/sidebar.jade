@@ -1,6 +1,19 @@
 div.mdl-layout__drawer
-    span.mdl-layout-title.headSidebar Kurtography
+    header#sidebar.mdl-layout__header
+        div.mdl-layout__header-row
+            //i.material-icons.mdl-list__item-avatar person
+            span Connexion / Register
+            div.mdl-layout-spacer
+                button#accbtn.mdl-button.mdl-js-button.mdl-js-ripple-effect.mdl-button--icon
+                    i.material-icons(role="presentation") arrow_drop_down
+                    //span class="visuallyhidden">Accounts</span>
+            ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="accbtn")
+                li.mdl-menu__item
+                    a.mdl-navigation__link(data-link="auth", href="#auth") Connexion
+                li.mdl-menu__item
+                    a.mdl-navigation__link(data-link="register", href="#register") Register
 
+    //span.mdl-layout-title.headSidebar Kurtography
     // Layer switcher
     include switcherlayer
 
