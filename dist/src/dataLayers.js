@@ -52,9 +52,17 @@ export default {
         var this_ = this;
         var options = {
             from: 0,
-            size: 100000
+            size: 100000,
+            /*sort: {
+                "properties.date_publish" :{
+                    order: "desc"
+                }
+            }*/
         };
-        kuzzle.dataCollectionFactory(collection).fetchAllDocuments(options, function(err, res) {
+
+        // TODO : test with advancedSearch because fetchAllDocuments retrieve 10 elements
+        //kuzzle.dataCollectionFactory(collection).fetchAllDocuments(options, function(err, res) {
+        kuzzle.dataCollectionFactory(collection).advancedSearch(options, function(err, res) {
             if (!err) {
                 var result = [];
                 console.log(res);
