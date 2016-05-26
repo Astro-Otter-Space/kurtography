@@ -414,14 +414,15 @@ export default {
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
         document.getElementById("dateKdoc").innerHTML = fProperties.date_publish;
 
-        //if (undefined != fProperties.description ) {
-            document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
-        //}
-        //if (undefined != fProperties.url_image) {
+        document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
+        if ("" != fProperties.url_image) {
+            document.getElementById("imgKdoc").classList.remove("hidden");
             document.getElementById("imgKdoc").setAttribute("src", fProperties.url_image);
             document.getElementById("imgKdoc").setAttribute("alt", fProperties.name);
             document.getElementById("imgKdoc").setAttribute("title", fProperties.name);
-        //}
+        } else {
+            document.getElementById("imgKdoc").classList.add("hidden");
+        }
         this.addGeometriesTab(feature.getGeometry());
 
         if (true == centerTofeature) {
