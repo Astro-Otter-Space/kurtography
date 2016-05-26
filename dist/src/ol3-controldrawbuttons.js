@@ -1,6 +1,7 @@
 import Projection from '../services/geo-parameters'
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
+import olMap from './openlayers';
 
 /**
  * OpenLayers 3 Draw Control, special fork for Kuzzle
@@ -60,15 +61,16 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
         options.style_buttons = "default";
     }
 
-    // Not implemented yet
-    if (options.popup_form == true) {
-        this.popup = document.getElementById('popup');
-    }
-
     // Events listeners
     var handleButtonsClick = function (e)
     {
         e = e || window.event;
+
+        // TODO desactivate subscribe
+        if (dataLayers.state.subscription) {
+            dataLayers.state.subscription.unsubscribe();
+            console.log("Unsubscribe");
+        }
 
         // Disabled Controls buttons
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
@@ -102,6 +104,12 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
     var handleControlsClick = function (e)
     {
         e = e || window.event;
+
+        // TODO desactivate subscribe
+        if (dataLayers.state.subscription) {
+            dataLayers.state.subscription.unsubscribe();
+            console.log("Unsubscribe");
+        }
 
         // Disabled Controls buttons
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
@@ -189,6 +197,10 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
         }
 
         this_.setFlagDraw(false); // Desactivation of drawing flag
+        // TODO activate subscribe
+        console.log("Reactivation subscribe with " + this_.getSelectedLayer().get('title'));
+        console.log(olMap.state.coordinates);
+        dataLayers.subscribeCollection(this_.getSelectedLayer(), olMap.state.coordinates);
         e.preventDefault();
     };
 

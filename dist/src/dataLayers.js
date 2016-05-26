@@ -16,6 +16,7 @@ export default {
         newFeature: null,
         mappingCollection: null, // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures(),
+        subscription: null,
         rstAdvancedSearch: null
     },
 
@@ -179,20 +180,25 @@ export default {
                 olMap.state.featureForm = newFeature;
 
                 // If point and not in subscribe zone
-                if ('Point' == typeFeature) {
-                    if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
-                        olMap.getSelectedLayer().getSource().addFeature(newFeature);
-                    }
-                // If not point and centroid is not un subscribe zone
-                } else {
-                    var centroidPt = olMap.getFeatureCentroid(fDatasGeoJson);
-                    if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
-                        olMap.getSelectedLayer().getSource().addFeature(newFeature);
-                    }
-                }
+                //if ('Point' == typeFeature) {
+                //    if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
+                //        olMap.getSelectedLayer().getSource().addFeature(newFeature);
+                //    }
+                //// If not point and centroid is not un subscribe zone
+                //} else {
+                //    var centroidPt = olMap.getFeatureCentroid(fDatasGeoJson);
+                //    if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
+                //        olMap.getSelectedLayer().getSource().addFeature(newFeature);
+                //    }
+                //}
+                olMap.getSelectedLayer().getSource().addFeature(newFeature);
                 olMap.createEditDatasForm();
             } else {
-                console.log(err.message)
+                console.log(err.message);
+                notification.init({
+                    type: 'error',
+                    message: "Error creation kuzzle document."
+                });
             }
         });
     },
@@ -271,6 +277,10 @@ export default {
             kuzzle.dataCollectionFactory(layer).updateDocument(feature.getId(), featureGeoJSON, (err, res) => {
                 if (err) {
                     console.error(err.message);
+                    notification.init({
+                        type: 'error',
+                        message:  "Error update kuzzle document"
+                    });
                 } else {
 
                     // If Document is not in the subscribe zone
@@ -286,7 +296,7 @@ export default {
                     }
                     var updFeature = parser.readFeature(featureGeoJSON, {featureProjection: Projection.projectionFrom});
                     olMap.state.featureForm = updFeature;
-                    olMap.showFeaturesInformations(updFeature, true);
+                    //olMap.showFeaturesInformations(updFeature, true);
                 }
             });
 
@@ -318,20 +328,29 @@ export default {
             kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).deleteDocument(feature.getId(), (err, res) => {
                 if (err) {
                     console.error(err.message);
+                    notification.init({
+                        type: 'error',
+                        message: "Error delete kuzzle document."
+                    });
                 } else {
                     var parser = new ol.format.GeoJSON();
                     var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
-                    if ('Point' == feature.getGeometry().getType()) {
-                        if (false == olMap.isPointInZoneSubscribe(featureGeoJSON)) {
-                            olMap.getSelectedLayer().getSource().removeFeature(feature);
-                        }
-                    } else {
-                        var centroidPt = olMap.getFeatureCentroid(featureGeoJSON);
-                        if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
-                            olMap.getSelectedLayer().getSource().removeFeature(feature);
-                        }
-                    }
+                    olMap.getSelectedLayer().getSource().removeFeature(feature);
+                    notification.init({
+                        type: 'notice',
+                        message: "Suppression kuzzle document ok."
+                    });
+                    //if ('Point' == feature.getGeometry().getType()) {
+                    //    if (false == olMap.isPointInZoneSubscribe(featureGeoJSON)) {
+                    //        olMap.getSelectedLayer().getSource().removeFeature(feature);
+                    //    }
+                    //} else {
+                    //    var centroidPt = olMap.getFeatureCentroid(featureGeoJSON);
+                    //    if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
+                    //        olMap.getSelectedLayer().getSource().removeFeature(feature);
+                    //    }
+                    //}
 
                 }
             });
@@ -349,8 +368,8 @@ export default {
     subscribeCollection(layer, coordonatesWGS84)
     {
         var this_ = this;
-        if (subscription) {
-            subscription.unsubscribe();
+        if (this.state.subscription) {
+            this.state.subscription.unsubscribe();
         }
 
         var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 5000;
@@ -374,7 +393,7 @@ export default {
         };
 
         //console.log(JSON.stringify(filter, '', false));
-        subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
+        this.state.subscription = subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 var kDoc = this_.loadDataById(resp.result._id);
                 console.log(resp.action + ' ' + resp.result._id + '/' + kDoc.id);
@@ -416,10 +435,13 @@ export default {
                         type: 'notice',
                         message: "A document have been deleted from Kuzzle in your subscribe area."
                     });
-
                 }
             } else {
                 console.error(err.message);
+                notification.init({
+                    type: 'error',
+                    message: "Error subscribe room."
+                });
             }
         });
     },

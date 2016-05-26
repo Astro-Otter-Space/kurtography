@@ -351,10 +351,10 @@ export default {
      */
     createZoneSubscription(distance)
     {
-        var coordonatesWGS84 = this.state.coordinates = this.geolocation.getPosition();
+        var coordonatesWGS84 = this.state.coordinates; // = this.geolocation.getPosition();
 
         var features = [];
-        // Transformation coordinates
+        // Transformation coordinates in Mercator projection
         var coordinatesTr = ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
 
         // Creation of circle
@@ -395,7 +395,7 @@ export default {
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
 
         // Rebuild the subscribe zone
-        dataLayers.subscribeCollection(this.getSelectedLayer(), this.geolocation.getPosition(), this.state.distance);
+        dataLayers.subscribeCollection(this.getSelectedLayer(), this.state.coordinates);
     },
 
     /**
