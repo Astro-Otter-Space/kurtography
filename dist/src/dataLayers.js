@@ -376,7 +376,7 @@ export default {
         //console.log(JSON.stringify(filter, '', false));
         subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
-                var kDoc = this.loadDataById(resp.result._id);
+                var kDoc = this_.loadDataById(resp.result._id);
                 console.log(resp.action + ' ' + resp.result._id + '/' + kDoc.id);
                 if ('in' == resp.scope) {
                     this_.action = resp.action;
