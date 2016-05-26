@@ -229,27 +229,39 @@ export default {
             kuzzle.dataCollectionFactory(layer).updateDocument(kDocId, fDatasGeoJson, function (err, res) {
                 if (err) {
                     console.error(err.message);
+                    notification.init({
+                        type: 'error',
+                        message:  "Error update geodatas kuzzle document"
+                    });
                 } else {
                     var parser = new ol.format.GeoJSON();
                     var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
                     // If Document is not in the subscribe zone
-                    if ('Point' == feature.getGeometry().getType()) {
-                        if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
-                            olMap.getSelectedLayer().getSource().removeFeature(feature);
-                            olMap.getSelectedLayer().getSource().addFeature(feature);
-                        }
-                    } else {
-                        var centroidPt = olMap.getFeatureCentroid(fDatasGeoJson);
-                        if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
-                            olMap.getSelectedLayer().getSource().removeFeature(feature);
-                            olMap.getSelectedLayer().getSource().addFeature(feature);
-                        }
-                    }
+                    //if ('Point' == feature.getGeometry().getType()) {
+                    //    if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
+                    //        olMap.getSelectedLayer().getSource().removeFeature(feature);
+                    //        olMap.getSelectedLayer().getSource().addFeature(feature);
+                    //    }
+                    //} else {
+                    //    var centroidPt = olMap.getFeatureCentroid(fDatasGeoJson);
+                    //    if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
+                    //        olMap.getSelectedLayer().getSource().removeFeature(feature);
+                    //        olMap.getSelectedLayer().getSource().addFeature(feature);
+                    //    }
+                    //}
 
                     var updFeature = parser.readFeature(fDatasGeoJson, {featureProjection: Projection.projectionFrom});
+
+                    olMap.getSelectedLayer().getSource().removeFeature(updFeature);
+                    olMap.getSelectedLayer().getSource().addFeature(updFeature);
+
                     olMap.state.featureForm = updFeature;
-                    olMap.showFeaturesInformations(updFeature, true);
+                    notification.init({
+                        type: 'notice',
+                        message:  "Update geodatas kuzzle document"
+                    });
+                    //olMap.showFeaturesInformations(updFeature, true);
                 }
             });
 
@@ -322,8 +334,6 @@ export default {
                 type: 'error',
                 message: "Can't delete the kuzzle document."
             });
-            return false;
-
         } else {
             kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).deleteDocument(feature.getId(), (err, res) => {
                 if (err) {
