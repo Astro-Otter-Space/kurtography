@@ -269,6 +269,10 @@ export default {
             //document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
             //$("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
             console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
+            notification.init({
+                type: 'notice',
+                message:  "No document identifier."
+            });
         }
     },
 
@@ -294,25 +298,19 @@ export default {
                         message:  "Error update kuzzle document"
                     });
                 } else {
-
                     // If Document is not in the subscribe zone
-                    if ('Point' == feature.getGeometry().getType()) {
-                        if (false == olMap.isPointInZoneSubscribe(featureGeoJSON)) {
-                            olMap.showFeaturesInformations(feature, false);
-                        }
-                    } else {
-                        var centroidPt = olMap.getFeatureCentroid(featureGeoJSON);
-                        if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
-                            olMap.showFeaturesInformations(feature, false);
-                        }
-                    }
                     var updFeature = parser.readFeature(featureGeoJSON, {featureProjection: Projection.projectionFrom});
                     olMap.state.featureForm = updFeature;
-                    //olMap.showFeaturesInformations(updFeature, true);
+                    notification.init({
+                        type: 'notice',
+                        message:  "Update kuzzle document ok"
+                    });
+                    olMap.showFeaturesInformations(updFeature, false);
                 }
             });
 
         } else {
+            console.log("Sorry impossible to edit this kuzzle document, there is no identifier");
             notification.init({
                 type: 'error',
                 message:  "Sorry impossible to edit this kuzzle document, there is no identifier"
@@ -351,17 +349,6 @@ export default {
                         type: 'notice',
                         message: "Suppression kuzzle document ok."
                     });
-                    //if ('Point' == feature.getGeometry().getType()) {
-                    //    if (false == olMap.isPointInZoneSubscribe(featureGeoJSON)) {
-                    //        olMap.getSelectedLayer().getSource().removeFeature(feature);
-                    //    }
-                    //} else {
-                    //    var centroidPt = olMap.getFeatureCentroid(featureGeoJSON);
-                    //    if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
-                    //        olMap.getSelectedLayer().getSource().removeFeature(feature);
-                    //    }
-                    //}
-
                 }
             });
         }
@@ -406,7 +393,7 @@ export default {
         this.state.subscription = subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 var kDoc = this_.loadDataById(resp.result._id);
-                console.log(resp.action + ' ' + resp.result._id + '/' + kDoc.id);
+                //console.log(resp.action + ' ' + resp.result._id + '/' + kDoc.id);
                 if ('in' == resp.scope) {
                     this_.action = resp.action;
                     kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, (err, resp) => {

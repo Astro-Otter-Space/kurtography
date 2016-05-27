@@ -223,7 +223,6 @@ ol.control.ControlDrawButtons.prototype.drawOnMap = function(evt)
         var geometryFctDraw;
         var typeSelect = evt.target.draw;
 
-        console.log(evt.target.draw);
         // Specific for square
         if (typeSelect == 'Square') {
             typeSelect = 'Circle';
@@ -263,7 +262,6 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
         var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
         if (undefined != this.element) {
-
             // Ajout new document in Kuzzle
             dataLayers.addDocument(featureGeoJSON, feature.getGeometry().getType());
         } else {
@@ -584,6 +582,7 @@ var ol3buttons = {
         // Marker
         var buttonPoint = this.buttonPoint = document.createElement('button');
         buttonPoint.setAttribute('title', 'Draw point');
+        buttonPoint.setAttribute('disabled', 'disabled');
         buttonPoint.id = buttonPoint.draw = 'Point';
         buttonPoint.type_control = 'draw';
         buttonPoint.addEventListener('click', this.handleButtonsClick, false);
@@ -592,6 +591,7 @@ var ol3buttons = {
         // Line
         var buttonLine = this.buttonLine = document.createElement('button');
         buttonLine.setAttribute('title', 'Draw line');
+        buttonLine.setAttribute('disabled', 'disabled');
         buttonLine.id = buttonLine.draw = 'LineString';
         buttonLine.type_control = 'draw';
         buttonLine.addEventListener('click', this.handleButtonsClick, false);
@@ -600,6 +600,7 @@ var ol3buttons = {
         // Square
         var buttonSquare = this.buttonCircle = document.createElement('button');
         buttonSquare.setAttribute('title', 'Draw square');
+        buttonSquare.setAttribute('disabled', 'disabled');
         buttonSquare.id = buttonSquare.draw = 'Square';
         buttonSquare.type_control = 'draw';
         buttonSquare.addEventListener('click', this.handleButtonsClick, false);
@@ -608,6 +609,7 @@ var ol3buttons = {
         // Circle
         var buttonCircle = this.buttonCircle = document.createElement('button');
         buttonCircle.setAttribute('title', 'Draw circle');
+        buttonCircle.setAttribute('disabled', 'disabled');
         buttonCircle.id = buttonCircle.draw = 'Circle';
         buttonCircle.type_control = 'draw';
         buttonCircle.addEventListener('click', this.handleButtonsClick, false);
@@ -616,6 +618,7 @@ var ol3buttons = {
         // Polygone
         var buttonPolygone = this.buttonPolygone = document.createElement('button');
         buttonPolygone.setAttribute('title', 'Draw polygone');
+        buttonPolygone.setAttribute('disabled', 'disabled');
         buttonPolygone.id = buttonPolygone.draw = 'Polygon';
         buttonPolygone.type_control = 'draw';
         buttonPolygone.addEventListener('click', this.handleButtonsClick, false);
@@ -624,6 +627,7 @@ var ol3buttons = {
         // Record add items
         var buttonDrawEnd = this.buttonDrawEnd = document.createElement('button');
         buttonDrawEnd.setAttribute('title', 'Ending draw mode');
+        buttonDrawEnd.setAttribute('disabled', 'disabled');
         buttonDrawEnd.id = buttonDrawEnd.draw = 'Ending';
         buttonDrawEnd.type_control = 'ending';
         buttonDrawEnd.addEventListener('click', this.handleGroupEnd, false);
@@ -644,36 +648,42 @@ var ol3buttons = {
             buttonPoint.className = this.olButtonClassName;
             var iPoint = document.createElement('i');
             iPoint.className = "material-icons";
+            iPoint.draw = buttonPoint.draw;
             iPoint.innerHTML = "add_location";
             buttonPoint.appendChild(iPoint);
 
             buttonLine.className = this.olButtonClassName;
             var iLine = document.createElement('i');
             iLine.className = "material-icons";
+            iLine.draw = buttonLine.draw;
             iLine.innerHTML = "timeline";
             buttonLine.appendChild(iLine);
 
             buttonSquare.className = this.olButtonClassName;
             var iSquare = document.createElement('i');
             iSquare.className = "material-icons";
+            iSquare.draw = buttonSquare.draw;
             iSquare.innerHTML = "format_shapes";
             buttonSquare.appendChild(iSquare);
 
             buttonCircle.className = this.olButtonClassName;
             var iCircle = document.createElement('i');
             iCircle.className = "material-icons";
+            iCircle.draw = buttonCircle.draw;
             iCircle.innerHTML = "bubble_chart";
             buttonCircle.appendChild(iCircle);
 
             buttonPolygone.className = this.olButtonClassName;
             var iPolygon = document.createElement('i');
             iPolygon.className = "material-icons";
+            iPolygon.draw = buttonPolygone.draw;
             iPolygon.innerHTML = "share";
             buttonPolygone.appendChild(iPolygon);
 
             buttonDrawEnd.className = this.olButtonClassName + ' hidden';
             var iSaveFeature = document.createElement('i');
             iSaveFeature.className = "material-icons";
+            iSaveFeature.draw = buttonDrawEnd.draw;
             iSaveFeature.innerHTML = "save";
             buttonDrawEnd.appendChild(iSaveFeature);
         }
@@ -698,6 +708,7 @@ var ol3buttons = {
 
         var buttonEdit = this.buttonEdit = document.createElement('button');
         buttonEdit.setAttribute('title', 'Edit feature');
+        buttonEdit.setAttribute('disabled', 'disabled');
         buttonEdit.id = 'Edit';
         buttonEdit.type_control = 'edit';
         buttonEdit.addEventListener('click', this.handleControlsClick, false);
@@ -706,6 +717,7 @@ var ol3buttons = {
         // Delete
         var buttonDel = this.buttonEdit = document.createElement('button');
         buttonDel.setAttribute('title', 'Delete feature');
+        buttonDel.setAttribute('disabled', 'disabled');
         buttonDel.id = 'Delete';
         buttonDel.type_control = 'delete';
         buttonDel.addEventListener('click', this.handleControlsClick, false);
@@ -713,7 +725,8 @@ var ol3buttons = {
 
         var buttonControlEnd = this.buttonControlEnd = document.createElement('button');
         buttonControlEnd.setAttribute('title', 'Ending control mode');
-        buttonControlEnd.id = 'Ending';
+        buttonDel.setAttribute('disabled', 'disabled');
+        buttonControlEnd.id = 'EndingControl';
         buttonControlEnd.type_control = 'ending';
         buttonControlEnd.addEventListener('click', this.handleGroupEnd, false);
         buttonControlEnd.removeEventListener('dblclick', this.handleGroupEnd);
@@ -730,18 +743,21 @@ var ol3buttons = {
             buttonEdit.className = this.olButtonClassName;
             var iEdit = document.createElement('i');
             iEdit.className = "material-icons";
+            iEdit.type_control = buttonEdit.type_control;
             iEdit.innerHTML = "edit_location";
             buttonEdit.appendChild(iEdit);
 
             buttonDel.className = this.olButtonClassName;
             var iDel = document.createElement('i');
             iDel.className = "material-icons";
+            iDel.type_control = buttonDel.type_control;
             iDel.innerHTML = "delete";
             buttonDel.appendChild(iDel);
 
             buttonControlEnd.className = this.olButtonClassName + ' hidden';
             var iSaveCtrl = document.createElement('i');
             iSaveCtrl.className = "material-icons";
+            iSaveCtrl.type_control = buttonControlEnd.type_control;
             iSaveCtrl.innerHTML = "save";
             buttonControlEnd.appendChild(iSaveCtrl);
 

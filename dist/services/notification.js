@@ -1,3 +1,5 @@
+let re = /(^|\s)mdl-color--\S+/ig;
+
 export default {
 
     state :{
@@ -12,22 +14,20 @@ export default {
     {
         this.objConst = {
             message: obj.message.toString(),
-            timeout: 3000,
-            //actionHandler: function(event) {},
-            //actionText: 'Undo'
+            timeout: 3000
         };
 
+        var regex = new RegExp(re);
         var snackbarContainer = document.querySelector('.mdl-js-snackbar');
 
         var cssClass = this.state.classCss[obj.type];
         var type = obj.type;
 
-        var re = new RegExp(/(^|\s)mdl-color--\S+/, "gi");
         for (var i = 0, len = snackbarContainer.classList.length; i < len; i++) {
             // ma classe en cours
             var currentClass = snackbarContainer.classList[i];
             // Je réalise mon test
-            var result = re.test(currentClass);
+            var result = regex.test(currentClass);
             // Trace pour voir si je matche ma regex
             if (result === true) {
                 snackbarContainer.classList.remove(currentClass);

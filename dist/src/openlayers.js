@@ -289,6 +289,16 @@ export default {
                     // Not sure if correct but it's working :|
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);
 
+                    // Enabled control draw buttons
+                    document.getElementById("Point").disabled = false;
+                    document.getElementById("LineString").disabled = false;
+                    document.getElementById("Square").disabled = false;
+                    document.getElementById("Polygon").disabled = false;
+                    document.getElementById("Ending").disabled = false;
+                    document.getElementById("Edit").disabled = false;
+                    document.getElementById("Delete").disabled = false;
+                    document.getElementById("EndingControl").disabled = false;
+
                     // Set the export links
                     this_.editExportLinks();
                 }
@@ -495,7 +505,6 @@ export default {
             });
             dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
             document.getElementById("divAddDoc").classList.toggle("hidden");
-            return false;
         };
 
         // Submit listener
