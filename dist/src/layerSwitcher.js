@@ -131,7 +131,7 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
 
         if (lyr.get('type') === 'base') {
 
-            iLabel.innerHTML = "timeline";
+            iLabel.innerHTML = "layers";
 
             var spanInput = document.createElement('span');
             spanInput.className = "mdl-list__item-secondary-action";

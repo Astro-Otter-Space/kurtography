@@ -38,22 +38,22 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
     var this_ = this;
 
     // Set the selected layer : default layer or from localStorage
-    this.setFlagLocStor(false);
-    if (options.local_storage == true) {
-
-        this.setFlagLocStor(true);
-        if (localStorage.getItem('features') !== null) {
-
-            // Create geojson features from local storage
-            console.log(localStorage.getItem('features'))
-            var featuresLS = new ol.format.GeoJSON().readFeatures(JSON.parse(localStorage.getItem('features')));
-
-            var sourceLS =  new ol.source.Vector({
-                features: featuresLS
-            });
-            this.selectedLayers.setSource(sourceLS);
-        }
-    }
+    //this.setFlagLocStor(false);
+    //if (options.local_storage == true) {
+    //
+    //    this.setFlagLocStor(true);
+    //    if (localStorage.getItem('features') !== null) {
+    //
+    //        // Create geojson features from local storage
+    //        console.log(localStorage.getItem('features'))
+    //        var featuresLS = new ol.format.GeoJSON().readFeatures(JSON.parse(localStorage.getItem('features')));
+    //
+    //        var sourceLS =  new ol.source.Vector({
+    //            features: featuresLS
+    //        });
+    //        this.selectedLayers.setSource(sourceLS);
+    //    }
+    //}
 
     this.setSelectedLayer(this.selectedLayers);
 
@@ -66,25 +66,23 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
     {
         e = e || window.event;
 
-        // TODO desactivate subscribe
         if (dataLayers.state.subscription) {
             dataLayers.state.subscription.unsubscribe();
-            console.log("Unsubscribe");
         }
 
         // Disabled Controls buttons
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
-            divsChildren.item(i).classList.remove('enable');
-            divsChildren.item(i).classList.remove('progress');
+            //divsChildren.item(i).classList.remove('enable');
+            //divsChildren.item(i).classList.remove('progress');
             divsChildren.item(i).disabled = true;
         }
 
         // Disable Draws controls
         var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
-            divsChildren.item(i).classList.remove('enable');
-            divsChildren.item(i).classList.remove('progress');
+            //divsChildren.item(i).classList.remove('enable');
+            //divsChildren.item(i).classList.remove('progress');
             divsChildren.item(i).disabled = true;
 
             if (divsChildren.item(i).type_control == 'ending') {
@@ -92,9 +90,6 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
                 divsChildren.item(i).disabled = false;
             }
         }
-
-        // Enable the actual button
-        e.target.classList.toggle('progress');
 
         this_.drawOnMap(e);
         e.preventDefault();
@@ -108,14 +103,13 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
         // TODO desactivate subscribe
         if (dataLayers.state.subscription) {
             dataLayers.state.subscription.unsubscribe();
-            console.log("Unsubscribe");
         }
 
         // Disabled Controls buttons
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
-            divsChildren.item(i).classList.remove('enable');
-            divsChildren.item(i).classList.remove('progress');
+            //divsChildren.item(i).classList.remove('enable');
+            //divsChildren.item(i).classList.remove('progress');
             divsChildren.item(i).disabled = true;
 
             if (divsChildren.item(i).type_control == 'ending') {
@@ -127,13 +121,10 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
         // Disable Draws controls
         var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
-            divsChildren.item(i).classList.remove('enable');
-            divsChildren.item(i).classList.remove('progress');
+            //divsChildren.item(i).classList.remove('enable');
+            //divsChildren.item(i).classList.remove('progress');
             divsChildren.item(i).disabled = true;
         }
-
-        // Enable the actual button
-        e.target.classList.toggle('progress');
 
         switch (e.target.type_control) {
             case 'edit' :
@@ -208,7 +199,7 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
 
     ol.control.Control.call(this, {
         element: buttonsContainer,
-        target: options.target
+        target: document.getElementById("external_draw_control")
     });
 };
 
@@ -232,6 +223,7 @@ ol.control.ControlDrawButtons.prototype.drawOnMap = function(evt)
         var geometryFctDraw;
         var typeSelect = evt.target.draw;
 
+        console.log(evt.target.draw);
         // Specific for square
         if (typeSelect == 'Square') {
             typeSelect = 'Circle';
@@ -520,10 +512,9 @@ ol.control.ControlDrawButtons.prototype.getFlagLocStor = function()
 var ol3buttons = {
 
     tabOptions: {},
-    olClassName: 'ol-unselectable ol-control',
-    drawContainer: 'toggle-control',
-    olGroupClassName: 'ol-control-group',
-    olButtonClassName: 'ol3-drawButtons', // Generic CSS class for override style
+
+    olButtonClassName: 'mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--mini-fab mdl-button--colored ',// Generic CSS class for override style
+
     handleButtonsClick: null,
     handleControlsClick: null,
     handleGroupEnd: null,
@@ -533,19 +524,12 @@ var ol3buttons = {
         var this_ = this;
         this.tabOptions = ol3buttons.tabOptions = tabOptions;
 
-        // Classes CSS
-        this.olClassName = ol3buttons.olClassName;
-        this.drawContainer = ol3buttons.drawContainer;
-        this.olGroupClassName = ol3buttons.olGroupClassName;
-        this.drawClassName = this.olClassName + ' ' + this.drawContainer;
-
         // Callback TEST
         this.handleButtonsClick = ol3buttons.handleButtonsClick = handleButtonsClick;
         this.handleControlsClick = ol3buttons.handleControlsClick = handleControlsClick;
         this.handleGroupEnd = ol3buttons.handleGroupEnd = handleGroupEnd;
 
         var container = ol3buttons.elContainer();
-        container.className = this.drawClassName;
         return container;
     },
 
@@ -556,10 +540,13 @@ var ol3buttons = {
     {
         var this_ = this;
         // Containers
-        var elementDrawButtons = this.drawButtons();
-        var divDraw = document.createElement('div');
-        divDraw.className = 'div-draw ' + this.olGroupClassName;
 
+        // adding Draw buttons to container
+        var divDraw = document.createElement('div');
+        divDraw.className = 'div-draw';
+        divDraw.id = 'drawButtons';
+
+        var elementDrawButtons = this.drawButtons();
         elementDrawButtons.forEach(function(button) {
             button.removeEventListener("dblclick", this_.handleButtonsClick);
             if(this_.tabOptions.draw[button.draw] == true) {
@@ -567,18 +554,22 @@ var ol3buttons = {
             }
         });
 
-        var elementDrawControls = this.drawControls();
+        // adding Control buttons to container
         var divControls = document.createElement('div');
-        divControls.className = 'div-controls ' + this.olGroupClassName;
+        divControls.className = 'div-controls';
+        divControls.id = 'controlButtons';
+
+        var elementDrawControls = this.drawControls();
         elementDrawControls.forEach(function(button) {
             button.removeEventListener("dblclick", this_.handleControlsClick);
             divControls.appendChild(button);
         });
 
         // Container
-        var elementContainer = document.createElement('div');
+        var elementContainer = document.getElementById('panelDrawControl');
         elementContainer.appendChild(divDraw);
         elementContainer.appendChild(divControls);
+
 
         return elementContainer;
     },
@@ -647,7 +638,46 @@ var ol3buttons = {
             buttonCircle.className = this.olButtonClassName + ' glyphicon icon-vector-path-circle';
             buttonPolygone.className = this.olButtonClassName + ' glyphicon icon-vector-path-polygon';
             buttonDrawEnd.className = this.olButtonClassName + ' glyphicon glyphicon-ok hidden';
-        } else {
+
+        } else if (this.tabOptions.style_buttons == "mdlIcons") {
+
+            buttonPoint.className = this.olButtonClassName;
+            var iPoint = document.createElement('i');
+            iPoint.className = "material-icons";
+            iPoint.innerHTML = "add_location";
+            buttonPoint.appendChild(iPoint);
+
+            buttonLine.className = this.olButtonClassName;
+            var iLine = document.createElement('i');
+            iLine.className = "material-icons";
+            iLine.innerHTML = "timeline";
+            buttonLine.appendChild(iLine);
+
+            buttonSquare.className = this.olButtonClassName;
+            var iSquare = document.createElement('i');
+            iSquare.className = "material-icons";
+            iSquare.innerHTML = "format_shapes";
+            buttonSquare.appendChild(iSquare);
+
+            buttonCircle.className = this.olButtonClassName;
+            var iCircle = document.createElement('i');
+            iCircle.className = "material-icons";
+            iCircle.innerHTML = "bubble_chart";
+            buttonCircle.appendChild(iCircle);
+
+            buttonPolygone.className = this.olButtonClassName;
+            var iPolygon = document.createElement('i');
+            iPolygon.className = "material-icons";
+            iPolygon.innerHTML = "share";
+            buttonPolygone.appendChild(iPolygon);
+
+            buttonDrawEnd.className = this.olButtonClassName + ' hidden';
+            var iSaveFeature = document.createElement('i');
+            iSaveFeature.className = "material-icons";
+            iSaveFeature.innerHTML = "save";
+            buttonDrawEnd.appendChild(iSaveFeature);
+        }
+        else {
             buttonPoint.className = this.olButtonClassName + ' glyphicon-vector-path-point';
             buttonLine.className = this.olButtonClassName + ' glyphicon-vector-path-line';
             buttonSquare.className = this.olButtonClassName + ' glyphicon-vector-path-square';
@@ -694,10 +724,32 @@ var ol3buttons = {
             buttonDel.className = this.olButtonClassName + ' glyphicon glyphicon-trash';
             buttonControlEnd.className = this.olButtonClassName + ' glyphicon glyphicon-ok hidden';
 
+        } else if (this.tabOptions.style_buttons == "mdlIcons") {
+
+
+            buttonEdit.className = this.olButtonClassName;
+            var iEdit = document.createElement('i');
+            iEdit.className = "material-icons";
+            iEdit.innerHTML = "edit_location";
+            buttonEdit.appendChild(iEdit);
+
+            buttonDel.className = this.olButtonClassName;
+            var iDel = document.createElement('i');
+            iDel.className = "material-icons";
+            iDel.innerHTML = "delete";
+            buttonDel.appendChild(iDel);
+
+            buttonControlEnd.className = this.olButtonClassName + ' hidden';
+            var iSaveCtrl = document.createElement('i');
+            iSaveCtrl.className = "material-icons";
+            iSaveCtrl.innerHTML = "save";
+            buttonControlEnd.appendChild(iSaveCtrl);
+
+
         } else {
-            buttonEdit.className = this.olButtonClassName + ' glyphicon-vector-path-pencil';
-            buttonDel.className = this.olButtonClassName + ' glyphicon-vector-path-trash';
-            buttonControlEnd.className = this.olButtonClassName + ' glyphicon-vector-path-ok hidden';
+            buttonEdit.className = this.olButtonClassName; // + ' glyphicon-vector-path-pencil';
+            buttonDel.className = this.olButtonClassName; // + ' glyphicon-vector-path-trash';
+            buttonControlEnd.className = this.olButtonClassName + ' hidden'; // + ' glyphicon-vector-path-ok hidden';
         }
 
         return elementDrawControls;

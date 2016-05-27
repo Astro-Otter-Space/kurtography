@@ -250,7 +250,7 @@ export default {
 
         // Adding draw controls
         var optionsControlDraw = {
-            "style_buttons" : null,
+            "style_buttons" : "mdlIcons",
             "draw": {
                 "Point": true,
                 "LineString": true,

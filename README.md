@@ -8,7 +8,7 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.9.4
+Beta stage of development : v. 0.9.5
 
 Requirements
 -------------
@@ -23,9 +23,8 @@ Installation
 git clone git@github.com:HamHamFonFon/kurtogaphy.git kurtography
 cd kurtography
 
-// Installation
+// Installation of dependencies
 npm install
-npm start
 ```
 
 
@@ -60,11 +59,6 @@ check the [spatial reference list](http://spatialreference.org/ref/epsg/) and ed
 > **Note 2:** Default coordinates are from Paris, France
 
 #### <i class="icon-upload"></i> Developpement
-
-Live test :
-```
-npm test
-```
 
 Compile and minify CSS files :
 ```
