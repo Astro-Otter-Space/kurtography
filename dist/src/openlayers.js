@@ -7,6 +7,7 @@ import ControlDrawButtons from './ol3-controldrawbuttons'
 import ZoomControl from './ol3-zoomuibuttons';
 import SetPosition from './ol3-resetposition';
 import RedrawSubscribeZone from './ol3-editsubscribezone';
+import RealTimeTracking from './ol3-realTimeTracking';
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
 //import jsoneditor from 'jsoneditor';
@@ -313,6 +314,10 @@ export default {
         // Redraw the subscribe zone
         var RedrawSubscribeZone = new ol.control.EditSubscribeRoom();
         this.state.map.addControl(RedrawSubscribeZone);
+
+        // RealTime Tracking
+        var realTimeTracking = new ol.control.RealTimeTracking();
+        //this.state.map.addControl(realTimeTracking);
     },
 
 
@@ -497,14 +502,16 @@ export default {
         var handleSubmit = this.handleSubmit = function(e) {
             e.preventDefault();
             //var featureForm = this_.state.featureForm;
-            var objPropertiesFeature = new Object();
+            var objPropertiesFeature = new Array(); // { };
             Array.from(e.target.elements).forEach(element => {
                 if ("text" == element.type && "undefined" != element.type) {
                     objPropertiesFeature[element.name] = element.value;
+                    this_.state.featureForm.setProperties(objPropertiesFeature);
                 }
             });
-            dataLayers.updatePropertiesDocument(this_.state.featureForm, objPropertiesFeature);
             document.getElementById("divAddDoc").classList.toggle("hidden");
+            dataLayers.updatePropertiesDocument(this_.state.featureForm);
+
         };
 
         // Submit listener

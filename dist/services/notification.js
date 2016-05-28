@@ -8,6 +8,7 @@ export default {
             warning: "mdl-color--orange-500",
             error: "mdl-color--red-500"
         }
+        //notifBrowserPermission: false
     },
 
     init(obj)
@@ -33,12 +34,7 @@ export default {
                 snackbarContainer.classList.remove(currentClass);
             }
         }
-
         snackbarContainer.classList.add(cssClass);
         snackbarContainer.MaterialSnackbar.showSnackbar(this.objConst);
-
-        //setTimeout(function() {
-        //    snackbarContainer.MaterialSnackbar.showSnackbar(this.objConst);
-        //}, 5000);
     }
 }
