@@ -100,7 +100,6 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
     {
         e = e || window.event;
 
-        // TODO desactivate subscribe
         if (dataLayers.state.subscription) {
             dataLayers.state.subscription.unsubscribe();
         }
@@ -380,14 +379,17 @@ ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt)
         selectDelInteraction.getFeatures().addEventListener('add', function(e) {
             var feature = e.element;
             if(confirm('Are you sure you want to delete this feature ?')) {
-                try {
+                //try {
+                    console.log("Suppression de la feature de selectDelInteraction");
                     // Remove from interaction
+                    var featureId = feature.getId();
                     selectDelInteraction.getFeatures().remove(feature);
-                } catch (e) {
+                    console.log("On rentre dans deleteDocument('" + featureId + "')");
+                    dataLayers.deleteDocument(featureId);
+                /*} catch (e) {
                     console.log(e.message);
-                }
-                // Remove from kuzzle
-                dataLayers.deleteDocument(feature);
+                }*/
+
             }
             e.preventDefault();
         });

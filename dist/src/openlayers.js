@@ -414,7 +414,7 @@ export default {
      */
     showFeaturesInformations(feature, centerTofeature = true)
     {
-
+        console.log("set des informations de " + feature.getId());
         var parser = new ol.format.GeoJSON();
 
         var fProperties = feature.getProperties();

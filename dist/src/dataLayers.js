@@ -61,12 +61,10 @@ export default {
             }*/
         };
 
-        // TODO : test with advancedSearch because fetchAllDocuments retrieve 10 elements
         //kuzzle.dataCollectionFactory(collection).fetchAllDocuments(options, function(err, res) {
         kuzzle.dataCollectionFactory(collection).advancedSearch(options, function(err, res) {
             if (!err) {
                 var result = [];
-                console.log(res);
                 if(res.total > 0) {
                     res.documents.forEach(function (kDoc, index) {
                         // Push document identifier in feature data
@@ -237,40 +235,24 @@ export default {
                     var parser = new ol.format.GeoJSON();
                     var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
-                    // If Document is not in the subscribe zone
-                    //if ('Point' == feature.getGeometry().getType()) {
-                    //    if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
-                    //        olMap.getSelectedLayer().getSource().removeFeature(feature);
-                    //        olMap.getSelectedLayer().getSource().addFeature(feature);
-                    //    }
-                    //} else {
-                    //    var centroidPt = olMap.getFeatureCentroid(fDatasGeoJson);
-                    //    if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
-                    //        olMap.getSelectedLayer().getSource().removeFeature(feature);
-                    //        olMap.getSelectedLayer().getSource().addFeature(feature);
-                    //    }
-                    //}
-
                     var updFeature = parser.readFeature(fDatasGeoJson, {featureProjection: Projection.projectionFrom});
 
                     olMap.getSelectedLayer().getSource().removeFeature(updFeature);
                     olMap.getSelectedLayer().getSource().addFeature(updFeature);
 
                     olMap.state.featureForm = updFeature;
+                    olMap.showFeaturesInformations(updFeature, false);
                     notification.init({
                         type: 'notice',
                         message:  "Update geodatas kuzzle document"
                     });
-                    //olMap.showFeaturesInformations(updFeature, true);
                 }
             });
 
         } else {
-            //document.getElementById('msgSuccessKuzzle').innerHTML = "A document have been updated in Kuzzle in your subscribe area.";
-            //$("#alertSuccessKuzzle").slideDown('slow').delay(3000).slideUp('slow');
             console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
             notification.init({
-                type: 'notice',
+                type: 'warning',
                 message:  "No document identifier."
             });
         }
@@ -298,13 +280,13 @@ export default {
                         message:  "Error update kuzzle document"
                     });
                 } else {
-                    // If Document is not in the subscribe zone
                     var updFeature = parser.readFeature(featureGeoJSON, {featureProjection: Projection.projectionFrom});
                     olMap.state.featureForm = updFeature;
                     notification.init({
                         type: 'notice',
                         message:  "Update kuzzle document ok"
                     });
+                    console.log(updFeature.getProperties());
                     olMap.showFeaturesInformations(updFeature, false);
                 }
             });
@@ -325,15 +307,16 @@ export default {
      * @param layer
      * @returns {boolean}
      */
-    deleteDocument(feature)
+    deleteDocument(featureId)
     {
-        if (!feature.getId()) {
+        if (!featureId) {
             notification.init({
                 type: 'error',
                 message: "Can't delete the kuzzle document."
             });
         } else {
-            kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).deleteDocument(feature.getId(), (err, res) => {
+            console.log("Suppression dans kuzzle de  " + featureId);
+            kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).deleteDocument(featureId, (err, res) => {
                 if (err) {
                     console.error(err.message);
                     notification.init({
@@ -341,14 +324,15 @@ export default {
                         message: "Error delete kuzzle document."
                     });
                 } else {
-                    var parser = new ol.format.GeoJSON();
-                    var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-
-                    olMap.getSelectedLayer().getSource().removeFeature(feature);
+                    console.log(res);
+                    console.log("La feature a ete supprimé de kuzzle, suppression de la map de " + res[0]);
+                    var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(res[0]);
+                    olMap.getSelectedLayer().getSource().removeFeature(featureDel);
                     notification.init({
                         type: 'notice',
                         message: "Suppression kuzzle document ok."
                     });
+                    console.log("La feature est effacée de la map");
                 }
             });
         }
@@ -389,11 +373,12 @@ export default {
             state: 'done'
         };
 
-        //console.log(JSON.stringify(filter, '', false));
+        console.log(JSON.stringify(filter, null, '\t'));
         this.state.subscription = subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 var kDoc = this_.loadDataById(resp.result._id);
                 //console.log(resp.action + ' ' + resp.result._id + '/' + kDoc.id);
+                console.log("detection : " + resp.scope);
                 if ('in' == resp.scope) {
                     this_.action = resp.action;
                     kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, (err, resp) => {
@@ -414,6 +399,8 @@ export default {
                         // Show new feature
                         olMap.showFeaturesInformations(newFeature, false);
 
+                        // debug
+                        console.log(this_.action + " : " + kDoc.id);
                         notification.init({
                             type: 'notice',
                             message: "A document have been " +  this_.action + "d in Kuzzle in your subscribe area."
@@ -424,8 +411,9 @@ export default {
                  * Suppression
                  */
                 } else if ('out' == resp.scope) {
-                    console.log("Suppresion de la feature");
+                    console.log("Suppresion kuzzle doc " + kDoc.id);
                     var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
+                    console.log("Suppression map feature " + featureDel.getId());
                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
 
                     notification.init({
