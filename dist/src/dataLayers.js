@@ -355,8 +355,9 @@ export default {
     subscribeCollection(layer, coordonatesWGS84)
     {
         var this_ = this;
-        if (this.state.subscription) {
+        if (this.state.subscription || subscription) {
             this.state.subscription.unsubscribe();
+            subscription.unsubscribe();
         }
 
         var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 5000;
@@ -382,10 +383,11 @@ export default {
         console.log(JSON.stringify(filter, null, '\t'));
         this.state.subscription = subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
-                var kDoc = this_.loadDataById(resp.result._id);
+
                 //console.log(resp.action + ' ' + resp.result._id + '/' + kDoc.id);
                 console.log("detection : " + resp.scope);
                 if ('in' == resp.scope) {
+                    var kDoc = this_.loadDataById(resp.result._id);
                     this_.action = resp.action;
                     kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, (err, resp) => {
                         var f = new ol.format.GeoJSON();
@@ -419,8 +421,8 @@ export default {
                  * Suppression
                  */
                 } else if ('out' == resp.scope) {
-                    console.log("Suppresion kuzzle doc " + kDoc.id);
-                    var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
+                    console.log("Suppresion kuzzle doc " + resp.result._id);
+                    var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(resp.result._id);
                     console.log("Suppression map feature " + featureDel.getId());
                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
 

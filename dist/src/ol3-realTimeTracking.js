@@ -19,6 +19,15 @@ ol.control.RealTimeTracking = function () {
     this.handleTracking = function(e) {
         e = e || window.event;
 
+        // ALGO :
+        //1 - Choice : point or linestring
+        //2 - Create adding interaction
+        //3 - create first point of feature (manual or by geoloc ?) and retrieve id from kuzzle
+        //4 - change adding interaction in modify interaction
+        //5 - with change geoloc, update (point) or adding (linestring) geometries
+        //6 - If linestring : update field location
+        //7 - Event for stopping tracking
+
     };
     button.addEventListener('click', this.handleTracking(), false);
 
