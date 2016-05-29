@@ -262,7 +262,6 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
 ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
 {
     var features = evt.features.getArray();
-    var parser = new ol.format.GeoJSON();
 
     // Dont use ES2015 syntax "array.forEach(feature => { return feature; })"
     features.forEach(function(feature, index) {
@@ -270,11 +269,8 @@ ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
         if ('Circle' == feature.getGeometry().getType()) {
             //var parserCircle = parser.writeCircleGeometry_()
         } else {
-            // Addind feature to source vector in EPSG:4326
-            var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-
             // Edit document in Kuzzle
-            dataLayers.updateGeodatasDocument(featureGeoJSON, feature);
+            dataLayers.updateGeodatasDocument(feature);
         }
     });
 };

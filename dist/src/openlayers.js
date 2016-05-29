@@ -35,7 +35,6 @@ export default {
         buttonsDrawControls: null,
         layerSwitcher: null,
         markerSource: null,
-        featureForm: null,
         tabStyles: null,
     },
 
@@ -164,14 +163,12 @@ export default {
 
         // Show feature data + listener
         this.state.map.on('click', function(evt) {
-            // When we select a feature, it's become the featureForm
             var feature = this_.state.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
                     return feature;
                 }
             );
             if (undefined != feature && undefined != feature.getId() && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-                this_.state.featureForm = feature;
                 this_.showFeaturesInformations(feature, true);
             }
         });
@@ -498,6 +495,7 @@ export default {
      */
     createEditDatasForm()
     {
+        console.log("createEditDatasForm() : lancement formulaire properties pour " + dataLayers.state.notNotifFeatureId);
         var this_ = this;
         var divForm = document.getElementById("divFormInput");
 
