@@ -2,15 +2,17 @@ import Projection from '../services/geo-parameters'
 import notification from '../services/notification';
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
+// Openlayers controls
 import LayerSwitcher from './layerSwitcher'
 import ControlDrawButtons from './ol3-controldrawbuttons'
 import ZoomControl from './ol3-zoomuibuttons';
 import SetPosition from './ol3-resetposition';
 import RedrawSubscribeZone from './ol3-editsubscribezone';
 import RealTimeTracking from './ol3-realTimeTracking';
+// Openlayers 3 add-ons
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
-//import jsoneditor from 'jsoneditor';
+
 /**
  * Initialisation de la map
  * @returns {ol.Map|*}
@@ -35,7 +37,6 @@ export default {
         markerSource: null,
         featureForm: null,
         tabStyles: null,
-        acceptGeoloc : true
     },
 
     /**
@@ -419,7 +420,6 @@ export default {
      */
     showFeaturesInformations(feature, centerTofeature = true)
     {
-        console.log("set des informations de " + feature.getId());
         var parser = new ol.format.GeoJSON();
 
         var fProperties = feature.getProperties();
@@ -499,26 +499,6 @@ export default {
     createEditDatasForm()
     {
         var this_ = this;
-        var handleSubmit = this.handleSubmit = function(e) {
-            e.preventDefault();
-            //var featureForm = this_.state.featureForm;
-            var objPropertiesFeature = new Array(); // { };
-            Array.from(e.target.elements).forEach(element => {
-                if ("text" == element.type && "undefined" != element.type) {
-                    objPropertiesFeature[element.name] = element.value;
-                    this_.state.featureForm.setProperties(objPropertiesFeature);
-                }
-            });
-            document.getElementById("divAddDoc").classList.toggle("hidden");
-            dataLayers.updatePropertiesDocument(this_.state.featureForm);
-
-        };
-
-        // Submit listener
-        var form = document.forms['form-edit-properties'];
-        form.removeEventListener('submit', this.handleSubmit);
-        form.addEventListener('submit', this.handleSubmit, false);
-
         var divForm = document.getElementById("divFormInput");
 
         if (divForm.childElementCount > 0) {
@@ -744,7 +724,7 @@ export default {
 
             'Point': [new ol.style.Style({
                 image: new ol.style.Circle({
-                    fill: new ol.style.Fill({ color: [255,110,1,64] }), // interieur // rgb(255,110,64)
+                    fill: new ol.style.Fill({ color: [255,110,64] }), // interieur // rgb(255,110,64)
                     stroke: new ol.style.Stroke({ color: [255,102,0,1] }), // bordure
                     radius: 5
                 })
@@ -752,14 +732,14 @@ export default {
 
             'LineString': [new ol.style.Style({
                 stroke: new ol.style.Stroke({
-                    color: [255,110,1,64,1],
+                    color: [255,110,64],
                     width: 4
                 })
             })],
 
             'Polygon': [new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color : [255,110,1,64,0.4]
+                    color : 'rgba(255,110,64, 0.3)'
                 }),
                 stroke: new ol.style.Stroke({
                     color: [255,102,0,1],
@@ -769,7 +749,7 @@ export default {
 
             'Circle': [new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color: [255,110,1,64,0.4]
+                    color: 'rgba(255,110,64, 0.3)'
                 }),
                 stroke: new ol.style.Stroke({
                     color: [255,102,0, 1],

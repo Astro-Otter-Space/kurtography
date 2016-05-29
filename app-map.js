@@ -1,5 +1,6 @@
 import dataLayers from './dist/src/dataLayers';
 dataLayers.listCollections();
+import olMap from './dist/src/openlayers';
 
 // Liens
 document.querySelector('a[data-link="auth"]').addEventListener('click', function() {
@@ -32,6 +33,25 @@ document.querySelector('#mdlClose').addEventListener('click', function() {
 document.querySelector('#mdlAddClose').addEventListener('click', function() {
     document.getElementById("divAddDoc").classList.toggle("hidden");
 }, false);
+
+// Add document listener
+var handleSubmit = function(e) {
+    e.preventDefault();
+    var objPropertiesFeature = new Array();
+    Array.from(e.target.elements).forEach(element => {
+        if ("text" == element.type && "undefined" != element.type) {
+            objPropertiesFeature[element.name] = element.value;
+            olMap.state.featureForm.setProperties(objPropertiesFeature);
+        }
+    });
+    document.getElementById("divAddDoc").classList.toggle("hidden");
+    dataLayers.updatePropertiesDocument(olMap.state.featureForm);
+};
+var form = document.forms['form-edit-properties'];
+form.addEventListener('submit', handleSubmit, false);
+
+
+
 
 //$(function(){
 //    $('form[name="formSearch"]').on('submit', function (e) {

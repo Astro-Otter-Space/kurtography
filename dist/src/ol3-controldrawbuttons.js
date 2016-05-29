@@ -1,4 +1,5 @@
-import Projection from '../services/geo-parameters'
+import Projection from '../services/geo-parameters';
+import notification from '../services/notification';
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import olMap from './openlayers';
@@ -24,36 +25,10 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
     this.typeSelect = 'Point';
     this.map = this.getMap();
     this.flagDraw = new Boolean(false);
-    this.flagLocStor = new Boolean(false);
-
-    //
-    if (undefined != options.properties)
-    {
-        this.element = options.properties.element;
-    }
 
     this.setFlagDraw(this.flagDraw);
-    this.setFlagLocStor(this.flagLocStor);
 
     var this_ = this;
-
-    // Set the selected layer : default layer or from localStorage
-    //this.setFlagLocStor(false);
-    //if (options.local_storage == true) {
-    //
-    //    this.setFlagLocStor(true);
-    //    if (localStorage.getItem('features') !== null) {
-    //
-    //        // Create geojson features from local storage
-    //        console.log(localStorage.getItem('features'))
-    //        var featuresLS = new ol.format.GeoJSON().readFeatures(JSON.parse(localStorage.getItem('features')));
-    //
-    //        var sourceLS =  new ol.source.Vector({
-    //            features: featuresLS
-    //        });
-    //        this.selectedLayers.setSource(sourceLS);
-    //    }
-    //}
 
     this.setSelectedLayer(this.selectedLayers);
 
@@ -66,23 +41,15 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
     {
         e = e || window.event;
 
-        if (dataLayers.state.subscription) {
-            dataLayers.state.subscription.unsubscribe();
-        }
-
         // Disabled Controls buttons
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
-            //divsChildren.item(i).classList.remove('enable');
-            //divsChildren.item(i).classList.remove('progress');
             divsChildren.item(i).disabled = true;
         }
 
         // Disable Draws controls
         var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
-            //divsChildren.item(i).classList.remove('enable');
-            //divsChildren.item(i).classList.remove('progress');
             divsChildren.item(i).disabled = true;
 
             if (divsChildren.item(i).type_control == 'ending') {
@@ -100,15 +67,9 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
     {
         e = e || window.event;
 
-        if (dataLayers.state.subscription) {
-            dataLayers.state.subscription.unsubscribe();
-        }
-
         // Disabled Controls buttons
         var divsChildren = this_.element.getElementsByClassName('div-controls')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
-            //divsChildren.item(i).classList.remove('enable');
-            //divsChildren.item(i).classList.remove('progress');
             divsChildren.item(i).disabled = true;
 
             if (divsChildren.item(i).type_control == 'ending') {
@@ -120,8 +81,6 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
         // Disable Draws controls
         var divsChildren = this_.element.getElementsByClassName('div-draw')[0].children;
         for(var i = 0; i < divsChildren.length; i++) {
-            //divsChildren.item(i).classList.remove('enable');
-            //divsChildren.item(i).classList.remove('progress');
             divsChildren.item(i).disabled = true;
         }
 
@@ -182,15 +141,9 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
             this_.map.removeInteraction(this_.delInteraction);
         }
 
-        if (true == this_.getFlagLocStor()) {
-            this_.setFeaturesInLocalStorage();
-        }
-
         this_.setFlagDraw(false); // Desactivation of drawing flag
-        // TODO activate subscribe
-        console.log("Reactivation subscribe with " + this_.getSelectedLayer().get('title'));
-        console.log(olMap.state.coordinates);
-        dataLayers.subscribeCollection(this_.getSelectedLayer(), olMap.state.coordinates);
+        dataLayers.state.notNotifFeatureId = null; // desactivation of featureId in progress
+        dataLayers.subscribeCollection(olMap.getSelectedLayer(), olMap.state.coordinates);
         e.preventDefault();
     };
 
@@ -269,26 +222,6 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
     }
 };
 
-
-/**
- * Record features in local storage
- * /!\ circles can't ge parsing in GeoJSON : https://github.com/openlayers/ol3/pull/3434
- */
-ol.control.ControlDrawButtons.prototype.setFeaturesInLocalStorage = function()
-{
-    var features = this.getSelectedLayer().getSource().getFeatures();
-    var parser = new ol.format.GeoJSON();
-
-    if (features.length > 0) {
-        var featuresGeoJson = parser.writeFeatures(features)
-        localStorage.clear();
-        //console.log('Number of feature : ' + features.length);
-        //console.log(featuresGeoJson);
-        localStorage.setItem('features', JSON.stringify(featuresGeoJson));
-    }
-}
-
-
 /**
  * Edit or delete a feature
  * @param evt
@@ -362,8 +295,6 @@ ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt)
     if (this.getFlagDraw() == true) {
         this.map = this.getMap();
 
-        // TODO : set specific style on hover
-
         // Select Interaction
         var selectDelInteraction = this.selectDelInteraction = new ol.interaction.Select({
             condition: ol.events.condition.click,
@@ -379,17 +310,18 @@ ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt)
         selectDelInteraction.getFeatures().addEventListener('add', function(e) {
             var feature = e.element;
             if(confirm('Are you sure you want to delete this feature ?')) {
-                //try {
+                if (undefined != feature) {
                     console.log("Suppression de la feature de selectDelInteraction");
                     // Remove from interaction
                     var featureId = feature.getId();
                     selectDelInteraction.getFeatures().remove(feature);
-                    console.log("On rentre dans deleteDocument('" + featureId + "')");
                     dataLayers.deleteDocument(featureId);
-                /*} catch (e) {
-                    console.log(e.message);
-                }*/
-
+                } else {
+                    notification.init({
+                        type: 'error',
+                        message: "Can't delete the kuzzle document."
+                    });
+                }
             }
             e.preventDefault();
         });
@@ -488,20 +420,6 @@ ol.control.ControlDrawButtons.prototype.setFlagDraw = function(/** @type {boolea
 ol.control.ControlDrawButtons.prototype.getFlagDraw = function()
 {
     return this.flagDraw;
-};
-
-/**
- * Flag for local storage
- * @param locStor
- */
-ol.control.ControlDrawButtons.prototype.setFlagLocStor = function(/** @type {boolean} */locStor)
-{
-    this.flagLocStor = locStor;
-};
-
-ol.control.ControlDrawButtons.prototype.getFlagLocStor = function()
-{
-    return this.flagLocStor;
 };
 
 
