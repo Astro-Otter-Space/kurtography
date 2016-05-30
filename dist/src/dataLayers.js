@@ -242,9 +242,10 @@ export default {
 
                     if (undefined != olMap.getSelectedLayer().getSource().getFeatureById(res.id)) {
                         var updFeatureDel = olMap.getSelectedLayer().getSource().getFeatureById(res.id);
+                        console.log("updateGeodatasDocument() : suppression de "  + res.id);
                         olMap.getSelectedLayer().getSource().removeFeature(updFeatureDel);
                     }
-
+                    console.log("updateGeodatasDocument() : ajout nouvelle version de "  + updFeatureEdited.getId());
                     olMap.getSelectedLayer().getSource().addFeature(updFeatureEdited);
 
                     olMap.showFeaturesInformations(updFeatureEdited, false);
@@ -338,7 +339,7 @@ export default {
                         type: 'notice',
                         message: "Suppression kuzzle document ok."
                     });
-                    console.log("deleteDocument() : La feature est effacée de la map");
+                    console.log("deleteDocument() : La feature " + featureDel.getId() +" est effacée de la map");
                 }
             });
         }

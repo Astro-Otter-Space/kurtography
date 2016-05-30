@@ -1,6 +1,5 @@
 import dataLayers from './dist/src/dataLayers';
 dataLayers.listCollections();
-import olMap from './dist/src/openlayers';
 
 // Liens
 document.querySelector('a[data-link="auth"]').addEventListener('click', function() {
@@ -30,22 +29,20 @@ document.querySelector('#mdlAuthClose').addEventListener('click', function() {
 document.querySelector('#mdlClose').addEventListener('click', function() {
     document.getElementById("infoKdoc").classList.toggle("hidden");
 }, false);
-document.querySelector('#mdlAddClose').addEventListener('click', function() {
-    document.getElementById("divAddDoc").classList.toggle("hidden");
-}, false);
 
-// Add document listener
+// Listener Add document
 var handleSubmit = function(e) {
     e.preventDefault();
     var objPropertiesFeature = new Array();
+    var updFeature = dataLayers.getSource().getFeatureById(dataLayers.state.notNotifFeatureId);
     Array.from(e.target.elements).forEach(element => {
         if ("text" == element.type && "undefined" != element.type) {
             objPropertiesFeature[element.name] = element.value;
-            olMap.state.featureForm.setProperties(objPropertiesFeature);
+            updFeature.setProperties(objPropertiesFeature);
         }
     });
     document.getElementById("divAddDoc").classList.toggle("hidden");
-    dataLayers.updatePropertiesDocument(olMap.state.featureForm);
+    dataLayers.updatePropertiesDocument(updFeature);
 };
 var form = document.forms['form-edit-properties'];
 form.addEventListener('submit', handleSubmit, false);

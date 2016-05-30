@@ -112,33 +112,37 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
         }
 
         // Removing adding interaction
-        if (undefined != this_.drawInteraction && this_.drawInteraction.getActive() == true) {
-            this_.drawInteraction.setActive(false);
+        if (undefined != this_.drawInteraction /*&& this_.drawInteraction.getActive() == true*/) {
+            //this_.drawInteraction.setActive(false);
+            console.log("Removing drawInteraction");
             this_.map.removeInteraction(this_.drawInteraction);
+            this_.drawInteraction = null;
         }
 
-        // Remove modify interaction
-        if (undefined != this_.editSelectInteraction && this_.editSelectInteraction.getActive() == true) {
-            this_.editSelectInteraction.setActive(false);
+        // Remove selection interaction and modify interaction
+        if (undefined != this_.editSelectInteraction /*&& this_.editSelectInteraction.getActive() == true*/) {
+            //this_.editSelectInteraction.setActive(false);
+            console.log("removing editSelectInteraction");
             this_.map.removeInteraction(this_.editSelectInteraction);
+            this_.editSelectInteraction = null;
         }
-        if (undefined != this_.delInteraction && this_.delInteraction.getActive()) {
-            this_.delInteraction.setActive(false);
-            this_.map.removeInteraction(this_.delInteraction);
-        }
-        if (undefined != this_.modifyInteraction && this_.modifyInteraction.getActive() == true) {
-            this_.modifyInteraction.setActive(false);
+
+        if (undefined != this_.modifyInteraction /*&& this_.modifyInteraction.getActive() == true*/) {
+            //this_.modifyInteraction.setActive(false);
+            console.log("removing modifyInteraction");
             this_.map.removeInteraction(this_.modifyInteraction);
+            this_.modifyInteraction = null;
         }
 
         // Remove delete interaction
-        if (undefined != this_.selectDelInteraction && this_.selectDelInteraction.getActive()) {
-            this_.selectDelInteraction.setActive(false);
+        if (undefined != this_.selectDelInteraction /*&& this_.selectDelInteraction.getActive()*/) {
+            //this_.selectDelInteraction.setActive(false);
             this_.map.removeInteraction(this_.selectDelInteraction);
         }
-        if (undefined != this_.delInteraction && this_.delInteraction.getActive()) {
-            this_.delInteraction.setActive(false);
+        if (undefined != this_.delInteraction /*&& this_.delInteraction.getActive()*/) {
+            //this_.delInteraction.setActive(false);
             this_.map.removeInteraction(this_.delInteraction);
+            this_.delInteraction = null;
         }
 
         this_.setFlagDraw(false); // Desactivation of drawing flag
@@ -192,7 +196,6 @@ ol.control.ControlDrawButtons.prototype.drawOnMap = function(evt)
         });
 
         draw.on('drawend', this.drawEndFeature, this);
-
         this.map.addInteraction(draw);
     }
 };
@@ -216,6 +219,8 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
         if (undefined != this.element) {
             // Ajout new document in Kuzzle
             dataLayers.addDocument(featureGeoJSON, feature.getGeometry().getType());
+            // Because of strange bug, I delete the drawing feature who will recreated in kuzzle callback
+            this.map.getSelectedLayer().getSource().removeFeature(feature);
         } else {
             console.error("Problem create new feature");
         }
@@ -239,13 +244,19 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
         // Select Interaction
         var selectedLayer = this.getSelectedLayer();
         var editSelectInteraction = this.editSelectInteraction = new ol.interaction.Select({
-            condition: ol.events.condition.click,
+            condition: ol.events.condition.singleClick,
+            source : function(layer) {
+                if (layer == this.getSelectedLayer()) {
+                    return layer
+                }
+            }
         });
         this.map.addInteraction(editSelectInteraction);
 
         // Modify interaction
         var mod = this.modifyInteraction = new ol.interaction.Modify({
             features: editSelectInteraction.getFeatures(),
+            //features: new ol.Collection(olMap.getSelectedLayer().getSource().getFeatures()),
             style: this.styleEdit(),
             zIndex: 50
         });
