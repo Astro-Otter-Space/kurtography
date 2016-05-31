@@ -210,20 +210,16 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
     var parser = new ol.format.GeoJSON();
 
     // Problem with recuperation of a circle geometry : https://github.com/openlayers/ol3/pull/3434
-    if ('Circle' == feature.getGeometry().getType()) {
-        //var parserCircle = parser.writeCircleGeometry_()
-    } else {
-        // Addind feature to source vector in EPSG:4326
-        var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+    // Addind feature to source vector in EPSG:4326
+    var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
-        if (undefined != this.element) {
-            // Ajout new document in Kuzzle
-            dataLayers.addDocument(featureGeoJSON, feature.getGeometry().getType());
-            // Because of strange bug, I delete the drawing feature who will recreated in kuzzle callback
-            this.map.getSelectedLayer().getSource().removeFeature(feature);
-        } else {
-            console.error("Problem create new feature");
-        }
+    if (undefined != this.element) {
+        // Ajout new document in Kuzzle
+        console.log("Recording feature in addDocument() :" + featureGeoJSON);
+        dataLayers.addDocument(featureGeoJSON, feature/*.getGeometry().getType()*/);
+        // Because of strange bug, I delete the drawing feature who will recreated in kuzzle callback
+    } else {
+        console.error("Problem create new feature");
     }
 };
 

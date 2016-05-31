@@ -1,3 +1,6 @@
+// https://www.dartdocs.org/documentation/mdl/1.15.2/mdlcomponents/mdlcomponents-library.html
+// https://code.getmdl.io/1.1.3/material.js
+// http://quaintous.com/2015/07/09/react-components-with-mdl/
 import dataLayers from './dist/src/dataLayers';
 dataLayers.listCollections();
 

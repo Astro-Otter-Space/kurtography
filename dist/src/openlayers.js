@@ -542,7 +542,7 @@ export default {
                 divForm.appendChild(div);
             }
 
-            componentHandler.upgradeElements(divq);
+            componentHandler.upgradeElements(div);
         });
 
 

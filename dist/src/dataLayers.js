@@ -137,10 +137,12 @@ export default {
      * @param datas
      * @param newFeature
      */
-    addDocument(fDatasGeoJson, typeFeature)
+    addDocument(fDatasGeoJson, feature)
     {
         var this_ = this;
         var layer = olMap.getSelectedLayer().get('title');
+
+        var typeFeature = feature.getGeometry().getType();
 
         // Create empty properties from mapping
         fDatasGeoJson.properties = {};
@@ -173,7 +175,7 @@ export default {
             if (!err) {
                 // set of notNotifFeatureId and reconstruction of subscribe with new value of notNotifFeatureId
                 this_.state.notNotifFeatureId = resp.id;
-                this_.subscribeCollection(olMap.getSelectedLayer(), olMap.state.coordinates);
+                //this_.subscribeCollection(olMap.getSelectedLayer(), olMap.state.coordinates);
 
                 // Setting of Kuzzle Document Identifier to identifier of the feature
                 var f = new ol.format.GeoJSON();
@@ -192,6 +194,7 @@ export default {
                 //        olMap.getSelectedLayer().getSource().addFeature(newFeature);
                 //    }
                 //}
+                //olMap.getSelectedLayer().getSource().removeFeature(feature);
                 olMap.getSelectedLayer().getSource().addFeature(newFeature);
                 olMap.createEditDatasForm();
             } else {
