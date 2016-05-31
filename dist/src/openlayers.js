@@ -316,6 +316,8 @@ export default {
         // RealTime Tracking
         var realTimeTracking = new ol.control.RealTimeTracking();
         //this.state.map.addControl(realTimeTracking);
+
+
     },
 
 
@@ -539,7 +541,10 @@ export default {
                 div.appendChild(input);
                 divForm.appendChild(div);
             }
+
+            componentHandler.upgradeElements(divq);
         });
+
 
         document.getElementById("divAddDoc").classList.toggle("hidden");
     },
@@ -629,6 +634,10 @@ export default {
         return tabG;
     },
 
+
+    /**
+     *
+     */
     editExportLinks()
     {
         var links = document.getElementsByClassName('export');

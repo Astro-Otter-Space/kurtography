@@ -120,7 +120,7 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
         var li = document.createElement('li');
         li.className = "mdl-list__item";
 
-        var lyrTitle = document.createTextNode(lyr.get('title')); ;
+        var lyrTitle = document.createTextNode(lyr.get('title'));
         var lyrId = lyr.get('title').replace(/\s+/g, '-') + '_' + idx;
 
         var span = document.createElement('span');
@@ -154,6 +154,8 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
 
             labelInput.appendChild(input);
             spanInput.appendChild(labelInput);
+
+
         } else {
             iLabel.innerHTML = "public";
         }
@@ -164,6 +166,7 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
         li.appendChild(span);
         if (undefined != spanInput){
             li.appendChild(spanInput);
+            componentHandler.upgradeElements(li);
         }
 
         return li;
