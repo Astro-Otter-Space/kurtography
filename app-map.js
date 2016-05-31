@@ -32,6 +32,10 @@ document.querySelector('#mdlAuthClose').addEventListener('click', function() {
 document.querySelector('#mdlClose').addEventListener('click', function() {
     document.getElementById("infoKdoc").classList.toggle("hidden");
 }, false);
+document.querySelector('#mdlChoiceClose').addEventListener('click', function() {
+    document.getElementById("divTrackingChoice").classList.toggle("hidden");
+}, false);
+
 
 // Listener Add document
 var handleSubmit = function(e) {
@@ -49,31 +53,6 @@ var handleSubmit = function(e) {
 };
 var form = document.forms['form-edit-properties'];
 form.addEventListener('submit', handleSubmit, false);
-
-
-
-
-//$(function(){
-//    $('form[name="formSearch"]').on('submit', function (e) {
-//        e.preventDefault();
-//    });
-//    $('input[name="search"]').autocomplete({
-//        source: function(request, response) {
-//            dataLayers.searchDocuments(request.term);
-//            if (dataLayers.state.rstAdvancedSearch) {
-//                response(dataLayers.state.rstAdvancedSearch);
-//            }
-//        },
-//        minLength: 2,
-//        open: function(event, ui) {
-//            $(".ui-autocomplete").css("z-index", 10000);
-//        },
-//        select: function(event, ui)
-//        {
-//            dataLayers.setCenterKuzzleDoc(ui.item.id);
-//        }
-//    });
-//});
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);

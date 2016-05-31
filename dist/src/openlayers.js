@@ -33,6 +33,7 @@ export default {
         distance: 5000,
         zoneSubscriptionLayer: null,
         buttonsDrawControls: null,
+        realTimeTracking: null,
         layerSwitcher: null,
         markerSource: null,
         tabStyles: null,
@@ -260,6 +261,11 @@ export default {
         };
         this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
+        // RealTime Tracking
+        if(false != this.state.acceptGeoloc) {
+            var realTimeTracking = this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
+            this.state.map.addControl(realTimeTracking);
+        }
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
             l.on("change:visible", function(e) {
@@ -287,6 +293,9 @@ export default {
 
                     // Not sure if correct but it's working :|
                     this_.state.buttonsDrawControls.setSelectedLayer(lyr);
+                    if(false != this_.state.acceptGeoloc) {
+                        this_.state.realTimeTracking.setSelectedLayer(lyr);
+                    }
 
                     // Enabled control draw buttons
                     document.getElementById("Point").disabled = false;
@@ -297,6 +306,7 @@ export default {
                     document.getElementById("Edit").disabled = false;
                     document.getElementById("Delete").disabled = false;
                     document.getElementById("EndingControl").disabled = false;
+                    document.getElementById("trackingButton").disabled = false;
 
                     // Set the export links
                     this_.editExportLinks();
@@ -312,11 +322,6 @@ export default {
         // Redraw the subscribe zone
         var RedrawSubscribeZone = new ol.control.EditSubscribeRoom();
         this.state.map.addControl(RedrawSubscribeZone);
-
-        // RealTime Tracking
-        var realTimeTracking = new ol.control.RealTimeTracking();
-        //this.state.map.addControl(realTimeTracking);
-
 
     },
 

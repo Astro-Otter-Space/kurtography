@@ -1,18 +1,21 @@
 doctype html
 html(lang="fr")
-    include components/header
+    include header
     body
         // Content
         block content
 
         // cards connexion / register
-        include components/authentification
+        include ../components/authentification
 
         // http://codepen.io/tutsplus/pen/RWwypM
-        include components/informations
+        include ../components/informations
 
         // Form adding
-        include components/adding_properties
+        include ../components/adding_properties
+
+        // Choice of tracking feature
+        include ../components/choice_tracking
 
         // Javascript scripts
         script(src='https://code.getmdl.io/1.1.3/material.min.js')

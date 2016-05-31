@@ -1,9 +1,9 @@
-extends ../layout-ui
+extends ../layout/layout-ui
 
 block content
     div.mdl-layout.mdl-js-layout.mdl-layout--fixed-header
         //Sidebar
-        include ../components/sidebar
+        include ../layout/sidebar
         //Header
         include ../components/navbar
 
@@ -13,6 +13,7 @@ block content
         // Buttons draw
         div#external_draw_control
             div#panelDrawControl
+            div#panelTracking
 
         // External zoom buttons
         div#external_control_zoom

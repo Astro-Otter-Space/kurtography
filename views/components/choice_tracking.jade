@@ -1,0 +1,31 @@
+div#divTrackingChoice.mdl-layout.mdl-js-layout.mdl-color--grey-100.hidden
+    main.mdl-layout__content
+        div.mdl-grid
+            div.mdl-card.mdl-cell.mdl-cell--12-col.mdl-cell--8-col-tablet.mdl-shadow--2dp
+                form(action="#", method="POST", name="form-choice-tracking")#formChoiceTracking
+                    div.mdl-card__menu
+                        button#mdlChoiceClose.mdl-button.mdl-button--icon.mdl-js-button.mdl-js-ripple-effect
+                            i.material-icons close
+                    div.mdl-card__title
+                        h1.mdl-card__title-text Type of view
+                    div.mdl-card__supporting-text
+                        p Select type of real-time feature
+                        ul.mdl-list
+                            li.mdl-list__item
+                                span.mdl-list__item-primary-content
+                                    i.material-icons.mdl-list__item-icon add_circle
+                                    | Point
+                                span.mdl-list__item-secondary-action
+                                    label.inline-list-radio.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="trackingPoint")
+                                        input(type="radio", name="type_tracking", value="Point")#trackingPoint.mdl-radio__button
+
+                            li.mdl-list__item
+                                span.mdl-list__item-primary-content
+                                    i.material-icons.mdl-list__item-icon timeline
+                                    | Line
+                                span.mdl-list__item-secondary-action
+                                    label.inline-list-radio.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="trackingLine")
+                                        input(type="radio", name="type_tracking", value="LineString")#trackingLine.mdl-radio__button
+
+                    div.mdl-card__actions.mdl-card--border
+                        button.mdl-button.mdl-button--colored.mdl-js-button.mdl-js-ripple-effect Submit

@@ -187,6 +187,6 @@ body{
     margin-left: 3px;
 }
 
-#infoKdoc, #divAuth, #divAddDoc {
+#infoKdoc, #divAuth, #divAddDoc, #divTrackingChoice {
     top: 5em;
 }
