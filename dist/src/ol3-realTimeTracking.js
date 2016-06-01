@@ -26,7 +26,6 @@ ol.control.RealTimeTracking = function (selected_layer) {
         e.preventDefault();
 
         var type = e.target.elements.type_tracking.value;
-        /
         document.getElementById("divTrackingChoice").classList.toggle("hidden");
     };
     var formChoice = document.forms['form-choice-tracking'];
@@ -98,7 +97,7 @@ ol.control.RealTimeTracking.prototype.createFeature = function(typeSelect) {
     }
 
     var parser = new ol.format.GeoJSON();
-    // TODo : put a specifique ID, don't let kuzzle set the ID
+    // TODO : put a specifique ID, don't let kuzzle set the ID
     var myRealTimeFeature = new ol.Feature({
         geometry: geomType
     });
