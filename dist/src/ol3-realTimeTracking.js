@@ -112,24 +112,20 @@ ol.control.RealTimeTracking.prototype.createFeature = function(typeSelect) {
         id: idFeature,
         style: this.getStyle(typeSelect)
     });
-    // Add feature to map
-    //this.getSelectedLayer().getSource().addFeature(this.myRealTimeFeature);
 
-    // Convert feature in geoJSON
+    // Convert feature in geoJSON and add in Kuzzle
     var parser = new ol.format.GeoJSON();
     var featureGeoJSON = parser.writeFeatureObject(newRealTimeFeature, {dataProjection: olMap.state.projectionTo, featureProjection: olMap.state.projectionFrom});
-
-    // Add feature in kuzzle
     dataLayers.addDocument(featureGeoJSON, newRealTimeFeature);
 
     var kRealTimeFeature = this.getSelectedLayer().getSource().getFeatureById(idFeature);
-    this.drawOnMap(kRealTimeFeature, typeSelect);
+    // TODO : put drawOnMap function in a fonction dataLayers.addDocument like for put new feature in selectInteraction
+    this.drawOnMap(kRealTimeFeature);
 };
 
 
-ol.control.RealTimeTracking.prototype.drawOnMap = function(myRealTimeFeature, typeSelect)
+ol.control.RealTimeTracking.prototype.drawOnMap = function(myRealTimeFeature)
 {
-    var this_ = this;
     this.map = this.getMap();
     var selectInteraction = this.selectInteraction = new ol.interaction.Select({
         features: myRealTimeFeature,
@@ -139,18 +135,17 @@ ol.control.RealTimeTracking.prototype.drawOnMap = function(myRealTimeFeature, ty
             }
         }
     });
-    console.log("Add selectInteraction");
     this.map.addInteraction(this.selectInteraction);
-
+    console.log("this.selectInteraction.getFeatures()")
     var modifyInteraction = this.modifyInteraction = new ol.interaction.Modify({
         features : this.selectInteraction.getFeatures(),
-        geometryFunction: function (coords, geom) {
-
-        },
         style : this.getStyle('edit'),
         zIndex: 50
     });
-    console.log("Add selectInteraction");
+
+    this.modifyInteraction.on('modifystart', this.drawStartFeature, this);
+    this.modifyInteraction.on('modifyend', this.drawEndFeature, this);
+
     this.map.addInteraction(this.modifyInteraction);
 };
 

@@ -215,8 +215,7 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
 
     if (undefined != this.element) {
         // Ajout new document in Kuzzle
-        console.log("Recording feature in addDocument() :" + featureGeoJSON);
-        dataLayers.addDocument(featureGeoJSON, feature/*.getGeometry().getType()*/);
+        dataLayers.addDocument(featureGeoJSON, feature);
         // Because of strange bug, I delete the drawing feature who will recreated in kuzzle callback
     } else {
         console.error("Problem create new feature");
