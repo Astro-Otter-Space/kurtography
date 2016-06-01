@@ -1,4 +1,3 @@
-import Projection from '../services/geo-parameters';
 import notification from '../services/notification';
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
@@ -27,7 +26,7 @@ ol.control.RealTimeTracking = function (selected_layer) {
         e.preventDefault();
 
         var type = e.target.elements.type_tracking.value;
-        this_.drawOnMap(type);
+        /
         document.getElementById("divTrackingChoice").classList.toggle("hidden");
     };
     var formChoice = document.forms['form-choice-tracking'];
@@ -90,34 +89,55 @@ ol.inherits(ol.control.RealTimeTracking, ol.control.Control);
  * Create Draw Interaction
  * @param evt
  */
-ol.control.RealTimeTracking.prototype.drawOnMap = function(typeSelect)
-{
-    this.map = this.getMap();
-    this.position = olMap.state.coordinates;
-    var this_ = this;
+ol.control.RealTimeTracking.prototype.createFeature = function(typeSelect) {
 
-    var drawInteraction = this.drawInteraction = new ol.interaction.Draw({
-        source : this.getSelectedLayer().getSource(),
-        features : new ol.Collection(),
-        type: /** @type {ol.geom.GeometryType} */ (typeSelect),
-        geometryFunction: function (coords, geom) {
+    if ('Point' == typeSelect) {
+        var geomType = new ol.geom.Point(olMap.state.coordinates).transform(olMap.state.projectionTo, olMap.state.projectionFrom);
+    } else if ('LineString' == typeSelect) {
+        var geomType = new ol.geom.LineString([[olMap.state.coordinates],[olMap.state.coordinates]]).transform(olMap.state.projectionTo, olMap.state.projectionFrom);
+    }
 
-        }
-        //style : this.styleAdd()
+    var parser = new ol.format.GeoJSON();
+    // TODo : put a specifique ID, don't let kuzzle set the ID
+    var myRealTimeFeature = new ol.Feature({
+        geometry: geomType
     });
 
-    draw.on('drawstart', this.drawStartFeature, this);
-    draw.on('drawend', this.drawEndFeature, this);
-    this.map.addInteraction(drawInteraction);
+    this.drawOnMap(myRealTimeFeature)
+};
+
+ol.control.RealTimeTracking.prototype.drawOnMap = function(myRealTimeFeature)
+{
+    this.map = this.getMap();
+    var this_ = this;
+
+    var selectInteraction = this.selectInteraction = new ol.interaction.Select({
+        features: myRealTimeFeature,
+        source : function(layer) {
+            if (layer == this.getSelectedLayer()) {
+                return layer
+            }
+        }
+    });
+
+    this.map.addInteraction(this.selectInteraction);
+
+    //var modifyInteraction = this.modifyInteraction = new ol.interaction.Modify({
+    //    source : this.getSelectedLayer().getSource(),
+    //    features : new ol.Collection(),
+    //    type: /** @type {ol.geom.GeometryType} */ (typeSelect),
+    //    geometryFunction: function (coords, geom) {
+    //
+    //    }
+    //    //style : this.styleAdd()
+    //});
+    //this.map.addInteraction(drawInteraction);
 };
 
 // Event on start
 ol.control.RealTimeTracking.prototype.drawStartFeature = function(evt)
 {
     var feature = evt.feature;
-    var pointStart = new ol.geom.Geometry([olMap.geolocation.getPosition()[0], olMap.geolocation.getPosition()[1]]).transform(olMap.state.projectionTo, olMap.state.projectionFrom).getCoordinates();
-    console.log(pointStart);
-    feature.setGeometry(pointStart);
 };
 
 // Event on ending
