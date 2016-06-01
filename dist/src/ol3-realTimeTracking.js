@@ -2,11 +2,12 @@ import notification from '../services/notification';
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import olMap from './openlayers';
+import uuid from 'node-uuid';
 
 // Algo
-// 1 - Choice : point or linestring
-// 2 - Create adding interaction
-// 3 - create first point of feature (manual or by geoloc ?) and retrieve id from kuzzle
+// 1 - Choice : point or linestring OK
+// 2 - create first point of feature by geoloc OK
+// 3 - Add point in kuzzle and update properties
 // 4 - change adding interaction in modify interaction
 // 5 - with change geoloc, update (point) or adding (linestring) geometries
 // 6 - If linestring : update field location
@@ -15,6 +16,7 @@ import olMap from './openlayers';
 ol.control.RealTimeTracking = function (selected_layer) {
 
     var this_ = this;
+    this.map = this.getMap();
     this.setSelectedLayer(this.selectedLayers);
 
     var divTarget = document.getElementById("external_draw_control");
@@ -26,10 +28,11 @@ ol.control.RealTimeTracking = function (selected_layer) {
         e.preventDefault();
 
         var type = e.target.elements.type_tracking.value;
+        this_.createFeature(type);
         document.getElementById("divTrackingChoice").classList.toggle("hidden");
     };
     var formChoice = document.forms['form-choice-tracking'];
-    formChoice.addEventListener('submit', handleChoice, false);
+        formChoice.addEventListener('submit', handleChoice, false);
 
     // BUTTON START
     var button = document.createElement('button');
@@ -90,26 +93,44 @@ ol.inherits(ol.control.RealTimeTracking, ol.control.Control);
  */
 ol.control.RealTimeTracking.prototype.createFeature = function(typeSelect) {
 
+    // Coordinates poistion
+    var coordonatesWGS84 = olMap.state.coordinates;
+    // Reprojection for openlayers
+    var coordinatesTr =  ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], olMap.state.projectionTo, olMap.state.projectionFrom);
+
+    // Create geom type
     if ('Point' == typeSelect) {
-        var geomType = new ol.geom.Point(olMap.state.coordinates).transform(olMap.state.projectionTo, olMap.state.projectionFrom);
+        var geomType = new ol.geom.Point(coordinatesTr);
     } else if ('LineString' == typeSelect) {
-        var geomType = new ol.geom.LineString([[olMap.state.coordinates],[olMap.state.coordinates]]).transform(olMap.state.projectionTo, olMap.state.projectionFrom);
+        var geomType = new ol.geom.LineString([[coordinatesTr],[coordinatesTr]])
     }
 
-    var parser = new ol.format.GeoJSON();
-    // TODO : put a specifique ID, don't let kuzzle set the ID
-    var myRealTimeFeature = new ol.Feature({
-        geometry: geomType
+    // Create feature
+    var idFeature = uuid.v1();
+    var newRealTimeFeature = new ol.Feature({
+        geometry: geomType,
+        id: idFeature,
+        style: this.getStyle(typeSelect)
     });
+    // Add feature to map
+    //this.getSelectedLayer().getSource().addFeature(this.myRealTimeFeature);
 
-    this.drawOnMap(myRealTimeFeature)
+    // Convert feature in geoJSON
+    var parser = new ol.format.GeoJSON();
+    var featureGeoJSON = parser.writeFeatureObject(newRealTimeFeature, {dataProjection: olMap.state.projectionTo, featureProjection: olMap.state.projectionFrom});
+
+    // Add feature in kuzzle
+    dataLayers.addDocument(featureGeoJSON, newRealTimeFeature);
+
+    var kRealTimeFeature = this.getSelectedLayer().getSource().getFeatureById(idFeature);
+    this.drawOnMap(kRealTimeFeature, typeSelect);
 };
 
-ol.control.RealTimeTracking.prototype.drawOnMap = function(myRealTimeFeature)
-{
-    this.map = this.getMap();
-    var this_ = this;
 
+ol.control.RealTimeTracking.prototype.drawOnMap = function(myRealTimeFeature, typeSelect)
+{
+    var this_ = this;
+    this.map = this.getMap();
     var selectInteraction = this.selectInteraction = new ol.interaction.Select({
         features: myRealTimeFeature,
         source : function(layer) {
@@ -118,19 +139,19 @@ ol.control.RealTimeTracking.prototype.drawOnMap = function(myRealTimeFeature)
             }
         }
     });
-
+    console.log("Add selectInteraction");
     this.map.addInteraction(this.selectInteraction);
 
-    //var modifyInteraction = this.modifyInteraction = new ol.interaction.Modify({
-    //    source : this.getSelectedLayer().getSource(),
-    //    features : new ol.Collection(),
-    //    type: /** @type {ol.geom.GeometryType} */ (typeSelect),
-    //    geometryFunction: function (coords, geom) {
-    //
-    //    }
-    //    //style : this.styleAdd()
-    //});
-    //this.map.addInteraction(drawInteraction);
+    var modifyInteraction = this.modifyInteraction = new ol.interaction.Modify({
+        features : this.selectInteraction.getFeatures(),
+        geometryFunction: function (coords, geom) {
+
+        },
+        style : this.getStyle('edit'),
+        zIndex: 50
+    });
+    console.log("Add selectInteraction");
+    this.map.addInteraction(this.modifyInteraction);
 };
 
 // Event on start
@@ -157,4 +178,49 @@ ol.control.RealTimeTracking.prototype.setSelectedLayer = function(layer)
 ol.control.RealTimeTracking.prototype.getSelectedLayer = function()
 {
     return this.selectedLayers;
+};
+
+ol.control.RealTimeTracking.prototype.getStyle = function(type)
+{
+    var styles = {
+        'Point': [new ol.style.Style({
+            image: new ol.style.Circle({
+                fill: new ol.style.Fill({ color: [255,110,64] }), // interieur // rgb(255,110,64)
+                stroke: new ol.style.Stroke({ color: [255,102,0,1] }), // bordure
+                radius: 5
+            })
+        })],
+
+        'LineString': [new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: [255,110,64],
+                width: 4
+            })
+        })],
+
+        'edit': [
+            new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: [4, 100, 128, 0.4] //#046380
+                }),
+                stroke: new ol.style.Stroke({
+                    color: [0, 64, 28, 0.75], //#004080
+                    width: 1.5
+                }),
+                image: new ol.style.Circle({
+                    radius: 7,
+                    fill: new ol.style.Fill({
+                        color: [4, 100, 128, 0.4]
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: [0, 64, 28, 0.75],
+                        width: 1.5
+                    })
+                }),
+                zIndex: 100000
+            })
+        ]
+    };
+
+    return styles;
 };

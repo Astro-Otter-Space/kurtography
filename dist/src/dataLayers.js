@@ -141,7 +141,7 @@ export default {
     {
         var this_ = this;
         var layer = olMap.getSelectedLayer().get('title');
-
+        var idFeature = (undefined != feature.get('id')) ? feature.get('id') : null;
         var typeFeature = feature.getGeometry().getType();
 
         // Create empty properties from mapping
@@ -171,7 +171,8 @@ export default {
             };
         }
 
-        kuzzle.dataCollectionFactory(layer).createDocument(fDatasGeoJson, function (err, resp) {
+        console.log(fDatasGeoJson);
+        kuzzle.dataCollectionFactory(layer).createDocument(idFeature, fDatasGeoJson, function (err, resp) {
             if (!err) {
                 // set of notNotifFeatureId and reconstruction of subscribe with new value of notNotifFeatureId
                 this_.state.notNotifFeatureId = resp.id;
