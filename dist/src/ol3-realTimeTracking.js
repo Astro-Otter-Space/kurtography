@@ -1,4 +1,5 @@
 import notification from '../services/notification';
+import kuzzle from '../services/kuzzle'
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import olMap from './openlayers';
@@ -22,17 +23,29 @@ ol.control.RealTimeTracking = function (selected_layer) {
     var divTarget = document.getElementById("external_draw_control");
     var divElement = document.getElementById("panelTracking");
 
-    // Formulaire
+    // Event listener Formulaire
     var handleChoice = function(e) {
         e = e || window.event;
         e.preventDefault();
 
+        // Datas from Form
+        var formDatas = {};
+        Object.keys(dataLayers.state.mappingCollection).forEach(field => {
+            if ( undefined != e.target.elements[field] && "text" == e.target.elements[field].type) {
+                formDatas[field] = e.target.elements[field].value;
+            }
+        });
+
+        // Type of feature
         var type = e.target.elements.type_tracking.value;
-        this_.createFeature(type);
+
+        this_.createFeature(formDatas, type);
         document.getElementById("divTrackingChoice").classList.toggle("hidden");
     };
+
     var formChoice = document.forms['form-choice-tracking'];
         formChoice.addEventListener('submit', handleChoice, false);
+
 
     // BUTTON START
     var button = document.createElement('button');
@@ -45,20 +58,6 @@ ol.control.RealTimeTracking = function (selected_layer) {
     iLabel.className = "material-icons";
     iLabel.innerHTML = "directions_run";
 
-    // Listener tracking
-    this.handleTracking = function(e) {
-        e = e || window.event;
-
-        document.getElementById("divTrackingChoice").classList.toggle("hidden");
-
-        // Toggle buttons
-        buttonOff.setAttribute('disabled', false);
-        buttonOff.classList.toggle("hidden");
-        button.setAttribute('disabled', 'disabled');
-
-        e.preventDefault();
-    };
-    button.addEventListener('click', this.handleTracking, false);
     button.appendChild(iLabel);
 
     // BUTTON OFF
@@ -71,8 +70,40 @@ ol.control.RealTimeTracking = function (selected_layer) {
     var iLabelOff = document.createElement('i');
     iLabelOff.className = "material-icons";
     iLabelOff.innerHTML = "done";
-
     buttonOff.appendChild(iLabelOff);
+
+    // Listener tracking
+    this.handleTracking = function(e) {
+        e = e || window.event;
+
+        document.getElementById("divTrackingChoice").classList.toggle("hidden");
+
+        // Toggle buttons
+        buttonOff.removeAttribute('disabled');
+        buttonOff.classList.toggle("hidden");
+        button.setAttribute('disabled', 'disabled');
+
+        // Form construction
+        this_.createForm();
+        e.preventDefault();
+    };
+
+    this.handleStopTracking = function(e) {
+        e = e || window.event;
+        console.log("Ending tracking");
+
+        // Button on
+        button.removeAttribute('disabled');
+
+        // Button Off
+        buttonOff.classList.toggle("hidden");
+        buttonOff.setAttribute('disabled', 'disabled');
+        e.preventDefault();
+    };
+
+    button.addEventListener('click', this.handleTracking, false);
+    buttonOff.addEventListener('click', this.handleStopTracking, false);
+
 
     // Add elements
     divElement.appendChild(button);
@@ -86,12 +117,61 @@ ol.control.RealTimeTracking = function (selected_layer) {
 
 ol.inherits(ol.control.RealTimeTracking, ol.control.Control);
 
+/**
+ * Form
+ */
+ol.control.RealTimeTracking.prototype.createForm = function()
+{
+    var divFormMapping = document.getElementById("listMappingTracking");
+    if (divFormMapping.childElementCount > 0) {
+        while (divFormMapping.firstChild) divFormMapping.removeChild(divFormMapping.firstChild);
+    }
+    Object.keys(dataLayers.state.mappingCollection).forEach(key => {
+
+        var div = document.createElement('div');
+        div.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
+
+        // Label
+        var label = document.createElement('label');
+        label.className = "mdl-textfield__label";
+
+        label.innerHTML = key.capitalizeFirstLetter();
+        label.setAttribute("for", key);
+
+        // Input
+        if ("string" == dataLayers.state.mappingCollection[key].type) {
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'mdl-textfield__input';
+            input.name = key;
+            input.id = key;
+
+            div.appendChild(label);
+            div.appendChild(input);
+            divFormMapping.appendChild(div);
+
+        } else if ("string" == dataLayers.state.mappingCollection[key].type && "description" == key) {
+            var input = document.createElement('textarea');
+            input.className = 'mdl-textfield__input';
+            input.type= "text";
+            input.row = 3;
+            input.name = key;
+            input.id = key;
+
+            div.appendChild(label);
+            div.appendChild(input);
+            divFormMapping.appendChild(div);
+        }
+
+        componentHandler.upgradeElements(div);
+    });
+};
 
 /**
- * Create Draw Interaction
+ * Create start Feature
  * @param evt
  */
-ol.control.RealTimeTracking.prototype.createFeature = function(typeSelect) {
+ol.control.RealTimeTracking.prototype.createFeature = function(formDatas, typeSelect) {
 
     // Coordinates poistion
     var coordonatesWGS84 = olMap.state.coordinates;
@@ -102,7 +182,7 @@ ol.control.RealTimeTracking.prototype.createFeature = function(typeSelect) {
     if ('Point' == typeSelect) {
         var geomType = new ol.geom.Point(coordinatesTr);
     } else if ('LineString' == typeSelect) {
-        var geomType = new ol.geom.LineString([[coordinatesTr],[coordinatesTr]])
+        var geomType = new ol.geom.LineString([[coordinatesTr],[coordinatesTr]]);
     }
 
     // Create feature
@@ -116,50 +196,77 @@ ol.control.RealTimeTracking.prototype.createFeature = function(typeSelect) {
     // Convert feature in geoJSON and add in Kuzzle
     var parser = new ol.format.GeoJSON();
     var featureGeoJSON = parser.writeFeatureObject(newRealTimeFeature, {dataProjection: olMap.state.projectionTo, featureProjection: olMap.state.projectionFrom});
-    dataLayers.addDocument(featureGeoJSON, newRealTimeFeature);
 
-    var kRealTimeFeature = this.getSelectedLayer().getSource().getFeatureById(idFeature);
-    // TODO : put drawOnMap function in a fonction dataLayers.addDocument like for put new feature in selectInteraction
-    this.drawOnMap(kRealTimeFeature);
+    featureGeoJSON.location = {};
+    featureGeoJSON.properties = formDatas;
+    newRealTimeFeature.setProperties(formDatas);
+
+    // Add location reference
+    if ('Point' == typeSelect) {
+        featureGeoJSON.location = {
+            lon: featureGeoJSON.geometry.coordinates[0],
+            lat : featureGeoJSON.geometry.coordinates[1]
+        };
+    } else if ('LineString' == typeSelect ) {
+        var fCentroid = olMap.getFeatureCentroid(featureGeoJSON);
+        featureGeoJSON.location = {
+            lon: fCentroid.geometry.coordinates[0],
+            lat: fCentroid.geometry.coordinates[1]
+        };
+    }
+
+    this.addDocumentTracking(newRealTimeFeature, featureGeoJSON);
 };
 
 
-ol.control.RealTimeTracking.prototype.drawOnMap = function(myRealTimeFeature)
+/**
+ * Create trackin document in kuzzle (like dataLayers.addDocument())
+ */
+ol.control.RealTimeTracking.prototype.addDocumentTracking = function(realTimeFeature, fDatasGeoJson)
 {
-    this.map = this.getMap();
-    var selectInteraction = this.selectInteraction = new ol.interaction.Select({
-        features: myRealTimeFeature,
-        source : function(layer) {
-            if (layer == this.getSelectedLayer()) {
-                return layer
-            }
+    var this_ = this;
+    var idFeature = (undefined != realTimeFeature.get('id')) ? realTimeFeature.get('id') : null;
+
+    kuzzle.dataCollectionFactory(this.getSelectedLayer().get('title')).createDocument(idFeature, fDatasGeoJson, function (err, resp) {
+        if (!err) {
+            dataLayers.state.notNotifFeatureId = resp.id;
+            olMap.getSelectedLayer().getSource().addFeature(realTimeFeature);
+            this_.drawOnMap(realTimeFeature);
+        } else {
+            notification.init({
+                type: 'error',
+                message: "Error creation kuzzle tracking document."
+            });
         }
     });
-    this.map.addInteraction(this.selectInteraction);
-    console.log("this.selectInteraction.getFeatures()")
-    var modifyInteraction = this.modifyInteraction = new ol.interaction.Modify({
-        features : this.selectInteraction.getFeatures(),
-        style : this.getStyle('edit'),
-        zIndex: 50
+};
+
+/**
+ *
+ * @param realTimeFeature
+ */
+ol.control.RealTimeTracking.prototype.drawOnMap = function(realTimeFeature)
+{
+    this.map = this.getMap();
+
+    // when we get a position update, add the coordinate to the track's
+    // geometry and recenter the view
+    olMap.geolocation.on('change:position', function() {
+
+        // Using olMap.state.coordinates from openlayers.js l.156 ???
+        var newPosition = this.getPosition();
+
+        if ('LineString' == realTimeFeature.getGeometry().getType()) {
+            realTimeFeature.getGeometry().appendCoordinate(newPosition);
+        } else {
+            realTimeFeature.getGeometry().setCoordinates(newPosition);
+        }
+
+        // set position in kuzzle
+        //kuzzle.dataCollectionFactory(this.getSelectedLayer().get('title'))
     });
-
-    this.modifyInteraction.on('modifystart', this.drawStartFeature, this);
-    this.modifyInteraction.on('modifyend', this.drawEndFeature, this);
-
-    this.map.addInteraction(this.modifyInteraction);
 };
 
-// Event on start
-ol.control.RealTimeTracking.prototype.drawStartFeature = function(evt)
-{
-    var feature = evt.feature;
-};
-
-// Event on ending
-ol.control.RealTimeTracking.prototype.drawEndFeature = function(evt)
-{
-    var feature = evt.feature;
-};
 
 /**
  * Getters/setters of selected layer : Set your layer according to your need :)
@@ -216,6 +323,5 @@ ol.control.RealTimeTracking.prototype.getStyle = function(type)
             })
         ]
     };
-
     return styles;
 };
