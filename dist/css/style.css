@@ -186,6 +186,9 @@ body{
     margin-right: 3px;
     margin-left: 3px;
 }
+.mdl-snackbar {
+    z-index: 5 !important;
+}
 
 #infoKdoc, #divAuth, #divAddDoc, #divTrackingChoice {
     top: 5em;

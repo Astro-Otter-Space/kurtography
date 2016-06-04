@@ -58,6 +58,6 @@ String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
-Array.prototype.valueOf = function(){
-    console.log(JSON.stringify(this, null, '\t'));
-};
+//Array.prototype.valueOf = function(){
+//    console.log(JSON.stringify(this, null, '\t'));
+//};
