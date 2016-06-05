@@ -15,11 +15,7 @@ ol.control.LayerSwitcher = function(opt_options) {
     var tipLabel = options.tipLabel ? options.tipLabel : 'Legend';
 
     this.mapListeners = [];
-
     var element = this.element = document.getElementById("layers");
-    //this.panel = document.createElement('ul');
-    //this.panel.className = "mdl-list";
-    //element.appendChild(this.panel);
 
     //ol.control.LayerSwitcher.enableTouchScroll_(this.panel);
 
@@ -62,9 +58,6 @@ ol.control.LayerSwitcher.prototype.setMap = function(map) {
     ol.control.Control.prototype.setMap.call(this, map);
     if (map) {
         var this_ = this;
-        //this.mapListeners.push(map.on('pointerdown', function() {
-        //    this_.hidePanel();
-        //}));
         this.renderPanel();
     }
 };
@@ -93,10 +86,18 @@ ol.control.LayerSwitcher.prototype.ensureTopVisibleBaseLayerShown_ = function() 
 ol.control.LayerSwitcher.prototype.setVisible_ = function(lyr, visible) {
     var map = this.getMap();
     lyr.setVisible(visible);
+
     if (visible && lyr.get('type') === 'base') {
         // Hide all other base layers regardless of grouping
         ol.control.LayerSwitcher.forEachRecursive(map, function(l, idx, a) {
             if (l != lyr && l.get('type') === 'base') {
+                l.setVisible(false);
+            }
+        });
+
+    } else if (visible && lyr.get('type') === 'overlays'){
+        ol.control.LayerSwitcher.forEachRecursive(map, function(l, idx, a) {
+            if (l != lyr && l.get('type') === 'overlays') {
                 l.setVisible(false);
             }
         });
@@ -129,9 +130,13 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
         var iLabel = document.createElement('i');
         iLabel.className = "material-icons mdl-list__item-icon";
 
-        if (lyr.get('type') === 'base') {
+        if ('base' === lyr.get('type') || 'overlays' === lyr.get('type')) {
 
-            iLabel.innerHTML = "layers";
+            if ('base' === lyr.get('type')) {
+                iLabel.innerHTML = "layers";
+            } else {
+                iLabel.innerHTML = "public";
+            }
 
             var spanInput = document.createElement('span');
             spanInput.className = "mdl-list__item-secondary-action";
@@ -142,7 +147,7 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
 
             var input = document.createElement('input');
             input.type = 'radio';
-            input.name = 'base';
+            input.name = lyr.get('type');
             input.className = "mdl-radio__button";
             input.id = lyrId;
             input.value = lyrId;
@@ -156,6 +161,15 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
             spanInput.appendChild(labelInput);
 
 
+        /*} else if (lyr.get('type') === 'overlays') {
+
+            iLabel.innerHTML = "public";
+            var spanInput = document.createElement('span');
+            spanInput.className = "mdl-list__item-secondary-action";
+
+            var labelInput = document.createElement('label');
+            labelInput.className = "inline-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect";
+            labelInput.setAttribute("for", lyrId);*/
         } else {
             iLabel.innerHTML = "public";
         }

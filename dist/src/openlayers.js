@@ -25,7 +25,9 @@ export default {
         view: null,
         zoom: null,
         tabLayersKuzzle: [],
+        tabBaseLayers: [],
         groupKuzzleLayers:null,
+        groupBaseMaps: null,
         projectionFrom: Projection.projectionFrom,
         projectionTo: Projection.projectionTo,
         coordinates: [],
@@ -49,8 +51,13 @@ export default {
         this.state.zoom = zoom;
         this.state.tabStyles = this.getStylesFeatures();
 
+        // Definition de la vue
+        this.state.view = new ol.View({
+            zoom: this.state.zoom
+        });
+
         // Recuperation du fond de carte OpenStreetMap
-        this.state.osm = new ol.layer.Tile({
+        var osm = new ol.layer.Tile({
                 title : 'Open Street Map',
                 visible : true,
                 type: 'overlays',
@@ -58,15 +65,27 @@ export default {
             }
         );
 
-        // Definition de la vue
-        this.state.view = new ol.View({
-            zoom: this.state.zoom
+        var mapQuest = new ol.layer.Tile({
+                title : 'Satellite',
+                visible : false,
+                type: 'overlays',
+                source: new ol.source.MapQuest({
+                    layer: 'sat'
+                })
+            }
+        );
+
+        this.state.tabBaseLayers.push(osm);
+        this.state.tabBaseLayers.push(mapQuest);
+
+        this.state.groupBaseMaps = new ol.layer.Group({
+            title: "Kuzzle group",
+            layers: this.state.tabBaseLayers
         });
 
         // Put layers in ol.layer.Group
         if (dataLayers.state.collections.length > 0) {
             this.state.tabLayersKuzzle = dataLayers.state.collections.map(layer => {
-
                 return new ol.layer.Vector({
                     title: layer,
                     type: 'base',
@@ -87,7 +106,7 @@ export default {
 
         // Definition de la map
         this.state.map = new ol.Map({
-            layers: [this.state.osm, this.state.groupKuzzleLayers],
+            layers: [this.state.groupBaseMaps, this.state.groupKuzzleLayers],
             target: 'map',
             controls: ol.control.defaults({
                 attributionOptions: ({
@@ -268,51 +287,55 @@ export default {
         }
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
+
             l.on("change:visible", function(e) {
                 var lyr = e.target;
 
-                if (lyr.getVisible() == true) {
-                    this_.setSelectedLayer(lyr);
+                if ('base' === l.get('type')) {
+                    if (lyr.getVisible() == true) {
+                        this_.setSelectedLayer(lyr);
 
-                    document.getElementById("redraw_zone").removeAttribute('disabled');
+                        document.getElementById("redraw_zone").removeAttribute('disabled');
 
-                    // Subscribe and Retrieve datas
-                    if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
-                        this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
+                        // Subscribe and Retrieve datas
+                        if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
+                            this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
+                        }
+                        // Creation couche zone subscribe
+                        this_.createZoneSubscription(this_.state.distance);
+                        Array.filter(scaleList, radio => {
+                            radio.disabled = false;
+                        });
+                        document.getElementById('zoneRadius').disabled = false;
+
+                        // Load datas and Mapping
+                        dataLayers.loadDatasFromCollection(lyr.get('title'));
+                        dataLayers.getPropertiesMapping(lyr.get('title'));
+
+                        // Not sure if correct but it's working :|
+                        this_.state.buttonsDrawControls.setSelectedLayer(lyr);
+                        if(false != this_.state.acceptGeoloc) {
+                            this_.state.realTimeTracking.setSelectedLayer(lyr);
+                        }
+
+                        // Enabled control draw buttons
+                        document.getElementById("Point").disabled = false;
+                        document.getElementById("LineString").disabled = false;
+                        document.getElementById("Square").disabled = false;
+                        document.getElementById("Polygon").disabled = false;
+                        document.getElementById("Ending").disabled = false;
+                        document.getElementById("Edit").disabled = false;
+                        document.getElementById("Delete").disabled = false;
+                        document.getElementById("EndingControl").disabled = false;
+
+                        document.getElementById("trackingButton").disabled = false;
+                        document.getElementById("stopTrackingButton").disabled = false;
+
+                        // Set the export links
+                        this_.editExportLinks();
                     }
-                    // Creation couche zone subscribe
-                    this_.createZoneSubscription(this_.state.distance);
-                    Array.filter(scaleList, radio => {
-                        radio.disabled = false;
-                    });
-                    document.getElementById('zoneRadius').disabled = false;
-
-                    // Load datas and Mapping
-                    dataLayers.loadDatasFromCollection(lyr.get('title'));
-                    dataLayers.getPropertiesMapping(lyr.get('title'));
-
-                    // Not sure if correct but it's working :|
-                    this_.state.buttonsDrawControls.setSelectedLayer(lyr);
-                    if(false != this_.state.acceptGeoloc) {
-                        this_.state.realTimeTracking.setSelectedLayer(lyr);
-                    }
-
-                    // Enabled control draw buttons
-                    document.getElementById("Point").disabled = false;
-                    document.getElementById("LineString").disabled = false;
-                    document.getElementById("Square").disabled = false;
-                    document.getElementById("Polygon").disabled = false;
-                    document.getElementById("Ending").disabled = false;
-                    document.getElementById("Edit").disabled = false;
-                    document.getElementById("Delete").disabled = false;
-                    document.getElementById("EndingControl").disabled = false;
-
-                    document.getElementById("trackingButton").disabled = false;
-                    document.getElementById("stopTrackingButton").disabled = false;
-
-                    // Set the export links
-                    this_.editExportLinks();
                 }
+
             });
         });
         this.state.map.addControl(this.state.buttonsDrawControls);

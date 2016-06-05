@@ -24,6 +24,8 @@ ol.control.RealTimeTracking = function (selected_layer) {
     var divTarget = document.getElementById("external_draw_control");
     var divElement = document.getElementById("panelTracking");
 
+    var trackingGeolocation = this.trackingGeolocation = olMap.geolocation;
+
     // Event listener Formulaire
     var handleChoice = function(e) {
         e = e || window.event;
@@ -99,7 +101,11 @@ ol.control.RealTimeTracking = function (selected_layer) {
             this.kuzzleRealTimeFeature = null;
         }
 
+        //
+         this_.trackingGeolocation = null;
+
         // Unset value of radio button ?
+        document.querySelector('input[name="type_tracking"]').removeAttribute("checked");
 
         // Button on
         button.removeAttribute('disabled');
@@ -292,7 +298,7 @@ ol.control.RealTimeTracking.prototype.drawOnMap = function()
 
     // when we get a position update, add the coordinate to the track's
     // geometry and recenter the view
-    olMap.geolocation.on('change:position', function() {
+    this.trackingGeolocation.on('change:position', function() {
 
         if (undefined != this_.kuzzleRealTimeFeature) {
             // Set new coordinates
