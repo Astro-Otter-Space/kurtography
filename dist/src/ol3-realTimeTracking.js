@@ -73,7 +73,7 @@ ol.control.RealTimeTracking = function (selected_layer) {
     iLabelOff.innerHTML = "done";
     buttonOff.appendChild(iLabelOff);
 
-    // Listener tracking
+    // Listener tracking ON
     this.handleTracking = function(e) {
         e = e || window.event;
 
@@ -89,9 +89,17 @@ ol.control.RealTimeTracking = function (selected_layer) {
         e.preventDefault();
     };
 
+    // Listener tracking OFF
     this.handleStopTracking = function(e) {
         e = e || window.event;
         console.log("Ending tracking");
+
+        // Set off the interaction
+        if (undefined != this.kuzzleRealTimeFeature) {
+            this.kuzzleRealTimeFeature = null;
+        }
+
+        // Unset value of radio button ?
 
         // Button on
         button.removeAttribute('disabled');
@@ -178,6 +186,18 @@ ol.control.RealTimeTracking.prototype.createForm = function()
  */
 ol.control.RealTimeTracking.prototype.createFeature = function(formDatas, typeSelect) {
 
+    // Unset variables
+    if (undefined != newRealTimeFeature || null != newRealTimeFeature) {
+        var newRealTimeFeature = null;
+    }
+    if (undefined != idFeature || null != idFeature) {
+        var idFeature = null;
+    }
+    if (undefined != featureGeoJSON || null != featureGeoJSON) {
+        var idFeature = null;
+    }
+
+
     // Coordinates position
     var coordonatesWGS84 = olMap.state.coordinates;
     // Reprojection in Mercator for openlayers
@@ -227,15 +247,14 @@ ol.control.RealTimeTracking.prototype.createFeature = function(formDatas, typeSe
 
 
 /**
- * Create trackin document in kuzzle (like dataLayers.addDocument())
+ * Create tracking document in kuzzle (like dataLayers.addDocument())
  */
 ol.control.RealTimeTracking.prototype.addDocumentTracking = function(realTimeFeature, fDatasGeoJson)
 {
     var this_ = this;
-    var idFeature = (undefined != realTimeFeature.get('id')) ? realTimeFeature.get('id') : null;
+    var idFeature = (undefined != realTimeFeature.getId()) ? realTimeFeature.getId() : null;
 
-    console.log("Feature : " + realTimeFeature.getId());
-    console.log(JSON.stringify(fDatasGeoJson, null, '\t'))
+    console.log("idFeature : " + idFeature);
 
     kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).createDocument(idFeature, fDatasGeoJson, function (err, resp) {
         if (!err) {
@@ -246,9 +265,11 @@ ol.control.RealTimeTracking.prototype.addDocumentTracking = function(realTimeFea
             var kuzzleRealTimeFeature = f.readFeature(fDatasGeoJson, {dataProjection: olMap.state.projectionTo, featureProjection: olMap.state.projectionFrom});
             kuzzleRealTimeFeature.setId(resp.id);
 
-            olMap.getSelectedLayer().getSource().addFeature(kuzzleRealTimeFeature);
+            this_.kuzzleRealTimeFeature = kuzzleRealTimeFeature;
+            console.log("createDocument : " + this_.kuzzleRealTimeFeature.getId())
 
-            this_.drawOnMap(kuzzleRealTimeFeature);
+            olMap.getSelectedLayer().getSource().addFeature(this_.kuzzleRealTimeFeature);
+            this_.drawOnMap();
         } else {
             console.log(err.message);
             notification.init({
@@ -263,74 +284,71 @@ ol.control.RealTimeTracking.prototype.addDocumentTracking = function(realTimeFea
  *
  * @param realTimeFeature
  */
-ol.control.RealTimeTracking.prototype.drawOnMap = function(kuzzleRealTimeFeature)
+ol.control.RealTimeTracking.prototype.drawOnMap = function()
 {
     this.map = this.getMap();
     var this_ = this;
     var parser = new ol.format.GeoJSON();
-    this.kuzzleRealTimeFeature = kuzzleRealTimeFeature;
 
     // when we get a position update, add the coordinate to the track's
     // geometry and recenter the view
     olMap.geolocation.on('change:position', function() {
 
-        // Set new coordinates
-        // Using olMap.state.coordinates from openlayers.js l.156 ???
-        var newPosition = this.getPosition();
-        var newPointPosition = new ol.geom.Point(newPosition).transform(olMap.state.projectionTo, olMap.state.projectionFrom).getCoordinates();
-        var typeTracking = this_.kuzzleRealTimeFeature.getGeometry().getType();
-        console.log("WGS84 : detection changement position : " + newPosition);
-        console.log("Mercator : detection changement position : " + newPointPosition);
+        if (undefined != this_.kuzzleRealTimeFeature) {
+            // Set new coordinates
+            // Using olMap.state.coordinates from openlayers.js l.156 ???
+            var newPosition = this.getPosition();
+            var newPointPosition = new ol.geom.Point(newPosition).transform(olMap.state.projectionTo, olMap.state.projectionFrom).getCoordinates();
+            var typeTracking = this_.kuzzleRealTimeFeature.getGeometry().getType();
 
-        // Set new coordinatates to feature
-        if ('LineString' == typeTracking) {
-            this_.kuzzleRealTimeFeature.getGeometry().appendCoordinate(newPointPosition);
-        } else if ('Point' == typeTracking) {
-            this_.kuzzleRealTimeFeature.getGeometry().setCoordinates(newPointPosition);
+            // Set new coordinatates to feature
+            if ('LineString' == typeTracking) {
+                this_.kuzzleRealTimeFeature.getGeometry().appendCoordinate(newPointPosition);
+            } else if ('Point' == typeTracking) {
+                this_.kuzzleRealTimeFeature.getGeometry().setCoordinates(newPointPosition);
+            }
+
+            // Create geosjon with WGS84 format from this._kuzzleRealTimeFeature
+            var updFeatureGeoJSON = parser.writeFeatureObject(this_.kuzzleRealTimeFeature, {dataProjection: olMap.state.projectionTo, featureProjection: olMap.state.projectionFrom});
+
+            // Adding location parameter
+            if ('Point' == typeTracking) {
+                updFeatureGeoJSON.location = {
+                    lon: updFeatureGeoJSON.geometry.coordinates[0],
+                    lat : updFeatureGeoJSON.geometry.coordinates[1]
+                };
+            } else if ('LineString' == typeTracking) {
+                var fCentroid = olMap.getFeatureCentroid(updFeatureGeoJSON);
+                updFeatureGeoJSON.location = {
+                    lon: fCentroid.geometry.coordinates[0],
+                    lat: fCentroid.geometry.coordinates[1]
+                };
+            }
+
+            // set position in kuzzle
+            kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).updateDocument(this_.kuzzleRealTimeFeature.getId(), updFeatureGeoJSON, function (err, res) {
+                if(!err) {
+                    // Update feature with new position
+                    var parser = new ol.format.GeoJSON();
+                    var updFeatureEdited = parser.readFeature(res.content, {featureProjection: olMap.state.projectionFrom});
+
+                    if (undefined != olMap.getSelectedLayer().getSource().getFeatureById(res.id)) {
+                        var updFeatureDel = olMap.getSelectedLayer().getSource().getFeatureById(res.id);
+                        olMap.getSelectedLayer().getSource().removeFeature(updFeatureDel);
+                    }
+                    olMap.getSelectedLayer().getSource().addFeature(updFeatureEdited);
+
+                } else {
+                    console.log(err.message);
+                    notification.init({
+                        type: 'error',
+                        message:  "Error update tracking kuzzle document"
+                    });
+                }
+            });
+        } else {
+            console.log("Error kuzzleRealTimeFeature");
         }
-
-        // Create geosjon with WGS84 format from this._kuzzleRealTimeFeature
-        var updFeatureGeoJSON = parser.writeFeatureObject(kuzzleRealTimeFeature, {dataProjection: olMap.state.projectionTo, featureProjection: olMap.state.projectionFrom});
-
-        // Adding location parameter
-        if ('Point' == typeTracking) {
-            updFeatureGeoJSON.location = {
-                lon: updFeatureGeoJSON.geometry.coordinates[0],
-                lat : updFeatureGeoJSON.geometry.coordinates[1]
-            };
-        } else if ('LineString' == typeTracking) {
-            var fCentroid = olMap.getFeatureCentroid(updFeatureGeoJSON);
-            updFeatureGeoJSON.location = {
-                lon: fCentroid.geometry.coordinates[0],
-                lat: fCentroid.geometry.coordinates[1]
-            };
-        }
-
-        // set position in kuzzle
-        console.log(updFeatureGeoJSON);
-        console.log("Update data tracking " + this_.kuzzleRealTimeFeature.getId());
-        kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).updateDocument(this_.kuzzleRealTimeFeature.getId(), updFeatureGeoJSON, function (err, res) {
-           if(!err) {
-               console.log("realtime tracking feature updated in kuzzle")
-
-               // Update feature with new position
-                var parser = new ol.format.GeoJSON();
-                var updFeatureEdited = parser.readFeature(res.content, {featureProjection: olMap.state.projectionFrom});
-
-               if (undefined != olMap.getSelectedLayer().getSource().getFeatureById(res.id)) {
-                   var updFeatureDel = olMap.getSelectedLayer().getSource().getFeatureById(res.id);
-                   olMap.getSelectedLayer().getSource().removeFeature(updFeatureDel);
-               }
-               olMap.getSelectedLayer().getSource().addFeature(updFeatureEdited);
-
-           } else {
-               console.log(err.message);
-               notification.init({
-                   type: 'error',
-                   message:  "Error update tracking kuzzle document"
-               });
-           }
-        });
     });
 };
 

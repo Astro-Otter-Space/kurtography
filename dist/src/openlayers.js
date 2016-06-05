@@ -306,7 +306,9 @@ export default {
                     document.getElementById("Edit").disabled = false;
                     document.getElementById("Delete").disabled = false;
                     document.getElementById("EndingControl").disabled = false;
+
                     document.getElementById("trackingButton").disabled = false;
+                    document.getElementById("stopTrackingButton").disabled = false;
 
                     // Set the export links
                     this_.editExportLinks();
