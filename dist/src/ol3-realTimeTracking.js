@@ -222,9 +222,9 @@ ol.control.RealTimeTracking.prototype.createFeature = function(formDatas, typeSe
     var idFeature = uuid.v1();
     var newRealTimeFeature = new ol.Feature({
         geometry: geomType,
-        id: idFeature,
         style: this.getStyle(typeSelect)
     });
+    newRealTimeFeature.setId(idFeature);
 
     // Convert feature in geoJSON and add in Kuzzle
     var parser = new ol.format.GeoJSON();

@@ -21,7 +21,7 @@ body{
     top: auto;
     left: 0.4em;
     bottom: 0.5em;
-    z-index: 4;
+    z-index: 1;
     position: absolute;
 }
 #external_control_zoom button {
