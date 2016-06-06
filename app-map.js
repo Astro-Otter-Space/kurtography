@@ -19,6 +19,14 @@ import Awesomplete from 'awesomplete';
 var awesomplete = new Awesomplete(searchInput, {
     maxItems: 10
 });
+
+// Event listener on select list
+window.addEventListener("awesomplete-select", function(e){
+    var idFeature = e.text.value;
+    dataLayers.setCenterKuzzleDoc(idFeature);
+    e.preventDefault();
+}, false);
+
 searchInput.addEventListener('keyup', function(e) {
     // TODO : reset the list
     dataLayers.searchDocuments(e.target.value);
