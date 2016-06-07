@@ -49,7 +49,10 @@ export default {
     projectionFrom: 'EPSG:3857',
     projectionTo: 'EPSG:4326'
     latDefault: 48.856614,
-    longDefault: 2.352222
+    longDefault: 2.352222,
+    icons: {
+        'collection_name': 'images/path_to_icon.png'
+    }
 }
 ```
 
@@ -183,12 +186,11 @@ Features
 
 Features in progress
 -------------
-  - Fix on geo_distance precision
   - Export datas
+  - Tracking position in real time
 
 Features will be avalaible soon:
 -------------
-  - Création d une feature (ligne ou polygone) à partir de la geolocalisation (ex : tracé)
   - Register user
   - Authentification
   - Filtering features by user authorisation
