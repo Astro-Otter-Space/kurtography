@@ -85,15 +85,27 @@ export default {
 
         // Put layers in ol.layer.Group
         if (dataLayers.state.collections.length > 0) {
-            this.state.tabLayersKuzzle = dataLayers.state.collections.map(layer => {
-                return new ol.layer.Vector({
-                    title: layer,
+            this.state.tabLayersKuzzle = dataLayers.state.collections.map(layerName => {
+                var layer = new ol.layer.Vector({
+                    title: layerName,
                     type: 'base',
                     visible: false,
                     style: function (feature, resolution) {
-                        return this_.state.tabStyles[feature.getGeometry().getType()];
+                        if (undefined != Projection.icons[layerName] && layerName in Projection.icons) {
+                            return new ol.style.Style({
+                                image: new ol.style.Icon({
+                                    anchor: [0.5, 18.5],
+                                    anchorXUnits: 'fraction',
+                                    anchorYUnits: 'pixels',
+                                    src: Projection.icons[layerName]
+                                })
+                            })
+                        } else {
+                            return this_.state.tabStyles[feature.getGeometry().getType()];
+                        }
                     }
                 });
+                return layer;
             });
 
             // Create a group layer for Kuzzle layers
