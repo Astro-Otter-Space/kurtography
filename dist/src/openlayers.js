@@ -279,6 +279,13 @@ export default {
         });
         document.getElementById('zoneRadius').addEventListener('change', this.handleChangeDistance, false);
 
+
+        // RealTime Tracking
+        if(false != this.state.acceptGeoloc) {
+            var realTimeTracking = this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
+            this.state.map.addControl(realTimeTracking);
+        }
+
         // Adding draw controls
         var optionsControlDraw = {
             "style_buttons" : "mdlIcons",
@@ -292,11 +299,7 @@ export default {
         };
         this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
-        // RealTime Tracking
-        if(false != this.state.acceptGeoloc) {
-            var realTimeTracking = this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
-            this.state.map.addControl(realTimeTracking);
-        }
+
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
 
@@ -364,7 +367,9 @@ export default {
 
 
     /**
-     * In progress...
+     * Initialisation of position
+     * @param lon
+     * @param lat
      */
     initPosition(lon, lat)
     {

@@ -163,6 +163,10 @@ body{
     color: white;
 }
 
+.mfb-component--tr{
+    top: 3em;
+}
+
 /* Card information */
 .mdl-grid {
     max-width: 400px;
