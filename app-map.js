@@ -4,11 +4,19 @@
 import dataLayers from './dist/src/dataLayers';
 dataLayers.listCollections();
 
-// Liens
+// Connexion/register links
 document.querySelector('a[data-link="auth"]').addEventListener('click', function() {
+    document.querySelector('.mdl-layout__drawer').classList.toggle('is-visible');
+    //document.querySelector('.mdl-mdl-layout__obfuscator').classList.toggle('is-visible');
     document.getElementById("divAuth").classList.toggle("hidden");
 }, false);
 
+document.querySelector('a[data-link="register"]').addEventListener('click', function() {
+    document.querySelector('.mdl-layout__drawer').classList.toggle('is-visible');
+    //document.querySelector('.mdl-mdl-layout__obfuscator').classList.toggle('is-visible');
+    document.querySelector('.mdl-layout__drawer').setAttribute('aria-hidden', true);
+    document.getElementById("divRegister").classList.toggle("hidden");
+}, false);
 
 /**
  * Search request with result in autocompletion
@@ -36,6 +44,9 @@ searchInput.addEventListener('keyup', function(e) {
 // Hide cards
 document.querySelector('#mdlAuthClose').addEventListener('click', function() {
     document.getElementById("divAuth").classList.toggle("hidden");
+}, false);
+document.querySelector('#mdlRegisterClose').addEventListener('click', function() {
+    document.getElementById("divRegister").classList.toggle("hidden");
 }, false);
 document.querySelector('#mdlClose').addEventListener('click', function() {
     document.getElementById("infoKdoc").classList.toggle("hidden");

@@ -1,0 +1,22 @@
+div#divRegister.mdl-layout.mdl-js-layout.mdl-color--grey-100.hidden
+    main.mdl-layout__content
+        div.mdl-grid
+            div.mdl-card.mdl-cell.mdl-cell--12-col.mdl-cell--8-col-tablet.mdl-shadow--2dp
+                div.mdl-card__menu
+                    button#mdlRegisterClose.mdl-button.mdl-button--icon.mdl-js-button.mdl-js-ripple-effect
+                        i.material-icons close
+                div.mdl-card__title
+                    h1.mdl-card__title-text Register
+                div.mdl-card__supporting-text
+                    form(action="#")#formRegister
+                        div.mdl-textfield.mdl-js-textfield
+                            input.mdl-textfield__input#username(type="text")
+                            label.mdl-textfield__label(for="username") Username
+                        div.mdl-textfield.mdl-js-textfield
+                            input.mdl-textfield__input#email(type="text")
+                            label.mdl-textfield__label(for="email") Email
+                        div.mdl-textfield.mdl-js-textfield
+                            input.mdl-textfield__input(type="password")#userpass
+                            label.mdl-textfield__label(for="userpass") Password
+                div.mdl-card__actions.mdl-card--border
+                    button.mdl-button.mdl-button--colored.mdl-js-button.mdl-js-ripple-effect Sign up
