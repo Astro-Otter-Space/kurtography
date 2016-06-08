@@ -219,6 +219,7 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
         // Ajout new document in Kuzzle
         dataLayers.addDocument(featureGeoJSON, feature);
         // Because of strange bug, I delete the drawing feature who will recreated in kuzzle callback
+        this.map.getSelectedLayer().getSource().removeFeature(feature);
     } else {
         console.error("Problem create new feature");
     }
