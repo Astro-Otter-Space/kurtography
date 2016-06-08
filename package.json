@@ -5,6 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "beefy app-map.js:bundle.js --live",
+    "createRole": "node dist/test/createRole.js",
+    "createUser": "node dist/test/createUserTest.js",
     "build-map": "browserify -e app-map.js -o ./public/js/bundle.js",
     "build-css": "cleancss ./dist/css/ol3-drawcontrols.css ./dist/css/style.css -o ./public/css/bundle.css",
     "start": "node app.js"

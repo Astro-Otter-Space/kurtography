@@ -1,8 +1,8 @@
+import kuzzle from '../services/kuzzle'
 /**
  * /!\ @source : https://github.com/kuzzleio/kuzzle-challenge-klack/blob/master/src/store/user.js
  * not enough time to make my own script :(
  */
-import kuzzle from '../services/kuzzle';
 
 export default {
 

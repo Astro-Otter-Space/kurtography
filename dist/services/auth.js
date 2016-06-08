@@ -1,5 +1,5 @@
-import kuzzle from 'kuzzle'
-import notification from 'notification';
+import kuzzle from './kuzzle'
+import notification from './notification';
 import user from '../src/user';
 
 export default {
@@ -22,8 +22,9 @@ export default {
             (undefined != pwdUser && 0 < pwdUser.length)
         )  {
 
-            kuzzle.login('local', {loginUser, pwdUser}, '1h', (err, resp) => {
+            kuzzle.login('local', {username: loginUser, password: pwdUser}, '1h', (err, resp) => {
                 if (err) {
+                    console.log(err.message);
                     notification.init({
                         type: 'error',
                         message: 'Error authentification'

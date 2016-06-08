@@ -2,19 +2,20 @@
 // https://code.getmdl.io/1.1.3/material.js
 // http://quaintous.com/2015/07/09/react-components-with-mdl/
 import dataLayers from './dist/src/dataLayers';
+import auth from './dist/services/auth'
 dataLayers.listCollections();
 
 // Connexion/register links
 document.querySelector('a[data-link="auth"]').addEventListener('click', function() {
-    document.querySelector('.mdl-layout__drawer').classList.toggle('is-visible');
+    //document.querySelector('.mdl-layout__drawer').classList.toggle('is-visible');
     //document.querySelector('.mdl-mdl-layout__obfuscator').classList.toggle('is-visible');
     document.getElementById("divAuth").classList.toggle("hidden");
 }, false);
 
 document.querySelector('a[data-link="register"]').addEventListener('click', function() {
-    document.querySelector('.mdl-layout__drawer').classList.toggle('is-visible');
+    //document.querySelector('.mdl-layout__drawer').classList.toggle('is-visible');
     //document.querySelector('.mdl-mdl-layout__obfuscator').classList.toggle('is-visible');
-    document.querySelector('.mdl-layout__drawer').setAttribute('aria-hidden', true);
+    //document.querySelector('.mdl-layout__drawer').setAttribute('aria-hidden', true);
     document.getElementById("divRegister").classList.toggle("hidden");
 }, false);
 
@@ -56,7 +57,10 @@ document.querySelector('#mdlChoiceClose').addEventListener('click', function() {
 }, false);
 
 
-// Listener Add document
+/**
+ * Form Adding Properties
+ * @param e
+ */
 var handleSubmit = function(e) {
     e.preventDefault();
     var objPropertiesFeature = new Array();
@@ -72,6 +76,22 @@ var handleSubmit = function(e) {
 };
 var form = document.forms['form-edit-properties'];
 form.addEventListener('submit', handleSubmit, false);
+
+/**
+ * Form Authentification
+ * @returns {string}
+ */
+var handleConnexion = function(e)
+{
+    e.preventDefault();
+
+    var login = e.target.elements.userkuzzlename.value;
+    var password = e.target.elements.userkuzzlepass.value;
+
+    auth.login(login, password);
+};
+var formAuth = document.forms['form-user-authentification'];
+formAuth.addEventListener('submit', handleConnexion, false);
 
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);

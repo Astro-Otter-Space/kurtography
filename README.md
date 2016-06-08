@@ -31,6 +31,24 @@ npm install
 Configuration and Getting started
 -------------
 
+#### <i class="icon-upload"></i> Create role and profile for users
+```
+npm run createRole
+```
+or
+```
+node dist/test/createRole.js
+```
+
+If you want to create a testing user, run:
+```
+npm run createUserTest
+```
+or
+```
+node dist/test/createUserTest.js
+```
+
 #### <i class="icon-upload"></i> Connexion to kuzzle
 
 Edit file public\services\config.js and change values kuzzleUrl and defaultIndex
