@@ -31,14 +31,18 @@ npm install
 Configuration and Getting started
 -------------
 
-#### <i class="icon-upload"></i> Create role and profile for users
+#### <i class="icon-upload"></i> Create roles
 ```
-npm run createRole
+node dist/test/roles/createRoleAuth.js
+node dist/test/roles/createRoleUser.js
 ```
-or
+
+#### <i class="icon-upload"></i> Create profiles linked to roles
 ```
-node dist/test/createRole.js
+node dist/test/profiles/createProfileUser.js
 ```
+> **Note:** You can add the role "auth" to the profil "admin", so the admin could be login with his kuzzle credentials
+
 
 If you want to create a testing user, run:
 ```

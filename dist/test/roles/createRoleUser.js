@@ -1,5 +1,4 @@
 var Kuzzle = require('kuzzle-sdk');
-var uuid = require('node-uuid');
 
 var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function() {
 
@@ -27,13 +26,6 @@ var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function(
                                 "actions": {
                                     "delete": true
                                 }
-                            },
-                            "auth": {
-                                "actions": {
-                                    "getCurrentUser": true,
-                                    "login": true,
-                                    "logout": true
-                                }
                             }
                         }
                     }
@@ -52,17 +44,6 @@ var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function(
             // result is a KuzzleUser object
             if (!error) {
                 console.log("Role created");
-                var roles = ['user', 'default'];
-                kuzzle
-                    .security
-                    .createProfile('user', roles, options, function(error, response) {
-                        // result is a KuzzleProfile object
-                        if (!error) {
-                            console.log("Creation profile 'User'");
-                        } else {
-                            console.log("Error from kuzzle : " + error.message);
-                        }
-                    });
             } else {
                 console.log("Error from kuzzle : " + error.message);
             }
