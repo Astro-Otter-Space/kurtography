@@ -284,6 +284,9 @@ export default {
         document.getElementById('zoneRadius').addEventListener('change', this.handleChangeDistance, false);
 
 
+        /**
+         * TODO : put this following in a function who verify if user is login or not
+         */
         // RealTime Tracking
         if(false != this.state.acceptGeoloc) {
             var realTimeTracking = this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
@@ -302,7 +305,9 @@ export default {
             }
         };
         this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
-
+        /**
+         * END TODO
+         */
 
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
@@ -331,12 +336,17 @@ export default {
                         dataLayers.loadDatasFromCollection(lyr.get('title'));
                         dataLayers.getPropertiesMapping(lyr.get('title'));
 
+                        /**
+                         * TODO : put this following in a function who verify if user is login or not
+                         */
                         // Not sure if correct but it's working :|
                         this_.state.buttonsDrawControls.setSelectedLayer(lyr);
                         if(false != this_.state.acceptGeoloc) {
                             this_.state.realTimeTracking.setSelectedLayer(lyr);
                         }
-
+                        /**
+                         * END TODO
+                         */
                         // Enabled control draw buttons
                         document.getElementById("Point").disabled = false;
                         document.getElementById("LineString").disabled = false;
@@ -357,8 +367,16 @@ export default {
 
             });
         });
-        this.state.map.addControl(this.state.buttonsDrawControls);
 
+        /**
+         * TODO : put this following in a function who verify if user is login or not
+         */
+        // This adding must be placed after the onchange...
+        this.state.map.addControl(this.state.buttonsDrawControls);
+        /**
+         * END TODO
+         */
+            
         // Reset to the position
         var resetPosition = new ol.control.ResetPosition();
         this.state.map.addControl(resetPosition);
@@ -366,7 +384,6 @@ export default {
         // Redraw the subscribe zone
         var RedrawSubscribeZone = new ol.control.EditSubscribeRoom();
         this.state.map.addControl(RedrawSubscribeZone);
-
     },
 
 
