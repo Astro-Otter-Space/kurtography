@@ -2,7 +2,11 @@ var Kuzzle = require('kuzzle-sdk');
 
 var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function() {
 
-    var roles = ['user', 'auth', 'default'];
+    var roles = {
+        "roles": [
+            'users', 'auth', 'default'
+        ]
+    };
 
     var options = {
         replaceIfExist: true

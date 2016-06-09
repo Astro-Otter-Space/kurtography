@@ -93,6 +93,36 @@ var handleConnexion = function(e)
 var formAuth = document.forms['form-user-authentification'];
 formAuth.addEventListener('submit', handleConnexion, false);
 
+/**
+ * Form registration
+ * @returns {string}
+ */
+var handleRegister = function(e)
+{
+    e.preventDefault();
+
+    var formLogin = e.target.elements.newUsername.value;
+    var formPassword = e.target.elements.newUserEmail.value;
+    var formEmail = e.target.elements.newUserPass.value;
+
+    // TODO : add email verification
+
+    var tabNewUser = {
+        username: formLogin,
+        password: formPassword,
+        email: formEmail
+    };
+
+    auth.registerNewUser(tabNewUser);
+};
+var formRegister = document.forms['form-user-register'];
+formRegister.addEventListener('submit', handleRegister, false);
+
+
+/**
+ *
+ * @returns {string}
+ */
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };

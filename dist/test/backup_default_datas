@@ -1,0 +1,151 @@
+/**
+ * Roles
+ */
+// Admin
+{
+    "indexes": {
+        "_canCreate": true,
+        "*": {
+            "_canDelete": true,
+            "collections": {
+                "_canCreate": true,
+                "*": {
+                    "_canDelete": true,
+                    "controllers": {
+                        "*": {
+                            "actions": {
+                                "*": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "%kuzzle": {
+            "_canDelete": false,
+            "collections": {
+                "_canCreate": true,
+                "*": {
+                    "_canDelete": false,
+                    "controllers": {
+                        "*": {
+                            "actions": {
+                                "*": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// anonymous
+{
+    "indexes": {
+        "_canCreate": true,
+        "*": {
+            "_canDelete": true,
+            "collections": {
+                "_canCreate": true,
+                "*": {
+                    "_canDelete": true,
+                    "controllers": {
+                        "*": {
+                            "actions": {
+                                "*": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "%kuzzle": {
+            "_canDelete": false,
+            "collections": {
+                "_canCreate": true,
+                "*": {
+                    "_canDelete": false,
+                    "controllers": {
+                        "*": {
+                            "actions": {
+                                "*": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// defauilt
+{
+    "indexes": {
+        "_canCreate": true,
+        "*": {
+            "_canDelete": true,
+            "collections": {
+                "_canCreate": true,
+                "*": {
+                    "_canDelete": true,
+                    "controllers": {
+                        "*": {
+                            "actions": {
+                                "*": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "%kuzzle": {
+            "_canDelete": false,
+            "collections": {
+                "_canCreate": true,
+                "*": {
+                    "_canDelete": false,
+                    "controllers": {
+                        "*": {
+                            "actions": {
+                                "*": true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Profiles
+ */
+// admin
+{
+    "roles": [
+        "admin"
+    ]
+}
+
+// default
+{
+    "roles": [
+        "default"
+    ]
+}
+
+// anonymous
+{
+    "roles": [
+        "anonymous"
+    ]
+}
+
+/**
+ * Users
+ */
+// smeaudre
+{
+    "profile": "admin"
+}

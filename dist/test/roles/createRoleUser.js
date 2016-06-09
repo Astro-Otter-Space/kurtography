@@ -8,7 +8,7 @@ var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function(
             "*": {
                 "collections" :{
                     "_canCreate": false,
-                    "_canDelete": false,
+                    //"_canDelete": false,
                     "*" :{
                         "controllers": {
                             "read": {
@@ -40,7 +40,7 @@ var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function(
 
     kuzzle
         .security
-        .createRole('user', roleDefinition, options, function(error, response) {
+        .createRole('users', roleDefinition, options, function(error, response) {
             // result is a KuzzleUser object
             if (!error) {
                 console.log("Role created");
