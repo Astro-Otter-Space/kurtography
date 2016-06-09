@@ -12,6 +12,8 @@ import RealTimeTracking from './ol3-realTimeTracking';
 // Openlayers 3 add-ons
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
+// User
+import user from './user';
 
 /**
  * Initialisation de la map
@@ -47,6 +49,8 @@ export default {
      */
     initMap(zoom)
     {
+        console.log("Verification auth : " + user.isAuthenticated());
+
         var this_ = this;
         this.state.zoom = zoom;
         this.state.tabStyles = this.getStylesFeatures();

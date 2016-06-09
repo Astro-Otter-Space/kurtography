@@ -1,17 +1,35 @@
+//script
+//    - var userClass = require('./dist/src/user');
+//    - var user = "#{user.isAuthenticated}"
 div.mdl-layout__drawer
     header#sidebar.mdl-layout__header
-        div.mdl-layout__header-row
-            //i.material-icons.mdl-list__item-avatar person
-            span Connexion / Register
-            div.mdl-layout-spacer
-                button#accbtn.mdl-button.mdl-js-button.mdl-js-ripple-effect.mdl-button--icon
-                    i.material-icons(role="presentation") arrow_drop_down
-                    //span class="visuallyhidden">Accounts</span>
-            ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="accbtn")
-                li.mdl-menu__item
-                    a.mdl-navigation__link(data-link="auth", href="#auth") Log in
-                li.mdl-menu__item
-                    a.mdl-navigation__link(data-link="register", href="#register") Sign up
+        if isLogin
+            // IF USER LOGGED
+            div.mdl-layout__header-row
+                i.material-icons.mdl-list__item-avatar person
+                span {user.username}
+                div.mdl-layout-spacer
+                    button#userbtn.mdl-button.mdl-js-button.mdl-js-ripple-effect.mdl-button--icon
+                        i.material-icons(role="presentation") arrow_drop_down
+                ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="userbtn")
+                    li.mdl-menu__item
+                        a.mdl-navigation__link(data-link="myaccount", href="#myaccount") My information
+                    li.mdl-menu__item
+                        a.mdl-navigation__link(data-link="logout", href="#logout") Log out
+
+        else
+            // If User NOT LOGGED
+            div.mdl-layout__header-row
+                span Connexion / Register
+                div.mdl-layout-spacer
+                    button#accbtn.mdl-button.mdl-js-button.mdl-js-ripple-effect.mdl-button--icon
+                        i.material-icons(role="presentation") arrow_drop_down
+                ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="accbtn")
+                    li.mdl-menu__item
+                        a.mdl-navigation__link(data-link="auth", href="#auth") Log in
+                    li.mdl-menu__item
+                        a.mdl-navigation__link(data-link="register", href="#register") Sign up
+
 
     //span.mdl-layout-title.headSidebar Kurtography
     // Layer switcher

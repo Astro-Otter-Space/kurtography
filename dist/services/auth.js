@@ -34,15 +34,14 @@ export default {
                     // Set session in session storage
                     document.getElementById("divAuth").classList.toggle("hidden");
                     window.sessionStorage.setItem('jwt', resp.jwt);
-                    user.getCurrentUser(/*() => {
-                        router.go({name: 'home'});
-                    }*/);
+
+                    user.getCurrentUser(() => {
+                    });
                     notification.init({
                         type: 'notice',
                         message: 'Welcome back ' + user.state.username
                     });
                 }
-
             });
 
         } else {
@@ -71,11 +70,11 @@ export default {
     {
         if (undefined != tabNewUser && 0 < Object.keys(tabNewUser).length) {
             var userContent = {
+                "profile": "user",
                 "username": tabNewUser.username,
-                "pictureId": "",
                 "password": tabNewUser.password,
+                "pictureId": "",
                 "email": tabNewUser.email,
-                "profile": "user"
             };
 
             var options = {
