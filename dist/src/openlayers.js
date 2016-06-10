@@ -204,6 +204,7 @@ export default {
                     return feature;
                 }
             );
+            this_.setOpenGraphContent(feature);
             if (undefined != feature && undefined != feature.getId() && this_.state.buttonsDrawControls.getFlagDraw() == false) {
                 this_.showFeaturesInformations(feature, true);
             }
@@ -834,6 +835,44 @@ export default {
         };
 
         return styles;
+    },
+
+    /**
+     * Set the properties for open graph
+     * @param feature
+     */
+    setOpenGraphContent(feature)
+    {
+        if (feature.getProperties()) {
+
+            var shareUrl = this.setShareFacebookUrl(feature);
+
+            document.querySelector('meta[property=og\\:title]').setAttribute('content', feature.getProperties().name);
+            document.querySelector('meta[property=og\\:type]').setAttribute('content', this.getSelectedLayer().get('title'));
+            document.querySelector('meta[property=og\\:url]').setAttribute('content', shareUrl);
+
+            if (undefined != feature.getProperties().description) {
+                document.querySelector('meta[property=og\\:description]').setAttribute('content', feature.getProperties().description);
+            }
+
+            if (undefined != feature.getProperties().url_image) {
+                document.querySelector('meta[property=og\\:image]').setAttribute('content', feature.getProperties().url_image);
+            }
+
+            var shareFacebook = 'https://www.facebook.com/sharer/sharer.php?u=' + window.location.href + encodeURIComponent(shareUrl);
+            var shareTwitter = 'https://twitter.com/intent/tweet?url=' + window.location.href + encodeURIComponent(shareUrl);
+            console.log(shareFacebook);
+            document.getElementById('shareFacebook').setAttribute('href', shareFacebook);
+            document.getElementById('shareFacebook').setAttribute('href', shareTwitter);
+        }
+    },
+
+    setShareFacebookUrl(feature)
+    {
+        var urlFacebook = '#/' + this.getSelectedLayer().get('title')
+                            + '/' + feature.getProperties().name
+                            + '/' + feature.getId()
+        return urlFacebook;
     },
 
     // Retourne la couche selectionnée
