@@ -62,7 +62,6 @@ app.get('/export/:type/:layer', function (req, res) {
         'shape' : 'ESRI Shapefile'
     };
 
-
     var geojson = '/home/stephane/www/kurtogaphy/public/fixtures/whereismycat.json';
 
     var ogr = ogr2ogr(geojson);

@@ -107,13 +107,18 @@ var handleRegister = function(e)
 
     // TODO : add email verification
 
-    var tabNewUser = {
-        username: formLogin,
-        password: formPassword,
-        email: formEmail
-    };
+    if (0 < formLogin.length
+        && 0 < formPassword.length
+        && 0 < formEmail.length
+    ) {
+        var tabNewUser = {
+            username: formLogin,
+            password: formPassword,
+            email: formEmail
+        };
 
-    auth.registerNewUser(tabNewUser);
+        auth.registerNewUser(tabNewUser);
+    }
 };
 var formRegister = document.forms['form-user-register'];
 formRegister.addEventListener('submit', handleRegister, false);
