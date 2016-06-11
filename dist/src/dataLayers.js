@@ -171,12 +171,10 @@ export default {
             };
         }
 
-        console.log(fDatasGeoJson);
         kuzzle.dataCollectionFactory(layer).createDocument(idFeature, fDatasGeoJson, function (err, resp) {
             if (!err) {
                 // set of notNotifFeatureId and reconstruction of subscribe with new value of notNotifFeatureId
                 this_.state.notNotifFeatureId = resp.id;
-                //this_.subscribeCollection(olMap.getSelectedLayer(), olMap.state.coordinates);
 
                 // Setting of Kuzzle Document Identifier to identifier of the feature
                 var f = new ol.format.GeoJSON();
@@ -195,7 +193,6 @@ export default {
                 //        olMap.getSelectedLayer().getSource().addFeature(newFeature);
                 //    }
                 //}
-                //olMap.getSelectedLayer().getSource().removeFeature(feature);
                 olMap.getSelectedLayer().getSource().addFeature(newFeature);
                 olMap.createEditDatasForm();
             } else {

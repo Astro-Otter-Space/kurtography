@@ -170,7 +170,7 @@ ol.inherits(ol.control.ControlDrawButtons, ol.control.Control);
 ol.control.ControlDrawButtons.prototype.drawOnMap = function(evt)
 {
     this.map = this.getMap();
-
+    var this_ = this;
     if (!this.getSelectedLayer()) {
         this.setFlagDraw(false);
     } else {
@@ -187,18 +187,25 @@ ol.control.ControlDrawButtons.prototype.drawOnMap = function(evt)
             geometryFctDraw = this.geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
         }
 
+        // Source and vector temporar for drawing
+        this.tmpVectorSource = new ol.source.Vector();
+        this.tmpVectorLayer = new ol.layer.Vector({source:this.tmpVectorSource});
+
         // Draw new item
         var draw = this.drawInteraction = new ol.interaction.Draw({
             //features: features,
-            source : this.getSelectedLayer().getSource(),
+            source : this.tmpVectorSource, //this.getSelectedLayer().getSource(),
             features : new ol.Collection(),
             type: /** @type {ol.geom.GeometryType} */ (typeSelect),
             geometryFunction : geometryFctDraw,
             style : this.styleAdd()
         });
 
-        draw.on('drawend', this.drawEndFeature, this);
-        this.map.addInteraction(draw);
+        this.drawInteraction.on('drawstart', function() {
+            this_.tmpVectorSource.clear();
+        }, this);
+        this.drawInteraction.on('drawend', this.drawEndFeature, this);
+        this.map.addInteraction(this.drawInteraction);
     }
 };
 
@@ -219,7 +226,7 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
         // Ajout new document in Kuzzle
         dataLayers.addDocument(featureGeoJSON, feature);
         // Because of strange bug, I delete the drawing feature who will recreated in kuzzle callback
-        this.map.getSelectedLayer().getSource().removeFeature(feature);
+        this.tmpVectorSource.clear();
     } else {
         console.error("Problem create new feature");
     }
