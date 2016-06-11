@@ -48,7 +48,7 @@ export default {
      * Retrieve datas from collections
      * @param collection
      */
-    loadDatasFromCollection(collection)
+    loadDatasFromCollection(collection, featureIdQs)
     {
         var this_ = this;
         var options = {
@@ -90,6 +90,12 @@ export default {
                 });
                 olMap.getSelectedLayer().setSource(kSource);
                 olMap.getSelectedLayer().setZIndex(20);
+
+                if (undefined != featureIdQs) {
+                    console.log("zoom sur " + featureIdQs);
+                    var featureQs = olMap.getSelectedLayer().getSource().getFeatureById(featureIdQs);
+                    olMap.showFeaturesInformations(featureQs, true);
+                }
 
             } else {
                 notification.init({

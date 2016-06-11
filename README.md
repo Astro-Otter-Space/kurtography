@@ -8,7 +8,7 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.10.0
+Beta stage of development : v. 0.10.1
 
 Requirements
 -------------
@@ -205,16 +205,18 @@ Features
   - Reset map to geolocation position
   - Change subscribe zone by geolocalisation
   - Change subscribe zone and search by manual tool
+  - Share on social network
+  - zoom to document by URL : http://my_site/?layer=kuzzle_collection&name=kuzzle_doc_name&id=kuzzle_doc_id
+  - Register user
 
 Features in progress
 -------------
   - Export datas
   - Tracking position in real time
+  - Authentification
 
 Features will be avalaible soon:
 -------------
-  - Register user
-  - Authentification
   - Filtering features by user authorisation
   - User can subscribe to a specific item
 

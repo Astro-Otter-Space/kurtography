@@ -110,7 +110,7 @@ ol.control.LayerSwitcher.prototype.setVisible_ = function(lyr, visible) {
  * @param {ol.layer.Base} lyr Layer to be rendered (should have a title property).
  * @param {Number} idx Position in parent group list.
  */
-ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
+ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr) {
 
     var this_ = this;
 
@@ -122,7 +122,7 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
         li.className = "mdl-list__item";
 
         var lyrTitle = document.createTextNode(lyr.get('title'));
-        var lyrId = lyr.get('title').replace(/\s+/g, '-') + '_' + idx;
+        var lyrId = lyr.get('title').replace(/\s+/g, '-');
 
         var span = document.createElement('span');
         span.className = "mdl-list__item-primary-content";
@@ -160,16 +160,6 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
             labelInput.appendChild(input);
             spanInput.appendChild(labelInput);
 
-
-        /*} else if (lyr.get('type') === 'overlays') {
-
-            iLabel.innerHTML = "public";
-            var spanInput = document.createElement('span');
-            spanInput.className = "mdl-list__item-secondary-action";
-
-            var labelInput = document.createElement('label');
-            labelInput.className = "inline-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect";
-            labelInput.setAttribute("for", lyrId);*/
         } else {
             iLabel.innerHTML = "public";
         }
@@ -198,7 +188,7 @@ ol.control.LayerSwitcher.prototype.renderLayers_ = function(lyr, elm) {
     for (var i = 0, l; i < lyrs.length; i++) {
         l = lyrs[i];
         if (l.get('title') && 'hidden' != l.get('type')) {
-            var linkLayer = this.renderLayer_(l, i);
+            var linkLayer = this.renderLayer_(l);
             if (undefined != linkLayer) {
                 elm.appendChild(linkLayer);
             }

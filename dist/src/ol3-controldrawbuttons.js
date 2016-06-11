@@ -187,7 +187,7 @@ ol.control.ControlDrawButtons.prototype.drawOnMap = function(evt)
             geometryFctDraw = this.geometryFctDraw = ol.interaction.Draw.createRegularPolygon(4);
         }
 
-        // Source and vector temporar for drawing
+        // Source and vector temporar for drawing : http://jsfiddle.net/jp4dojwu/
         this.tmpVectorSource = new ol.source.Vector();
         this.tmpVectorLayer = new ol.layer.Vector({source:this.tmpVectorSource});
 

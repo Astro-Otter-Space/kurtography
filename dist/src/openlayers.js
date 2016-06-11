@@ -40,7 +40,7 @@ export default {
         realTimeTracking: null,
         layerSwitcher: null,
         markerSource: null,
-        tabStyles: null,
+        tabStyles: null
     },
 
     /**
@@ -169,7 +169,6 @@ export default {
         document.addEventListener("DOMContentLoaded", function(event) {
             if(false != this_.state.acceptGeoloc) {
                 this.geolocation.on('change', function() {
-                    console.log("detection changement");
 
                     var lon = this_.geolocation.getPosition()[0];
                     var lat =  this_.geolocation.getPosition()[1];
@@ -184,7 +183,6 @@ export default {
 
         // Get change on geolocation (mobile use only)
         this.geolocation.on('change:position', function() {
-            console.log("detection changement position");
             var lon = this.getPosition()[0];
             var lat =  this.getPosition()[1];
             // Set of current coordonates
@@ -209,8 +207,41 @@ export default {
                 this_.showFeaturesInformations(feature, true);
             }
         });
+
+        // Adding controls
         this.initControls();
     },
+
+
+    /**
+     * Get if params URI and set the datas
+     * @param qs
+     * @returns {{}}
+     */
+    getQueryParams(qs) {
+
+        var query_string = {};
+        var vars = qs.split("&");
+
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            // If first entry with this name
+            if (typeof query_string[pair[0]] === "undefined") {
+                query_string[pair[0]] = decodeURIComponent(pair[1]);
+                // If second entry with this name
+
+            } else if (typeof query_string[pair[0]] === "string") {
+                var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+                query_string[pair[0]] = arr;
+                // If third or later entry with this name
+
+            } else {
+                query_string[pair[0]].push(decodeURIComponent(pair[1]));
+            }
+        }
+        return query_string;
+    },
+
 
 
     /**
@@ -243,7 +274,6 @@ export default {
                 inputZoneRadius.setAttribute("max", max);
                 inputZoneRadius.value = distanceUpdate;
 
-            //    var newDistance = ('km' == this_.state.unity) ? distance * 1000 : distance;
                 var lblDistance = (10000 > distanceUpdate)? distanceUpdate + ' m' : (distanceUpdate/1000) + ' km';
                 this_.state.distance = parseInt(distanceUpdate);
 
@@ -266,9 +296,6 @@ export default {
             if (undefined != this_.state.zoneSubscriptionLayer) {
                 var distance = e.target.value;
 
-            //    var newDistance = ('km' == this_.state.unity) ? distance * 1000 : distance;
-            //    var lblDistance = distance + ' ' + this_.state.unity;
-            //
                 this_.state.distance = parseInt(distance);
                 var lblDistance = (10000 > distance)? distance + ' m' : (distance/1000) + ' km';
                 this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
@@ -312,57 +339,11 @@ export default {
 
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
-
             l.on("change:visible", function(e) {
                 var lyr = e.target;
-
                 if ('base' === l.get('type')) {
                     if (lyr.getVisible() == true) {
-                        this_.setSelectedLayer(lyr);
-
-                        document.getElementById("redraw_zone").removeAttribute('disabled');
-
-                        // Subscribe and Retrieve datas
-                        if (undefined != this_.state.zoneSubscriptionLayer || null != this_.state.zoneSubscriptionLayer) {
-                            this_.state.map.removeLayer(this_.state.zoneSubscriptionLayer);
-                        }
-                        // Creation couche zone subscribe
-                        this_.createZoneSubscription(this_.state.distance);
-                        Array.filter(scaleList, radio => {
-                            radio.disabled = false;
-                        });
-                        document.getElementById('zoneRadius').disabled = false;
-
-                        // Load datas and Mapping
-                        dataLayers.loadDatasFromCollection(lyr.get('title'));
-                        dataLayers.getPropertiesMapping(lyr.get('title'));
-
-                        /**
-                         * TODO : put this following in a function who verify if user is login or not
-                         */
-                        // Not sure if correct but it's working :|
-                        this_.state.buttonsDrawControls.setSelectedLayer(lyr);
-                        if(false != this_.state.acceptGeoloc) {
-                            this_.state.realTimeTracking.setSelectedLayer(lyr);
-                        }
-                        /**
-                         * END TODO
-                         */
-                        // Enabled control draw buttons
-                        document.getElementById("Point").disabled = false;
-                        document.getElementById("LineString").disabled = false;
-                        document.getElementById("Square").disabled = false;
-                        document.getElementById("Polygon").disabled = false;
-                        document.getElementById("Ending").disabled = false;
-                        document.getElementById("Edit").disabled = false;
-                        document.getElementById("Delete").disabled = false;
-                        document.getElementById("EndingControl").disabled = false;
-
-                        document.getElementById("trackingButton").disabled = false;
-                        document.getElementById("stopTrackingButton").disabled = false;
-
-                        // Set the export links
-                        this_.editExportLinks();
+                        this_.setEventsSelectedLayer(lyr);
                     }
                 }
 
@@ -385,8 +366,84 @@ export default {
         // Redraw the subscribe zone
         var RedrawSubscribeZone = new ol.control.EditSubscribeRoom();
         this.state.map.addControl(RedrawSubscribeZone);
+
+
+        // TEST : detect query string
+        var paramsUrl = this.getQueryParams(window.location.search.substring(1));
+        if (1 < Object.keys(paramsUrl).length) {
+
+            ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
+                if (l.get('title') == paramsUrl.layer) {
+                    var idRadioLayer = paramsUrl.layer.replace(/\s+/g, '-');
+                    document.getElementById(idRadioLayer).parentNode.MaterialRadio.check();
+                    l.setVisible(true);
+                    this_.setEventsSelectedLayer(l, paramsUrl.id);
+                }
+            });
+        }
+
+
     },
 
+
+    /**
+     * Set all events when change layer
+     * @param layer
+     */
+    setEventsSelectedLayer(layer, featureId) {
+
+        this.setSelectedLayer(layer);
+
+        document.getElementById("redraw_zone").removeAttribute('disabled');
+
+        // Subscribe and Retrieve datas
+        if (undefined != this.state.zoneSubscriptionLayer || null != this.state.zoneSubscriptionLayer) {
+            this.state.map.removeLayer(this.state.zoneSubscriptionLayer);
+        }
+        // Creation couche zone subscribe
+        this.createZoneSubscription(this.state.distance);
+        var scaleList = document.getElementsByName('scale');
+        Array.filter(scaleList, radio => {
+            radio.disabled = false;
+        });
+        document.getElementById('zoneRadius').disabled = false;
+
+        // Load datas and Mapping
+        if (undefined != featureId && null != featureId) {
+            dataLayers.loadDatasFromCollection(layer.get('title'), featureId);
+        } else {
+            dataLayers.loadDatasFromCollection(layer.get('title'));
+        }
+
+        dataLayers.getPropertiesMapping(layer.get('title'));
+
+        /**
+         * TODO : put this following in a function who verify if user is login or not
+         */
+            // Not sure if correct but it's working :|
+        this.state.buttonsDrawControls.setSelectedLayer(layer);
+        if(false != this.state.acceptGeoloc) {
+            this.state.realTimeTracking.setSelectedLayer(layer);
+        }
+        /**
+         * END TODO
+         */
+            // Enabled control draw buttons
+        document.getElementById("Point").disabled = false;
+        document.getElementById("LineString").disabled = false;
+        document.getElementById("Square").disabled = false;
+        document.getElementById("Polygon").disabled = false;
+        document.getElementById("Ending").disabled = false;
+        document.getElementById("Edit").disabled = false;
+        document.getElementById("Delete").disabled = false;
+        document.getElementById("EndingControl").disabled = false;
+
+        document.getElementById("trackingButton").disabled = false;
+        document.getElementById("stopTrackingButton").disabled = false;
+
+        // Set the export links
+        this.editExportLinks();
+    },
 
     /**
      * Initialisation of position
@@ -523,7 +580,6 @@ export default {
     isPointInZoneSubscribe(featureGeoJSON)
     {
         var parser = new ol.format.GeoJSON();
-        //var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
         var zsLayerFeature = this.state.zoneSubscriptionLayer.getSource().getFeatures()[0];
         var zsGeoJSON = parser.writeFeatureObject(zsLayerFeature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
@@ -566,7 +622,6 @@ export default {
      */
     createEditDatasForm()
     {
-        console.log("createEditDatasForm() : lancement formulaire properties pour " + dataLayers.state.notNotifFeatureId);
         var this_ = this;
         var divForm = document.getElementById("divFormInput");
 
@@ -613,7 +668,6 @@ export default {
 
             componentHandler.upgradeElements(div);
         });
-
 
         document.getElementById("divAddDoc").classList.toggle("hidden");
     },
@@ -725,10 +779,9 @@ export default {
                     if (!obj.hasOwnProperty(prop)) {
                         continue;
                     }
-                    //pairs.push(prop + '=' + encodeURIComponent(obj[prop]));
                     pairs.push('/' + encodeURIComponent(obj[prop]));
                 }
-                return pairs.join(''); //('&');
+                return pairs.join('');
             };
 
             serialized += serialiseObject(tabParams);
@@ -845,7 +898,7 @@ export default {
     {
         if (feature.getProperties()) {
 
-            var shareUrl = this.setShareFacebookUrl(feature);
+            var shareUrl = this.setShareUrl(feature);
 
             document.querySelector('meta[property=og\\:title]').setAttribute('content', feature.getProperties().name);
             document.querySelector('meta[property=og\\:type]').setAttribute('content', this.getSelectedLayer().get('title'));
@@ -859,20 +912,24 @@ export default {
                 document.querySelector('meta[property=og\\:image]').setAttribute('content', feature.getProperties().url_image);
             }
 
-            var shareFacebook = 'https://www.facebook.com/sharer/sharer.php?u=' + window.location.href + encodeURIComponent(shareUrl);
-            var shareTwitter = 'https://twitter.com/intent/tweet?url=' + window.location.href + encodeURIComponent(shareUrl);
-            console.log(shareFacebook);
+            var locationUrl = window.location.href + encodeURIComponent(shareUrl);
+            var shareFacebook = 'https://www.facebook.com/sharer/sharer.php?u=' + locationUrl;
+            var shareTwitter = 'https://twitter.com/intent/tweet?url=' + locationUrl;
+            var shareGooglePlus = 'https://twitter.com/intent/tweet?url=' + locationUrl;
+
             document.getElementById('shareFacebook').setAttribute('href', shareFacebook);
-            document.getElementById('shareFacebook').setAttribute('href', shareTwitter);
+            document.getElementById('shareTwitter').setAttribute('href', shareTwitter);
+            document.getElementById('shareGooglePlus').setAttribute('href', shareGooglePlus);
+
+            window.history.pushState({ },"", '' + shareUrl);
         }
     },
 
-    setShareFacebookUrl(feature)
+    setShareUrl(feature)
     {
-        var urlFacebook = '#/' + this.getSelectedLayer().get('title')
-                            + '/' + feature.getProperties().name
-                            + '/' + feature.getId()
-        return urlFacebook;
+        return  '?layer=' + this.getSelectedLayer().get('title')
+                            + '&name=' + feature.getProperties().name
+                            + '&id=' + feature.getId();
     },
 
     // Retourne la couche selectionnée
