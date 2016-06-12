@@ -200,6 +200,9 @@ List of collections in kuzzle are represented as geographical layers. Select one
 -------------
 There are two ways to create a subscribe room :
  - Based on geolocation : a zone with a default radius of 5 km is created. The radius could be changed on the left sidebar
+4 differents scales are predefined : district, city, region and country. And you can adjust the radius with the scale line under the option scales
+
+![alt tag](public/documentation/subscribe_room.png)
 
  - Manually :
 
