@@ -215,16 +215,19 @@ Click on the needed link.
 
 #### <i class="icon-upload"></i> Add/edit/delete datas
 -------------
-When the user is connected, a new panel appears on left-side : it's the drawing-control panel.
+When the user is connected, a new panel with many buttons appears on left-side : it's the drawing-control panel.
+
 Icon     | Description
 -------- | --------
 ![alt tag](public/documentation/tracking.png) | Start a tracking feature in real-time based on geolocation
 ![alt tag](public/documentation/add_location.png) | Add a point on the map
-![alt tag](public/documentation/subscribe_room.png) | Draw a line
-![alt tag](public/documentation/subscribe_room.png) | Draw a square
-![alt tag](public/documentation/subscribe_room.png) | Draw a polygon
-![alt tag](public/documentation/subscribe_room.png) | Edit a selected feature
+![alt tag](public/documentation/line.png) | Draw a line
+![alt tag](public/documentation/square.png) | Draw a square
+![alt tag](public/documentation/polygon.png) | Draw a polygon
+![alt tag](public/documentation/delete.png) | Exit drawing mode
+![alt tag](public/documentation/edit.png) | Edit a selected feature
 ![alt tag](public/documentation/delete.png) | Delete a selected feature
+![alt tag](public/documentation/delete.png) | Exit edit/delete mode
 
 
 Features
