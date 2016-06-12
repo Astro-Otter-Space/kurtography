@@ -247,6 +247,9 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
         this.map = this.getMap();
 
         // Select Interaction
+
+        // TODO : ajouter filtre sur le userId
+
         var selectedLayer = this.getSelectedLayer();
         var editSelectInteraction = this.editSelectInteraction = new ol.interaction.Select({
             condition: ol.events.condition.singleClick,

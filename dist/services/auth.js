@@ -37,9 +37,11 @@ export default {
 
                     user.getCurrentUser(() => {
                     });
+
+                    var userName = (undefined != user.state.username) ? user.state.username :  user.state.id;
                     notification.init({
                         type: 'notice',
-                        message: 'Welcome back ' + user.state.username
+                        message: 'Welcome back ' + userName
                     });
                 }
             });

@@ -4,6 +4,7 @@ import Projection from '../services/geo-parameters'
 import notification from '../services/notification';
 import ol from 'openlayers';
 import olMap from './openlayers'
+import user from './user';
 
 let subscription = null;
 //let this_ = this;  --> correct ?
@@ -176,6 +177,7 @@ export default {
                 lat: fCentroid.geometry.coordinates[1]
             };
         }
+        fDatasGeoJson.userId = user.state.id;
 
         kuzzle.dataCollectionFactory(layer).createDocument(idFeature, fDatasGeoJson, function (err, resp) {
             if (!err) {

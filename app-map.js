@@ -1,8 +1,6 @@
-// https://www.dartdocs.org/documentation/mdl/1.15.2/mdlcomponents/mdlcomponents-library.html
-// https://code.getmdl.io/1.1.3/material.js
-// http://quaintous.com/2015/07/09/react-components-with-mdl/
 import dataLayers from './dist/src/dataLayers';
 import auth from './dist/services/auth'
+// Load collections
 dataLayers.listCollections();
 
 // Connexion/register links
@@ -102,8 +100,8 @@ var handleRegister = function(e)
     e.preventDefault();
 
     var formLogin = e.target.elements.newUsername.value;
-    var formPassword = e.target.elements.newUserEmail.value;
-    var formEmail = e.target.elements.newUserPass.value;
+    var formPassword = e.target.elements.newUserPass.value;
+    var formEmail = e.target.elements.newUserEmail.value;
 
     // TODO : add email verification
 
@@ -135,3 +133,9 @@ String.prototype.capitalizeFirstLetter = function() {
 //Array.prototype.valueOf = function(){
 //    console.log(JSON.stringify(this, null, '\t'));
 //};
+
+
+
+
+// https://www.dartdocs.org/documentation/mdl/1.15.2/mdlcomponents/mdlcomponents-library.html
+// http://quaintous.com/2015/07/09/react-components-with-mdl/

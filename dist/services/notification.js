@@ -15,7 +15,7 @@ export default {
     {
         this.objConst = {
             message: obj.message.toString(),
-            timeout: 3000
+            timeout: 5000
         };
 
         var regex = new RegExp(re);

@@ -49,8 +49,6 @@ export default {
      */
     initMap(zoom)
     {
-        console.log("Verification auth : " + user.isAuthenticated());
-
         var this_ = this;
         this.state.zoom = zoom;
         this.state.tabStyles = this.getStylesFeatures();
@@ -194,6 +192,10 @@ export default {
             }
         });
 
+        // Adding controls
+        this.initControls();
+        user.getCurrentUser(() => {})
+        //this.initControlsIfConnected();
 
         // Show feature data + listener
         this.state.map.on('click', function(evt) {
@@ -203,13 +205,19 @@ export default {
                 }
             );
             this_.setOpenGraphContent(feature);
-            if (undefined != feature && undefined != feature.getId() && this_.state.buttonsDrawControls.getFlagDraw() == false) {
-                this_.showFeaturesInformations(feature, true);
+            if (undefined != feature && undefined != feature.getId()) {
+                if (false == user.isAuthenticated()) {
+                    this_.showFeaturesInformations(feature, true);
+                } else {
+                    console.log(user.state.id + ' flag : ' + this_.state.buttonsDrawControls.getFlagDraw());
+                    if (false == this_.state.buttonsDrawControls.getFlagDraw()) {
+                        this_.showFeaturesInformations(feature, true);
+                    }
+                }
             }
         });
 
-        // Adding controls
-        this.initControls();
+
     },
 
 
@@ -311,54 +319,19 @@ export default {
         });
         document.getElementById('zoneRadius').addEventListener('change', this.handleChangeDistance, false);
 
-
-        /**
-         * TODO : put this following in a function who verify if user is login or not
-         */
-        // RealTime Tracking
-        if(false != this.state.acceptGeoloc) {
-            var realTimeTracking = this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
-            this.state.map.addControl(realTimeTracking);
-        }
-
-        // Adding draw controls
-        var optionsControlDraw = {
-            "style_buttons" : "mdlIcons",
-            "draw": {
-                "Point": true,
-                "LineString": true,
-                "Square": true,
-                "Circle": false,
-                "Polygon": true
-            }
-        };
-        this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
-        /**
-         * END TODO
-         */
-
         // Detection of selected layer
         ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
             l.on("change:visible", function(e) {
                 var lyr = e.target;
                 if ('base' === l.get('type')) {
                     if (lyr.getVisible() == true) {
-                        this_.setEventsSelectedLayer(lyr);
+                        this_.setEventsSelectedLayer(lyr, null, false);
                     }
                 }
 
             });
         });
 
-        /**
-         * TODO : put this following in a function who verify if user is login or not
-         */
-        // This adding must be placed after the onchange...
-        this.state.map.addControl(this.state.buttonsDrawControls);
-        /**
-         * END TODO
-         */
-            
         // Reset to the position
         var resetPosition = new ol.control.ResetPosition();
         this.state.map.addControl(resetPosition);
@@ -367,8 +340,7 @@ export default {
         var RedrawSubscribeZone = new ol.control.EditSubscribeRoom();
         this.state.map.addControl(RedrawSubscribeZone);
 
-
-        // TEST : detect query string
+        // Inspect query string
         var paramsUrl = this.getQueryParams(window.location.search.substring(1));
         if (1 < Object.keys(paramsUrl).length) {
 
@@ -377,20 +349,63 @@ export default {
                     var idRadioLayer = paramsUrl.layer.replace(/\s+/g, '-');
                     document.getElementById(idRadioLayer).parentNode.MaterialRadio.check();
                     l.setVisible(true);
-                    this_.setEventsSelectedLayer(l, paramsUrl.id);
+                    this_.setEventsSelectedLayer(l, paramsUrl.id, false);
                 }
             });
         }
-
-
     },
 
+    /**
+     * TEST
+     * List of controls who need to be connected
+     */
+    initControlsIfConnected(flagIsAuthenticated)
+    {
+        if (true == flagIsAuthenticated) {
+            var this_ = this;
+            // RealTime Tracking
+            if(false != this.state.acceptGeoloc) {
+                var realTimeTracking = this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
+                this.state.map.addControl(realTimeTracking);
+            }
+
+            // Adding draw controls
+            var optionsControlDraw = {
+                "style_buttons" : "mdlIcons",
+                "draw": {
+                    "Point": true,
+                    "LineString": true,
+                    "Square": true,
+                    "Circle": false,
+                    "Polygon": true
+                }
+            };
+            this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
+
+            ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
+                l.on("change:visible", function(e) {
+                    var lyr = e.target;
+                    if ('base' === l.get('type')) {
+                        if (lyr.getVisible() == true) {
+                            this_.setEventsSelectedLayer(lyr, null, flagIsAuthenticated);
+                        }
+                    }
+
+                });
+            });
+
+            // This adding must be placed after the onchange...
+            this.state.map.addControl(this.state.buttonsDrawControls);
+        } else {
+            console.log("User not connected : not adding controls");
+        }
+    },
 
     /**
      * Set all events when change layer
      * @param layer
      */
-    setEventsSelectedLayer(layer, featureId) {
+    setEventsSelectedLayer(layer, featureId, flagIsAuthenticated) {
 
         this.setSelectedLayer(layer);
 
@@ -402,6 +417,7 @@ export default {
         }
         // Creation couche zone subscribe
         this.createZoneSubscription(this.state.distance);
+
         var scaleList = document.getElementsByName('scale');
         Array.filter(scaleList, radio => {
             radio.disabled = false;
@@ -417,30 +433,28 @@ export default {
 
         dataLayers.getPropertiesMapping(layer.get('title'));
 
-        /**
-         * TODO : put this following in a function who verify if user is login or not
-         */
+        if (true == flagIsAuthenticated) {
+            this.state.buttonsDrawControls.setSelectedLayer(layer);
             // Not sure if correct but it's working :|
-        this.state.buttonsDrawControls.setSelectedLayer(layer);
-        if(false != this.state.acceptGeoloc) {
-            this.state.realTimeTracking.setSelectedLayer(layer);
+            if(false != this.state.acceptGeoloc) {
+                this.state.realTimeTracking.setSelectedLayer(layer);
+            }
         }
-        /**
-         * END TODO
-         */
+
+        if (true == flagIsAuthenticated) {
             // Enabled control draw buttons
-        document.getElementById("Point").disabled = false;
-        document.getElementById("LineString").disabled = false;
-        document.getElementById("Square").disabled = false;
-        document.getElementById("Polygon").disabled = false;
-        document.getElementById("Ending").disabled = false;
-        document.getElementById("Edit").disabled = false;
-        document.getElementById("Delete").disabled = false;
-        document.getElementById("EndingControl").disabled = false;
+            document.getElementById("Point").disabled = false;
+            document.getElementById("LineString").disabled = false;
+            document.getElementById("Square").disabled = false;
+            document.getElementById("Polygon").disabled = false;
+            document.getElementById("Ending").disabled = false;
+            document.getElementById("Edit").disabled = false;
+            document.getElementById("Delete").disabled = false;
+            document.getElementById("EndingControl").disabled = false;
 
-        document.getElementById("trackingButton").disabled = false;
-        document.getElementById("stopTrackingButton").disabled = false;
-
+            document.getElementById("trackingButton").disabled = false;
+            document.getElementById("stopTrackingButton").disabled = false;
+        }
         // Set the export links
         this.editExportLinks();
     },

@@ -1,4 +1,5 @@
 import kuzzle from '../services/kuzzle'
+import olMap from './openlayers';
 /**
  * /!\ @source : https://github.com/kuzzleio/kuzzle-challenge-klack/blob/master/src/store/user.js
  * not enough time to make my own script :(
@@ -32,8 +33,11 @@ export default {
         kuzzle.setJwtToken(jwt);
 
         kuzzle.whoAmI((error, kuzzleUser) => {
-                getCurrentUserCallback(error, kuzzleUser, this.state, cb)
-            });
+            getCurrentUserCallback(error, kuzzleUser, this.state, cb)
+            console.log("User connected : " + this.isAuthenticated());
+            // Set the controls who need authentification
+            olMap.initControlsIfConnected(this.isAuthenticated());
+        });
     },
 
     removeCurrentUser () {
