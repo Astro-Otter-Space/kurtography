@@ -679,6 +679,10 @@ export default {
                 input.name = key;
                 input.id = key;
 
+                if (key == "name"){
+                    input.setAttribute("required", "required");
+                }
+
                 div.appendChild(label);
                 div.appendChild(input);
                 divForm.appendChild(div);

@@ -101,9 +101,7 @@ var handleRegister = function(e)
 var formRegister = document.forms['form-user-register'];
 formRegister.addEventListener('submit', handleRegister, false);
 
-
 /**
- *
  * @returns {string}
  */
 String.prototype.capitalizeFirstLetter = function() {
@@ -113,9 +111,6 @@ String.prototype.capitalizeFirstLetter = function() {
 //Array.prototype.valueOf = function(){
 //    console.log(JSON.stringify(this, null, '\t'));
 //};
-
-
-
 
 // https://www.dartdocs.org/documentation/mdl/1.15.2/mdlcomponents/mdlcomponents-library.html
 // http://quaintous.com/2015/07/09/react-components-with-mdl/
