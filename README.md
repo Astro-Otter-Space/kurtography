@@ -188,7 +188,7 @@ location | Object |
 id | string | Kuzzle document identifier
 
 
-Utilisation
+How to use
 -------------
 
 #### <i class="icon-upload"></i> Select layer
@@ -204,8 +204,10 @@ There are two ways to create a subscribe room :
 
 ![alt tag](public/documentation/subscribe_room.png)
 
- - Manually :
-
+ - Manually : the user can specifiate his own subscribe room with the button "Redraw subscribe zone" in the bottom.
+ ![alt tag](public/documentation/draw_room.png)
+ After click, the user can draw a circle
+ ![alt tag](public/documentation/subscribe_draw.png)
 
 #### <i class="icon-upload"></i> Connexion / authentification
 -------------
