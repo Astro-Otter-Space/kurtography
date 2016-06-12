@@ -9,6 +9,7 @@ import ZoomControl from './ol3-zoomuibuttons';
 import SetPosition from './ol3-resetposition';
 import RedrawSubscribeZone from './ol3-editsubscribezone';
 import RealTimeTracking from './ol3-realTimeTracking';
+import exportDatas from './ol3-export';
 // Openlayers 3 add-ons
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
@@ -343,6 +344,10 @@ export default {
         var RedrawSubscribeZone = new ol.control.EditSubscribeRoom();
         this.state.map.addControl(RedrawSubscribeZone);
 
+        // Export datas
+        var exportDatas = new ol.control.Export();
+        this.state.map.addControl(exportDatas);
+
         // Inspect query string
         var paramsUrl = this.getQueryParams(window.location.search.substring(1));
         if (1 < Object.keys(paramsUrl).length) {
@@ -369,7 +374,7 @@ export default {
             // RealTime Tracking
             if(false != this.state.acceptGeoloc) {
                 var realTimeTracking = this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
-                this.state.map.addControl(realTimeTracking);
+                this.state.map.addControl(this.state.realTimeTracking);
             }
 
             // Adding draw controls
@@ -403,10 +408,9 @@ export default {
 
             // This adding must be placed after the onchange...
             this.state.map.addControl(this.state.buttonsDrawControls);
-
-
-
         } else {
+            this.state.map.removeControl(this.state.buttonsDrawControls);
+            this.state.map.removeControl(this.state.realTimeTracking);
             console.log("User not connected : not adding controls");
         }
     },

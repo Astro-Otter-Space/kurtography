@@ -8,19 +8,21 @@ header#navbar.mdl-layout__header.mdl-layout__header--transparent
                     i.material-icons search
                 div.mdl-textfield__expandable-holder
                     input.mdl-textfield__input#kuzzleSearch(type="text")
-                    label.mdl-textfield__label(for="sample-expandable") Expandable Input
+                    label.mdl-textfield__label(for="kuzzleSearch") Expandable Input
 
         button#demo-menu-lower-right.mdl-button.mdl-js-button.mdl-button--icon
             i.material-icons more_vert
 
         ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="demo-menu-lower-right")
             li.mdl-menu__item
-                a.export( data-type='geojson', disabled) GeoJSON
-            li.mdl-menu__item
-                a.export(data-type='csv', disabled) CSV
-            li.mdl-menu__item
-                a.export(data-type='gml', disabled) GML
-            li.mdl-menu__item
-                a.export(data-type='mapinfo', disabled) MapInfo
-            li.mdl-menu__item
-                a.export(data-type='shape', disabled) Shapefile
+                a.mdl-navigation__link(data-link="auth", href="#auth")
+                    i.material-icons flag
+                    | Log in
+            li.mdl-menu__item.mdl-menu__item--full-bleed-divider
+                a.mdl-navigation__link(data-link="register", href="#register")
+                    i.material-icons person_add
+                    | Sign up
+            li.mdl-menu__item(disabled="disabled")
+                a.mdl-navigation__link(data-link="logout", href="#logout")
+                    i.material-icons exit_to_app
+                    | Log out
