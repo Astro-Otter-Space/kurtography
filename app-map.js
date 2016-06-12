@@ -1,7 +1,10 @@
 import dataLayers from './dist/src/dataLayers';
 import auth from './dist/services/auth'
+import search from './dist/src/search';
 // Load collections
 dataLayers.listCollections();
+// Load research
+search.init();
 
 // Connexion/register links
 document.querySelector('a[data-link="auth"]').addEventListener('click', function() {
@@ -15,29 +18,6 @@ document.querySelector('a[data-link="register"]').addEventListener('click', func
     //document.querySelector('.mdl-mdl-layout__obfuscator').classList.toggle('is-visible');
     //document.querySelector('.mdl-layout__drawer').setAttribute('aria-hidden', true);
     document.getElementById("divRegister").classList.toggle("hidden");
-}, false);
-
-/**
- * Search request with result in autocompletion
- * @returns {string}
- */
-var searchInput = document.querySelector('#kuzzleSearch');
-import Awesomplete from 'awesomplete';
-var awesomplete = new Awesomplete(searchInput, {
-    maxItems: 10
-});
-
-// Event listener on select list
-window.addEventListener("awesomplete-select", function(e){
-    var idFeature = e.text.value;
-    dataLayers.setCenterKuzzleDoc(idFeature);
-    e.preventDefault();
-}, false);
-
-searchInput.addEventListener('keyup', function(e) {
-    // TODO : reset the list
-    dataLayers.searchDocuments(e.target.value);
-    awesomplete.list = dataLayers.state.rstAdvancedSearch
 }, false);
 
 // Hide cards

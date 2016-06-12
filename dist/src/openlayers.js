@@ -14,7 +14,7 @@ import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
 // Others
 import user from './user';
-import dateformat from 'dateformat';
+import dateFormat from 'dateformat';
 
 /**
  * Initialisation de la map
@@ -205,8 +205,10 @@ export default {
                     return feature;
                 }
             );
-            this_.setOpenGraphContent(feature);
+
             if (undefined != feature && undefined != feature.getId()) {
+                this_.setOpenGraphContent(feature);
+
                 if (false == user.isAuthenticated()) {
                     this_.showFeaturesInformations(feature, true);
                 } else {
@@ -383,6 +385,10 @@ export default {
             };
             this.state.buttonsDrawControls = new ol.control.ControlDrawButtons(this.getSelectedLayer(), optionsControlDraw);
 
+            if (undefined != this.getSelectedLayer()) {
+                this.setEventsSelectedLayer(this.getSelectedLayer(), null, flagIsAuthenticated);
+            }
+
             ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
                 l.on("change:visible", function(e) {
                     var lyr = e.target;
@@ -397,6 +403,9 @@ export default {
 
             // This adding must be placed after the onchange...
             this.state.map.addControl(this.state.buttonsDrawControls);
+
+
+
         } else {
             console.log("User not connected : not adding controls");
         }
@@ -412,10 +421,6 @@ export default {
 
         document.getElementById("redraw_zone").removeAttribute('disabled');
 
-        // Subscribe and Retrieve datas
-        if (undefined != this.state.zoneSubscriptionLayer || null != this.state.zoneSubscriptionLayer) {
-            this.state.map.removeLayer(this.state.zoneSubscriptionLayer);
-        }
         // Creation couche zone subscribe
         this.createZoneSubscription(this.state.distance);
 
@@ -507,6 +512,11 @@ export default {
      */
     createZoneSubscription(distance)
     {
+        console.log("Creation layer subscription");
+        if (undefined != this.state.zoneSubscriptionLayer || null != this.state.zoneSubscriptionLayer) {
+            this.state.map.removeLayer(this.state.zoneSubscriptionLayer);
+        }
+
         var coordonatesWGS84 = this.state.coordinates; // = this.geolocation.getPosition();
 
         var features = [];
@@ -568,7 +578,7 @@ export default {
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
 
         var datePublish = new Date(fProperties.date_publish);
-        document.getElementById("dateKdoc").innerHTML = dateformat(datePublish, 'dd/mm/yyyy');
+        document.getElementById("dateKdoc").innerHTML = " " + dateFormat(datePublish, 'dd/mm/yyyy');
         //if (fProperties.idUser) {
         //    document.getElementById("userKdoc").innerHTML = "by " + fProperties.idUser;
         //}
