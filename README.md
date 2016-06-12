@@ -8,7 +8,7 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.10.1
+Beta stage of development : v. 0.10.3
 
 Requirements
 -------------
@@ -46,11 +46,7 @@ node dist/test/profiles/createProfileUser.js
 
 If you want to create a testing user, run:
 ```
-npm run createUserTest
-```
-or
-```
-node dist/test/createUserTest.js
+In progress...
 ```
 
 #### <i class="icon-upload"></i> Connexion to kuzzle
