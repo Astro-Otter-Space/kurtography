@@ -81,6 +81,8 @@ check the [spatial reference list](http://spatialreference.org/ref/epsg/) and ed
 
 #### <i class="icon-upload"></i> Developpement
 
+Files bundle.js and bundle.css must be created with this following commands, by default, they're not exists.
+
 Compile and minify CSS files :
 ```
 npm run build-css
@@ -137,6 +139,9 @@ In Kuzzle-BO, when create a new collection, the mapping must be like :
                 "type": "string"
             }
         }
+    },
+    "userId": {
+        "type": "string"
     }
 }
 ```
@@ -146,7 +151,7 @@ type | "string" | store the value "feature"
 geometry | Object | Geometry
 location | geo_point | [See the doc](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/mapping-geo-point-type.html)
 properties | Object | Store fields
-
+userId | String | Store the id of the user
 
 #### <i class="icon-upload"></i> Data format
 -------------
@@ -171,7 +176,8 @@ Exemple of KuzzleDocument working in Kurtography :
     "lon": 3.9609146118164054,
     "lat": 43.624395670027354
   },
-  "id": "AVRO9acbPyvkbVrqtBU0"
+  "id": "AVRO9acbPyvkbVrqtBU0",
+  "userId": "mySuperUser"
 }
 ```
 
@@ -251,15 +257,15 @@ Features
   - zoom to document by URL : http://my_site/?layer=kuzzle_collection&name=kuzzle_doc_name&id=kuzzle_doc_id
   - Register user
   - Authentification
+  - Filtering features by user authorisation
 
 Features in progress
 -------------
-  - Export datas
+  - Export datas (need ogr2ogr)
   - Tracking position in real time
 
 Features will be avalaible soon:
 -------------
-  - Filtering features by user authorisation
   - User can subscribe to a specific item
 
 Author(s)
