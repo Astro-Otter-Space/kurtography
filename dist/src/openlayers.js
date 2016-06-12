@@ -423,6 +423,7 @@ export default {
 
         this.setSelectedLayer(layer);
 
+        document.getElementById("export_datas").removeAttribute('disabled');
         document.getElementById("redraw_zone").removeAttribute('disabled');
 
         // Creation couche zone subscribe
