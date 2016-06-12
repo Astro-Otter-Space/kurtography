@@ -3,6 +3,7 @@ import notification from '../services/notification';
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
 import olMap from './openlayers';
+import user from './user';
 
 // TODO TRY : http://materialdesignblog.com/material-design-floating-action-button-for-web-that-really-stands-out/
 
@@ -218,7 +219,6 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
     // Problem with recuperation of a circle geometry : https://github.com/openlayers/ol3/pull/3434
     // Addind feature to source vector in EPSG:4326
     var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-    console.log(featureGeoJSON);
     if (undefined != this.element) {
         // Ajout new document in Kuzzle
         dataLayers.addDocument(featureGeoJSON, feature);
@@ -244,9 +244,6 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
         this.map = this.getMap();
 
         // Select Interaction
-
-        // TODO : ajouter filtre sur le userId
-
         var selectedLayer = this.getSelectedLayer();
         var editSelectInteraction = this.editSelectInteraction = new ol.interaction.Select({
             condition: ol.events.condition.singleClick,
@@ -255,10 +252,16 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
                     return layer
                 }
             },
+            // TODO : ajouter filtre sur le userId
             filter: function(feature, layer) {
-                //if (feature.getProperties().userId == "kuzzleteam") {
+                if (feature.getProperties().userId == user.state.id) {
                     return feature;
-                //}
+                } else {
+                    notification.init({
+                        type: 'warning',
+                        message: 'You can\'t select feature you haven\'t create.'
+                    })
+                }
             }
         });
         this.map.addInteraction(editSelectInteraction);
@@ -317,6 +320,16 @@ ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt)
             source : function(layer) {
                 if (layer == this.getSelectedLayer()) {
                     return layer
+                }
+            },
+            filter: function(feature, layer) {
+                if (feature.getProperties().userId == user.state.id) {
+                    return feature;
+                } else {
+                    notification.init({
+                        type: 'warning',
+                        message: 'You can\'t select feature you haven\'t create.'
+                    })
                 }
             }
         });

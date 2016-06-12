@@ -8,7 +8,7 @@ Welcome !! Kurtography is a cartography application based on [Openlayers 3](http
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.10.3
+Beta stage of development : v. 0.11.0
 
 Requirements
 -------------
