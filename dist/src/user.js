@@ -34,7 +34,6 @@ export default {
 
         kuzzle.whoAmI((error, kuzzleUser) => {
             getCurrentUserCallback(error, kuzzleUser, this.state, cb)
-            console.log("User connected : " + this.isAuthenticated());
             // Set the controls who need authentification
             olMap.initControlsIfConnected(this.isAuthenticated());
 

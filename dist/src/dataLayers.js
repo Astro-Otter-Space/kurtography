@@ -67,14 +67,15 @@ export default {
             if (!err) {
                 var result = [];
                 if(res.total > 0) {
-                    res.documents.forEach(function (kDoc, index) {
-                        // Push document identifier in feature data
+                    result = res.documents.map(kDoc => {
                         kDoc.content.id = kDoc.id;
-                        //if (undefined != kDoc.content.idUser) {
-                        //    kDoc.content.properties.idUser = kDoc.content.idUser;
-                        //}
-                        result.push(kDoc.content);
+                        if(undefined != kDoc.content.userId) {
+                            kDoc.content.properties.userId = kDoc.content.userId;
+                            delete kDoc.content.userId;
+                        }
+                        return kDoc.content;
                     });
+
                 } else {
                     notification.init({
                         type: 'warning',
@@ -86,7 +87,7 @@ export default {
                     "type": "FeatureCollection",
                     "features": result
                 };
-
+                console.log(result);
                 // Construction of geoDatas from content
                 var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: Projection.projectionFrom});
                 var kSource = new ol.source.Vector({
@@ -96,11 +97,9 @@ export default {
                 olMap.getSelectedLayer().setZIndex(20);
 
                 if (undefined != featureIdQs) {
-                    console.log("zoom sur " + featureIdQs);
                     var featureQs = olMap.getSelectedLayer().getSource().getFeatureById(featureIdQs);
                     olMap.showFeaturesInformations(featureQs, true);
                 }
-
             } else {
                 notification.init({
                     type: 'error',
@@ -131,6 +130,10 @@ export default {
         var this_ = this;
         kuzzle.dataCollectionFactory(layer).getMapping(function (err, res) {
             if (!err) {
+                // Patch on user identifier
+                if (undefined != res.mapping.userId) {
+                    res.mapping.properties.properties.userId = res.mapping.userId;
+                }
                 this_.state.mappingCollection = res.mapping.properties.properties;
             } else {
                 notification.init({
@@ -207,7 +210,6 @@ export default {
                 olMap.getSelectedLayer().getSource().addFeature(newFeature);
                 olMap.createEditDatasForm();
             } else {
-                console.log(err.message);
                 notification.init({
                     type: 'error',
                     message: "Error creation kuzzle document."
@@ -254,10 +256,8 @@ export default {
 
                     if (undefined != olMap.getSelectedLayer().getSource().getFeatureById(res.id)) {
                         var updFeatureDel = olMap.getSelectedLayer().getSource().getFeatureById(res.id);
-                        console.log("updateGeodatasDocument() : suppression de "  + res.id);
                         olMap.getSelectedLayer().getSource().removeFeature(updFeatureDel);
                     }
-                    console.log("updateGeodatasDocument() : ajout nouvelle version de "  + updFeatureEdited.getId());
                     olMap.getSelectedLayer().getSource().addFeature(updFeatureEdited);
 
                     olMap.showFeaturesInformations(updFeatureEdited, false);
@@ -335,7 +335,6 @@ export default {
             });
         } else {
             var this_ = this;
-            console.log("Suppression dans kuzzle de  " + featureId);
             kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).deleteDocument(featureId, (err, res) => {
                 if (err) {
                     notification.init({
@@ -344,7 +343,6 @@ export default {
                     });
                 } else {
                     this_.state.notNotifFeatureId = res[0];
-                    console.log("deleteDocument() : La feature a ete supprimé de kuzzle, suppression de la map de " + res[0]);
                     var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(res[0]);
                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
                     notification.init({
@@ -394,7 +392,6 @@ export default {
         };
 
         //console.log(JSON.stringify(filter, null, '\t'));
-        console.log("notNotifFeatureId : " + this.state.notNotifFeatureId);
         this.state.subscription = subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 if (null == this_.state.notNotifFeatureId || resp.result._id != this_.state.notNotifFeatureId) {
@@ -408,7 +405,6 @@ export default {
 
                             if ("update" == this_.action) {
                                 var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
-                                console.log("update kRoom : " + featureDel.getId());
                                 if (undefined != featureDel && featureDel.getId()) {
                                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
                                 }
@@ -437,9 +433,7 @@ export default {
                         /**
                          * Suppression
                          */
-                        console.log("subscribeCollection() : Suppresion kuzzle doc " + resp.result._id);
                         var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(resp.result._id);
-                        console.log("subscribeCollection() : Suppression map feature " + featureDel.getId());
                         olMap.getSelectedLayer().getSource().removeFeature(featureDel);
 
                         notification.init({
@@ -541,7 +535,6 @@ export default {
 
             kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearch, (err, resp) => {
                 if(!err) {
-                    console.log(resp.total, "results");
                     if (1 > resp.total) {
                         notification.init({
                             type: 'warning',
@@ -557,7 +550,6 @@ export default {
                         this.state.rstAdvancedSearch = respAutoComplete;
                     }
                 } else {
-                    console.error(err);
                     notification.init({
                         type: 'error',
                         message: "Research error"

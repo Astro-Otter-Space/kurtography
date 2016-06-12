@@ -116,7 +116,6 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
         // Removing adding interaction
         if (undefined != this_.drawInteraction /*&& this_.drawInteraction.getActive() == true*/) {
             //this_.drawInteraction.setActive(false);
-            console.log("Removing drawInteraction");
             this_.map.removeInteraction(this_.drawInteraction);
             this_.drawInteraction = null;
         }
@@ -124,14 +123,12 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
         // Remove selection interaction and modify interaction
         if (undefined != this_.editSelectInteraction /*&& this_.editSelectInteraction.getActive() == true*/) {
             //this_.editSelectInteraction.setActive(false);
-            console.log("removing editSelectInteraction");
             this_.map.removeInteraction(this_.editSelectInteraction);
             this_.editSelectInteraction = null;
         }
 
         if (undefined != this_.modifyInteraction /*&& this_.modifyInteraction.getActive() == true*/) {
             //this_.modifyInteraction.setActive(false);
-            console.log("removing modifyInteraction");
             this_.map.removeInteraction(this_.modifyInteraction);
             this_.modifyInteraction = null;
         }
@@ -257,6 +254,12 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
                 if (layer == this.getSelectedLayer()) {
                     return layer
                 }
+            },
+            filter: function(feature, layer) {
+                console.log(feature.getProperties());
+                //if (feature.getProperties().userId == "kuzzleteam") {
+                    return feature;
+                //}
             }
         });
         this.map.addInteraction(editSelectInteraction);
@@ -264,7 +267,6 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
         // Modify interaction
         var mod = this.modifyInteraction = new ol.interaction.Modify({
             features: editSelectInteraction.getFeatures(),
-            //features: new ol.Collection(olMap.getSelectedLayer().getSource().getFeatures()),
             style: this.styleEdit(),
             zIndex: 50
         });
@@ -326,7 +328,6 @@ ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt)
             var feature = e.element;
             if(confirm('Are you sure you want to delete this feature ?')) {
                 if (undefined != feature) {
-                    console.log("Suppression de la feature de selectDelInteraction");
                     // Remove from interaction
                     var featureId = feature.getId();
                     selectDelInteraction.getFeatures().remove(feature);
@@ -547,13 +548,6 @@ var ol3buttons = {
         buttonSquare.type_control = 'draw';
         buttonSquare.addEventListener('click', this.handleButtonsClick, false);
         elementDrawButtons.push(buttonSquare);
-        /*
-         <svg style="width:24px;height:24px;">
-         <path fill="#FFF" d="M 2,2L 8,2L 8,4L 16,4L 16,2.00001L 22,2.00001L 22,8L 20,8L 20,16L 22,16L 22,22L 16,22L 16,20L 8,20L 8,22L 2,22L 2,16L 4,16L 4,8L 2,8L 2,2 Z M 16,8L 16,6L 8,6L 8,8L 6,8L 6,16L 8,16L 8,18L 16,18L 16,16L 18,16L 18,8L 16,8 Z M 4,4.00001L 4,6.00001L 5.99999,6.00001L 5.99999,4.00001L 4,4.00001 Z M 18,4.00001L 18,6.00001L 20,6.00001L 20,4.00001L 18,4.00001 Z M 4,18L 4,20L 6,20L 6,18L 4,18 Z M 18,18L 18,20L 20,20L 20,18L 18,18 Z "></path>
-         </svg>
-         */
-
-
 
         // Circle
         var buttonCircle = this.buttonCircle = document.createElement('button');

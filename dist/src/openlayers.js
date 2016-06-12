@@ -213,7 +213,6 @@ export default {
                 if (false == user.isAuthenticated()) {
                     this_.showFeaturesInformations(feature, true);
                 } else {
-                    console.log(user.state.id + ' flag : ' + this_.state.buttonsDrawControls.getFlagDraw());
                     if (false == this_.state.buttonsDrawControls.getFlagDraw()) {
                         this_.showFeaturesInformations(feature, true);
                     }
@@ -411,14 +410,6 @@ export default {
         } else {
             this.state.map.removeControl(this.state.buttonsDrawControls);
             this.state.map.removeControl(this.state.realTimeTracking);
-
-            var externalControl = document.getElementById('external_draw_control');
-            // Div
-            var divDrawControl = document.createElement('div');
-            divDrawControl.id = '';
-
-            var div =
-            console.log("User not connected : not adding controls");
         }
     },
 
@@ -532,7 +523,6 @@ export default {
      */
     createZoneSubscription(distance)
     {
-        console.log("Creation layer subscription");
         if (undefined != this.state.zoneSubscriptionLayer || null != this.state.zoneSubscriptionLayer) {
             this.state.map.removeLayer(this.state.zoneSubscriptionLayer);
         }
@@ -592,16 +582,19 @@ export default {
     {
         var parser = new ol.format.GeoJSON();
         var fProperties = feature.getProperties();
-        var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
         console.log(fProperties);
+        var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
         // Show datas
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
 
+        var byUser = "";
+        if (undefined != fProperties.userId) {
+            var byUser = " by " + fProperties.userId;
+        }
+
         var datePublish = new Date(fProperties.date_publish);
-        document.getElementById("dateKdoc").innerHTML = " " + dateFormat(datePublish, 'dd/mm/yyyy');
-        //if (fProperties.idUser) {
-        //    document.getElementById("userKdoc").innerHTML = "by " + fProperties.idUser;
-        //}
+        document.getElementById("dateKdoc").innerHTML = " " + dateFormat(datePublish, 'dd/mm/yyyy') + byUser;
+
 
 
         document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
@@ -681,46 +674,47 @@ export default {
 
         Object.keys(dataLayers.state.mappingCollection).forEach(key => {
 
-            var div = document.createElement('div');
-            div.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
+            if ("userId" != key) {
+                var div = document.createElement('div');
+                div.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
 
-            // Label
-            var label = document.createElement('label');
-            label.className = "mdl-textfield__label";
+                // Label
+                var label = document.createElement('label');
+                label.className = "mdl-textfield__label";
 
-            label.innerHTML = key.capitalizeFirstLetter();
-            label.setAttribute("for", key);
+                label.innerHTML = key.capitalizeFirstLetter();
+                label.setAttribute("for", key);
 
-            // Input
-            if ("string" == dataLayers.state.mappingCollection[key].type) {
-                var input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'mdl-textfield__input';
-                input.name = key;
-                input.id = key;
+                // Input
+                if ("string" == dataLayers.state.mappingCollection[key].type) {
+                    var input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'mdl-textfield__input';
+                    input.name = key;
+                    input.id = key;
 
-                if (key == "name"){
-                    input.setAttribute("required", "required");
+                    if (key == "name"){
+                        input.setAttribute("required", "required");
+                    }
+
+                    div.appendChild(label);
+                    div.appendChild(input);
+                    divForm.appendChild(div);
+
+                } else if ("string" == dataLayers.state.mappingCollection[key].type && "description" == key) {
+                    var input = document.createElement('textarea');
+                    input.className = 'mdl-textfield__input';
+                    input.type= "text";
+                    input.row = 3;
+                    input.name = key;
+                    input.id = key;
+
+                    div.appendChild(label);
+                    div.appendChild(input);
+                    divForm.appendChild(div);
                 }
-
-                div.appendChild(label);
-                div.appendChild(input);
-                divForm.appendChild(div);
-
-            } else if ("string" == dataLayers.state.mappingCollection[key].type && "description" == key) {
-                var input = document.createElement('textarea');
-                input.className = 'mdl-textfield__input';
-                input.type= "text";
-                input.row = 3;
-                input.name = key;
-                input.id = key;
-
-                div.appendChild(label);
-                div.appendChild(input);
-                divForm.appendChild(div);
+                componentHandler.upgradeElements(div);
             }
-
-            componentHandler.upgradeElements(div);
         });
 
         document.getElementById("divAddDoc").classList.toggle("hidden");

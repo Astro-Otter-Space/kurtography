@@ -36,9 +36,7 @@ document.querySelector('#mdlTrakingClose').addEventListener('click', function() 
 document.querySelector('#mdlExportClose').addEventListener('click', function() {
     document.getElementById("divExport").classList.toggle("hidden");
 }, false);
-
 document.querySelector('a[data-link="logout"]').addEventListener('click', function() {
-    console.log("Deconnexion")
     auth.logout();
 });
 

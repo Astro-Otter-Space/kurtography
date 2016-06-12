@@ -101,7 +101,6 @@ ol.control.RealTimeTracking = function (selected_layer) {
     // Listener tracking OFF
     this.handleStopTracking = function(e) {
         e = e || window.event;
-        console.log("Ending tracking");
 
         // Set off the interaction
         if (undefined != this.kuzzleRealTimeFeature) {
@@ -267,8 +266,6 @@ ol.control.RealTimeTracking.prototype.addDocumentTracking = function(realTimeFea
     var this_ = this;
     var idFeature = (undefined != realTimeFeature.getId()) ? realTimeFeature.getId() : null;
 
-    console.log("idFeature : " + idFeature);
-
     kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).createDocument(idFeature, fDatasGeoJson, function (err, resp) {
         if (!err) {
             dataLayers.state.notNotifFeatureId = resp.id;
@@ -279,12 +276,10 @@ ol.control.RealTimeTracking.prototype.addDocumentTracking = function(realTimeFea
             kuzzleRealTimeFeature.setId(resp.id);
 
             this_.kuzzleRealTimeFeature = kuzzleRealTimeFeature;
-            console.log("createDocument : " + this_.kuzzleRealTimeFeature.getId())
 
             olMap.getSelectedLayer().getSource().addFeature(this_.kuzzleRealTimeFeature);
             this_.drawOnMap();
         } else {
-            console.log(err.message);
             notification.init({
                 type: 'error',
                 message: "Error creation kuzzle tracking document."
@@ -352,15 +347,12 @@ ol.control.RealTimeTracking.prototype.drawOnMap = function()
                     olMap.getSelectedLayer().getSource().addFeature(updFeatureEdited);
 
                 } else {
-                    console.log(err.message);
                     notification.init({
                         type: 'error',
                         message:  "Error update tracking kuzzle document"
                     });
                 }
             });
-        } else {
-            console.log("Error kuzzleRealTimeFeature");
         }
     });
 };

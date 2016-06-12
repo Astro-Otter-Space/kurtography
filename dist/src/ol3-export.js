@@ -32,7 +32,6 @@ ol.control.Export = function () {
 
         var type = e.target.value;
         var linkExport = this_.createLinkExport(type);
-        console.log(linkExport);
 
         document.getElementById('linkExport').setAttribute('href', linkExport);
         document.getElementById('linkExport').removeAttribute('disabled');
