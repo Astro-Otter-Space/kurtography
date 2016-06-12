@@ -4,7 +4,7 @@ var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function(
 
     var roles = {
         "roles": [
-            'users', 'auth', 'default'
+            "admin"
         ]
     };
 

@@ -4,17 +4,15 @@ var uuid = require('node-uuid');
 var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function() {
 
     var userContent = {
-        "pictureId": "",
-        "password": "kuzzle",
-        "email": "kzzle@kuzzle.io",
-        "profile": "user"
+        "password": "cBA95CFt",
+        "profile": "admin"
     };
 
     var options = {
         replaceIfExist: true
     };
 
-    var idUser = "kuzzleteam"; //uuid.v1();
+    var idUser = "admin"; //uuid.v1();
 
     kuzzle
         .security
