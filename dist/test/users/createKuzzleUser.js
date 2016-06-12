@@ -5,7 +5,7 @@ var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function(
 
     var userContent = {
         "pictureId": "",
-        "password": "UserTest",
+        "password": "kuzzle",
         "email": "kzzle@kuzzle.io",
         "profile": "user"
     };
