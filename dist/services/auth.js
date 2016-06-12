@@ -60,6 +60,12 @@ export default {
         kuzzle.logout();
         user.removeCurrentUser();
         window.sessionStorage.removeItem('jwt');
+        document.querySelector('a[data-link="auth"]').parentNode.removeAttribute("disabled");
+        document.querySelector('a[data-link="logout"]').parentNode.setAttribute("disabled", "disabled");
+        notification.init({
+            type : 'notice',
+            message: 'See you later.'
+        });
     },
 
     /**

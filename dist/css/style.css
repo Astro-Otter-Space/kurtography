@@ -194,6 +194,6 @@ body{
     z-index: 5 !important;
 }
 
-#infoKdoc, #divAuth, #divRegister, #divAddDoc, #divTrackingChoice {
+#infoKdoc, #divAuth, #divRegister, #divAddDoc, #divTrackingChoice, #divExport {
     top: 5em;
 }

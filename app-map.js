@@ -33,7 +33,14 @@ document.querySelector('#mdlClose').addEventListener('click', function() {
 document.querySelector('#mdlChoiceClose').addEventListener('click', function() {
     document.getElementById("divTrackingChoice").classList.toggle("hidden");
 }, false);
+document.querySelector('#mdlExportClose').addEventListener('click', function() {
+    document.getElementById("divExport").classList.toggle("hidden");
+}, false);
 
+document.querySelector('a[data-link="logout"]').addEventListener('click', function() {
+    console.log("Deconnexion")
+    auth.logout();
+});
 
 /**
  * Form Adding Properties

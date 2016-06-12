@@ -37,6 +37,9 @@ export default {
             console.log("User connected : " + this.isAuthenticated());
             // Set the controls who need authentification
             olMap.initControlsIfConnected(this.isAuthenticated());
+
+            document.querySelector('a[data-link="auth"]').parentNode.setAttribute("disabled", "disabled");
+            document.querySelector('a[data-link="logout"]').parentNode.removeAttribute("disabled");
         });
     },
 
@@ -44,6 +47,8 @@ export default {
         this.state.id = null;
         this.state.username = null;
         this.state.pictureId = null;
+
+        olMap.initControlsIfConnected(this.isAuthenticated());
     }
 }
 
