@@ -143,7 +143,7 @@ In Kuzzle-BO, when create a new collection, the mapping must be like :
 Item     | type | Information
 -------- | -------- | ----------
 type | "string" | store the value "feature"
-geometry | Object |
+geometry | Object | Geometry
 location | geo_point | [See the doc](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/mapping-geo-point-type.html)
 properties | Object | Store fields
 
@@ -178,9 +178,9 @@ Exemple of KuzzleDocument working in Kurtography :
 Item     | Value | Information
 -------- | -------- | ----------
 type | "Feature" | default value, don't change it
-geometry | Object |
-properties | Object |
-location | Object |
+geometry | Object | Store the feature's geometry
+properties | Object | List of datas fields recorded in kuzzle
+location | Object | Coordinates point of referential point (for line and polygon, it's centroid coordinates)
 id | string | Kuzzle document identifier
 
 
