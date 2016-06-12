@@ -188,6 +188,29 @@ location | Object |
 id | string | Kuzzle document identifier
 
 
+Utilisation
+-------------
+
+#### <i class="icon-upload"></i> Select layer
+-------------
+List of collections in kuzzle are represented as geographical layers. Select one and documents will be visible.
+![alt tag](public/documentation/layer.png)
+
+#### <i class="icon-upload"></i> Subscribtion room
+-------------
+There are two ways to create a subscribe room :
+ - Based on geolocation : a zone with a default radius of 5 km is created. The radius could be changed on the left sidebar
+
+ - Manually :
+
+
+#### <i class="icon-upload"></i> Connexion / authentification
+-------------
+
+#### <i class="icon-upload"></i> Add/edit/delete datas
+-------------
+
+
 Features
 -------------
   - Loading collections as layers
@@ -208,12 +231,12 @@ Features
   - Share on social network
   - zoom to document by URL : http://my_site/?layer=kuzzle_collection&name=kuzzle_doc_name&id=kuzzle_doc_id
   - Register user
+  - Authentification
 
 Features in progress
 -------------
   - Export datas
   - Tracking position in real time
-  - Authentification
 
 Features will be avalaible soon:
 -------------
