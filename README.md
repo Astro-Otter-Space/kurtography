@@ -214,7 +214,8 @@ There are two ways to create a subscribe room :
 
 #### <i class="icon-upload"></i> Connexion / authentification
 -------------
-
+To create, edit or delete kuzzle documents, an account in kuzzle is required. I've create a testing account : kuzzleteam / kuzzle
+Click on the needed link.
 
 #### <i class="icon-upload"></i> Add/edit/delete datas
 -------------
