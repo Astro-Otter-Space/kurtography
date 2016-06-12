@@ -1,6 +1,31 @@
 import dataLayers from './dist/src/dataLayers';
 import auth from './dist/services/auth'
 import search from './dist/src/search';
+
+console.log("==========================================================================");
+console.log("========================> The Otter Team present <========================");
+console.log("==========================================================================");
+
+console.log("      .----.__             ");
+console.log("     / c  ^  _`;           ");
+console.log("     |     .--'            ");
+console.log("      \\   (               ");
+console.log("      /  -.\\               _   __              _                                      _");
+console.log("     / .   \\              | | / /             | |                                    | |");
+console.log("    /  \\    |             | |/ /  _   _  _ __ | |_   ___    __ _  _ __   __ _  _ __  | |__   _   _");
+console.log("   ;    `-. `.            |    \\ | | | || '__|| __| / _ \\  / _` || '__| / _` || '_ \\ | '_ \\ | | | |");
+console.log("   |      /`'.`.          | |\\  \\| |_| || |   | |_ | (_) || (_| || |   | (_| || |_) || | | || |_| |");
+console.log("   |      |   \\ \\         |_| \\_/ \\__,_||_|    \\__| \\___/  \\__, ||_|    \\__,_|| .__/ |_| |_| \\__, |");
+console.log("   |    __|    `'                                            __/ |             | |             __/ |");
+console.log("   ;   /   \\                                                |___/              |_|            |___/ ");
+console.log("  ,'        |              ");
+console.log(" (_`'---._ /--,            ");
+console.log("    `'---._`'---..__       ");
+console.log("          `''''--, )       ");
+console.log("            _.-'`,`        ");
+console.log("             ````          ");
+
+
 // Load collections
 dataLayers.listCollections();
 // Load research
