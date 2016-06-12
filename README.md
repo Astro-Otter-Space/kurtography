@@ -191,6 +191,9 @@ id | string | Kuzzle document identifier
 How to use
 -------------
 
+The selection of the layer and the subscribe room is set on the left sidebar : click to left-top button :
+![alt tag](public/documentation/open_sidebar.png)
+
 #### <i class="icon-upload"></i> Select layer
 -------------
 List of collections in kuzzle are represented as geographical layers. Select one and documents will be visible.
@@ -211,6 +214,7 @@ There are two ways to create a subscribe room :
 
 #### <i class="icon-upload"></i> Connexion / authentification
 -------------
+
 
 #### <i class="icon-upload"></i> Add/edit/delete datas
 -------------
