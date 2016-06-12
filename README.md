@@ -192,7 +192,7 @@ location | Object | Coordinates point of referential point (for line and polygon
 id | string | Kuzzle document identifier
 
 
-How to use
+How to : user documentation
 -------------
 
 The selection of the layer and the subscribe room is set on the left sidebar : click to left-top button :
@@ -206,8 +206,8 @@ List of collections in kuzzle are represented as geographical layers. Select one
 #### <i class="icon-upload"></i> Subscribtion room
 -------------
 There are two ways to create a subscribe room :
- - Based on geolocation : a zone with a default radius of 5 km is created. The radius could be changed on the left sidebar
-4 differents scales are predefined : district, city, region and country. And you can adjust the radius with the scale line under the option scales
+ - Based on geolocation : a zone with a default radius of 5 km is created. The radius could be changed on the left sidebar.
+4 differents scales are predefined : district, city, region and country. You can adjust the radius with the scale line under the option scales
 
 ![alt tag](public/documentation/subscribe_room.png)
 
@@ -227,7 +227,7 @@ When the user is connected, a new panel with many buttons appears on left-side :
 
 Icon     | Description
 -------- | --------
-![alt tag](public/documentation/tracking.png) | Start a tracking feature in real-time based on geolocation
+![alt tag](public/documentation/tracking.png) | Start a tracking feature in real-time based on geolocation (experimental)
 ![alt tag](public/documentation/add_location.png) | Add a point on the map
 ![alt tag](public/documentation/line.png) | Draw a line
 ![alt tag](public/documentation/square.png) | Draw a square
@@ -248,8 +248,7 @@ Features
   - Create a reference point (for polygons an lines, the reference point is the centroid) for the subscribe room
   - Edit subscribe zone by changing radius
   - Subscribe room : zone from geolocation with 5km radius
-  - Search items
-  - Search only in subscribe area
+  - Search items in subscribe area
   - Get default location if user blocking naviogator geolocation
   - Graphic refactoring with Material Design Lite
   - Reset map to geolocation position
@@ -259,7 +258,7 @@ Features
   - zoom to document by URL : http://my_site/?layer=kuzzle_collection&name=kuzzle_doc_name&id=kuzzle_doc_id
   - Register user
   - Authentification
-  - Filtering features by user authorisation
+  - Filtering features by user for edit and delete
 
 Features in progress
 -------------
