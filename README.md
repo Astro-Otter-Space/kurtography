@@ -14,7 +14,7 @@ Requirements
 -------------
  - [NodeJS and NPM](https://nodejs.org/en/)
  - [A Kuzzle instance](http://kuzzle.io/guide/), [installation](https://github.com/kuzzleio/kuzzle#installation)
- - If exports, install [GDAL/OGR Binaries](http://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries), [ogr2ogr](https://www.npmjs.com/package/ogr2ogr)
+ - If you want to export the datas in geometric format, install [GDAL/OGR Binaries](http://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries), [ogr2ogr](https://www.npmjs.com/package/ogr2ogr)
 
 Installation
 -------------
@@ -31,7 +31,7 @@ npm install
 Configuration and Getting started
 -------------
 
-#### <i class="icon-upload"></i> Create roles
+#### <i class="icon-upload"></i> Create roles for users
 ```
 node dist/test/roles/createRoleAuth.js
 node dist/test/roles/createRoleUser.js
@@ -51,7 +51,7 @@ In progress...
 
 #### <i class="icon-upload"></i> Connexion to kuzzle
 
-Edit file public\services\config.js and change values kuzzleUrl and defaultIndex
+Edit file public\services\config.js and change values of kuzzleUrl and defaultIndex
 ```
 export default {
     kuzzleUrl: 'url_to_kuzzle_instance', // ex : http://localhost:7512
@@ -79,7 +79,9 @@ check the [spatial reference list](http://spatialreference.org/ref/epsg/) and ed
 
 > **Note 2:** Default coordinates are from Paris, France
 
-#### <i class="icon-upload"></i> Developpement
+> **Note 3:** DIf you want to attach an icon or an image to a feature (only with type Point), set in "icons" the key/value pair 'collection_name':'images/path_to_icon'
+
+#### <i class="icon-upload"></i> Create compiled files
 
 Files bundle.js and bundle.css must be created with this following commands, by default, they're not exists.
 
