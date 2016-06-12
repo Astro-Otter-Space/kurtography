@@ -70,6 +70,9 @@ export default {
                     res.documents.forEach(function (kDoc, index) {
                         // Push document identifier in feature data
                         kDoc.content.id = kDoc.id;
+                        //if (undefined != kDoc.content.idUser) {
+                        //    kDoc.content.properties.idUser = kDoc.content.idUser;
+                        //}
                         result.push(kDoc.content);
                     });
                 } else {

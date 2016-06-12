@@ -25,10 +25,9 @@ export default {
 
             kuzzle.login('local', {username: loginUser, password: pwdUser}, '1h', (err, resp) => {
                 if (err) {
-                    console.log(err.message);
                     notification.init({
                         type: 'error',
-                        message: 'Error authentification'
+                        message: 'Error on authentification'
                     });
                 } else {
                     // Set session in session storage
@@ -38,10 +37,9 @@ export default {
                     user.getCurrentUser(() => {
                     });
 
-                    var userName = (undefined != user.state.username) ? user.state.username :  user.state.id;
                     notification.init({
                         type: 'notice',
-                        message: 'Welcome back ' + userName
+                        message: 'Welcome back ' + loginUser
                     });
                 }
             });
@@ -73,7 +71,6 @@ export default {
         if (undefined != tabNewUser && 0 < Object.keys(tabNewUser).length) {
             var userContent = {
                 "profile": "user",
-                "username": tabNewUser.username,
                 "password": tabNewUser.password,
                 "pictureId": "",
                 "email": tabNewUser.email,
@@ -82,26 +79,22 @@ export default {
             var options = {
                 replaceIfExist: true
             };
-            var idUser = uuid.v1();
 
-            kuzzle
-                .security
-                .createUser(idUser, userContent, options, function(error, response) {
-                    // result is a KuzzleUser object
-                    if (!error) {
-                        notification.init({
-                            type : 'notice',
-                            message: 'Welcome and thank you for registration ' + tabNewUser.username + ' :).'
-                        });
-                        document.getElementById("divRegister").classList.toggle("hidden");
-                    } else {
-                        console.log("Error from kuzzle : " + error.message);
-                        notification.init({
-                            type : 'error',
-                            message: 'Error registration, please retry.'
-                        });
-                    }
-                });
+            kuzzle.security.createUser(tabNewUser.username, userContent, options, function(error, response) {
+                // result is a KuzzleUser object
+                if (!error) {
+                    notification.init({
+                        type : 'notice',
+                        message: 'Welcome and thank you for registration ' + tabNewUser.username + ' :).'
+                    });
+                    document.getElementById("divRegister").classList.toggle("hidden");
+                } else {
+                    notification.init({
+                        type : 'error',
+                        message: 'Error registration, please retry.'
+                    });
+                }
+            });
         }
 
     }

@@ -12,8 +12,9 @@ import RealTimeTracking from './ol3-realTimeTracking';
 // Openlayers 3 add-ons
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
-// User
+// Others
 import user from './user';
+import dateformat from 'dateformat';
 
 /**
  * Initialisation de la map
@@ -560,13 +561,18 @@ export default {
     showFeaturesInformations(feature, centerTofeature = true)
     {
         var parser = new ol.format.GeoJSON();
-
         var fProperties = feature.getProperties();
         var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-
+        console.log(fProperties);
         // Show datas
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
-        document.getElementById("dateKdoc").innerHTML = fProperties.date_publish;
+
+        var datePublish = new Date(fProperties.date_publish);
+        document.getElementById("dateKdoc").innerHTML = dateformat(datePublish, 'dd/mm/yyyy');
+        //if (fProperties.idUser) {
+        //    document.getElementById("userKdoc").innerHTML = "by " + fProperties.idUser;
+        //}
+
 
         document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
         if ("" != fProperties.url_image) {
