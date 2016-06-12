@@ -582,7 +582,6 @@ export default {
     {
         var parser = new ol.format.GeoJSON();
         var fProperties = feature.getProperties();
-        console.log(fProperties);
         var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
         // Show datas
         document.getElementById("nameKdoc").innerHTML = fProperties.name;

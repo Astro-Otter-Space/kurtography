@@ -87,7 +87,7 @@ export default {
                     "type": "FeatureCollection",
                     "features": result
                 };
-                console.log(result);
+
                 // Construction of geoDatas from content
                 var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: Projection.projectionFrom});
                 var kSource = new ol.source.Vector({
@@ -160,9 +160,8 @@ export default {
         // Create empty properties from mapping
         fDatasGeoJson.properties = {};
         Object.keys(this.state.mappingCollection).forEach(objectMapping => {
-            if ("string" == this.state.mappingCollection[objectMapping].type) {
+            if ("string" == this.state.mappingCollection[objectMapping].type && "userId" != objectMapping) {
                 fDatasGeoJson.properties[objectMapping] = "";
-
             } else if ("date" == this.state.mappingCollection[objectMapping].type) {
                 fDatasGeoJson.properties[objectMapping] = new Date().toISOString().slice(0, 10);
             }
@@ -190,6 +189,7 @@ export default {
                 // set of notNotifFeatureId and reconstruction of subscribe with new value of notNotifFeatureId
                 this_.state.notNotifFeatureId = resp.id;
 
+                fDatasGeoJson.properties.userId = resp.content.userId;
                 // Setting of Kuzzle Document Identifier to identifier of the feature
                 var f = new ol.format.GeoJSON();
                 var newFeature = f.readFeature(fDatasGeoJson, {dataProjection:Projection.projectionTo, featureProjection: Projection.projectionFrom});
@@ -252,6 +252,7 @@ export default {
                     });
                 } else {
                     var parser = new ol.format.GeoJSON();
+                    res.content.properties.userId = res.content.userId;
                     var updFeatureEdited = parser.readFeature(res.content, {featureProjection: Projection.projectionFrom});
 
                     if (undefined != olMap.getSelectedLayer().getSource().getFeatureById(res.id)) {
@@ -298,6 +299,7 @@ export default {
                     });
                 } else {
                     //var updFeature = olMap.getSelectedLayer().getSource().getFeatureById(res.id);
+                    res.content.properties.userId = res.content.userId;
                     var updFeatureEdited = parser.readFeature(res.content, {featureProjection: Projection.projectionFrom});
 
                     olMap.getSelectedLayer().getSource().removeFeature(updFeature);

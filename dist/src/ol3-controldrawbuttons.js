@@ -218,7 +218,7 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
     // Problem with recuperation of a circle geometry : https://github.com/openlayers/ol3/pull/3434
     // Addind feature to source vector in EPSG:4326
     var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-
+    console.log(featureGeoJSON);
     if (undefined != this.element) {
         // Ajout new document in Kuzzle
         dataLayers.addDocument(featureGeoJSON, feature);
@@ -256,7 +256,6 @@ ol.control.ControlDrawButtons.prototype.controlEditOnMap = function(evt) {
                 }
             },
             filter: function(feature, layer) {
-                console.log(feature.getProperties());
                 //if (feature.getProperties().userId == "kuzzleteam") {
                     return feature;
                 //}
