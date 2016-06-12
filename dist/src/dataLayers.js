@@ -270,10 +270,9 @@ export default {
             });
 
         } else {
-            console.error("Sorry impossible to edit this kuzzle document, there is no identifier.");
             notification.init({
                 type: 'warning',
-                message:  "No document identifier."
+                message:  "There is no identifier fot the kuzzle document."
             });
         }
     },
@@ -298,7 +297,6 @@ export default {
                         message:  "Error update kuzzle document"
                     });
                 } else {
-                    //var updFeature = olMap.getSelectedLayer().getSource().getFeatureById(res.id);
                     res.content.properties.userId = res.content.userId;
                     var updFeatureEdited = parser.readFeature(res.content, {featureProjection: Projection.projectionFrom});
 
@@ -351,7 +349,6 @@ export default {
                         type: 'notice',
                         message: "Suppression kuzzle document ok."
                     });
-                    console.log("deleteDocument() : La feature " + featureDel.getId() +" est effacée de la map");
                 }
             });
         }
@@ -457,27 +454,7 @@ export default {
 
 
     /**
-     * IN PROGRESS...
-     * get a subscribe room if user subscribe to any docs
-     */
-    subscribeDocumentsUser()
-    {
-        var filter =
-        {
-        };
-        var options = {
-            // We want created messages only
-            scope: 'all',
-            // We treate our messages as any other messages
-            subscribeToSelf: true,
-            // We want only messages once they are stored (and volatile are always done)
-            state: 'done'
-        };
-    },
-
-
-    /**
-     *
+     * Kuzzle request for search
      * @param search
      * @param layer
      */
