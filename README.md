@@ -224,10 +224,10 @@ Icon     | Description
 ![alt tag](public/documentation/line.png) | Draw a line
 ![alt tag](public/documentation/square.png) | Draw a square
 ![alt tag](public/documentation/polygon.png) | Draw a polygon
-![alt tag](public/documentation/delete.png) | Exit drawing mode
+![alt tag](public/documentation/save.png) | Exit drawing mode
 ![alt tag](public/documentation/edit.png) | Edit a selected feature
 ![alt tag](public/documentation/delete.png) | Delete a selected feature
-![alt tag](public/documentation/delete.png) | Exit edit/delete mode
+![alt tag](public/documentation/save.png) | Exit edit/delete mode
 
 
 Features
