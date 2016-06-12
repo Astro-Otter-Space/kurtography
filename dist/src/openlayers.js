@@ -160,7 +160,7 @@ export default {
             this_.state.acceptGeoloc = false;
             notification.init({
                 type: 'warning',
-                message : 'Will you accept geolocation :) ?'
+                message : 'You should accept geolocation on your browser :)'
             });
         });
 
@@ -411,6 +411,13 @@ export default {
         } else {
             this.state.map.removeControl(this.state.buttonsDrawControls);
             this.state.map.removeControl(this.state.realTimeTracking);
+
+            var externalControl = document.getElementById('external_draw_control');
+            // Div
+            var divDrawControl = document.createElement('div');
+            divDrawControl.id = '';
+
+            var div =
             console.log("User not connected : not adding controls");
         }
     },
@@ -423,7 +430,15 @@ export default {
 
         this.setSelectedLayer(layer);
 
+        // Button export
+        var exportList = document.getElementsByName('export');
+        Array.filter(exportList, radio => {
+            radio.disabled = false;
+        });
+        document.getElementById("exportNameLayer").innerHTML = this.getSelectedLayer().get('title');
         document.getElementById("export_datas").removeAttribute('disabled');
+
+        // Button redraw
         document.getElementById("redraw_zone").removeAttribute('disabled');
 
         // Creation couche zone subscribe
@@ -467,7 +482,7 @@ export default {
             document.getElementById("stopTrackingButton").disabled = false;
         }
         // Set the export links
-        this.editExportLinks();
+        //this.editExportLinks();
     },
 
     /**
@@ -794,40 +809,6 @@ export default {
 
         tabG.appendChild(tbody);
         return tabG;
-    },
-
-
-    /**
-     *
-     */
-    editExportLinks()
-    {
-        var links = document.getElementsByClassName('export');
-        Array.filter(links, link => {
-            link.href = "";
-
-            var serialized = "export";
-            var tabParams = {
-                type: link.dataset.type,
-                layer: this.getSelectedLayer().get('title')
-            };
-
-            var serialiseObject = function(obj) {
-                var pairs = [];
-                for (var prop in obj) {
-                    if (!obj.hasOwnProperty(prop)) {
-                        continue;
-                    }
-                    pairs.push('/' + encodeURIComponent(obj[prop]));
-                }
-                return pairs.join('');
-            };
-
-            serialized += serialiseObject(tabParams);
-            link.href += serialized;
-            link.setAttribute('disabled', false);
-        });
-
     },
 
     /**

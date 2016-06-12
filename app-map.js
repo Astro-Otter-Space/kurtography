@@ -30,7 +30,7 @@ document.querySelector('#mdlRegisterClose').addEventListener('click', function()
 document.querySelector('#mdlClose').addEventListener('click', function() {
     document.getElementById("infoKdoc").classList.toggle("hidden");
 }, false);
-document.querySelector('#mdlChoiceClose').addEventListener('click', function() {
+document.querySelector('#mdlTrakingClose').addEventListener('click', function() {
     document.getElementById("divTrackingChoice").classList.toggle("hidden");
 }, false);
 document.querySelector('#mdlExportClose').addEventListener('click', function() {

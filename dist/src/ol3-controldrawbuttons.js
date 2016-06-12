@@ -499,7 +499,14 @@ var ol3buttons = {
         });
 
         // Container
-        var elementContainer = document.getElementById('panelDrawControl');
+        if (0 == document.getElementById('external_draw_control').childElementCount) {
+            var elementContainer = document.createElement('div');
+            elementContainer.id = 'panelDrawControl';
+            document.getElementById('external_draw_control').appendChild(elementContainer);
+        } else {
+            var elementContainer = document.getElementById('panelDrawControl');
+        }
+
         elementContainer.appendChild(divDraw);
         elementContainer.appendChild(divControls);
 

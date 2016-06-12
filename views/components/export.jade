@@ -8,6 +8,11 @@ div#divExport.mdl-layout.mdl-js-layout.mdl-color--grey-100.hidden
                 div.mdl-card__title
                     h1.mdl-card__title-text Export
                 div.mdl-card__supporting-text
+                    | This feature is in progress and not yet finished.
+                    | Select the type of export you need for the layer "
+                    span#exportNameLayer
+                    | "
+                div
                     div.mdl-grid
                         div.mdl-cell.mdl-cell--12-col
                             ul.mdl-list
@@ -46,3 +51,5 @@ div#divExport.mdl-layout.mdl-js-layout.mdl-color--grey-100.hidden
                                     span.mdl-list__item-secondary-action
                                         label.inline-list-radio.mdl-checkbox.mdl-radio.mdl-js-radio.mdl-js-ripple-effect(for="exportShapeFile")
                                             input(type="radio", name="export", value="shapefile", disabled)#exportShapeFile.mdl-radio__button
+                div.mdl-card__actions.mdl-card--border
+                    a#linkExport(type="button", href="", disabled="disabled", target="_blank").mdl-button.mdl-button--colored.mdl-js-button.mdl-js-ripple-effect.disabled Export

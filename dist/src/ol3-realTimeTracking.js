@@ -22,7 +22,14 @@ ol.control.RealTimeTracking = function (selected_layer) {
     olMap.markerPositionLayer.setVisible(false);
 
     var divTarget = document.getElementById("external_draw_control");
-    var divElement = document.getElementById("panelTracking");
+
+    if (0 == divTarget.childElementCount) {
+        var divElement = document.createElement('div');
+        divElement.id = 'panelDrawControl';
+        divTarget.appendChild(divElement);
+    } else {
+        var divElement = document.getElementById("panelTracking");
+    }
 
     var trackingGeolocation = this.trackingGeolocation = olMap.geolocation;
 
