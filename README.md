@@ -51,13 +51,6 @@ In progress...
 
 #### <i class="icon-upload"></i> Connexion to kuzzle
 
-Edit file public\services\config.js and change values of kuzzleUrl and defaultIndex
-```
-export default {
-    kuzzleUrl: 'url_to_kuzzle_instance', // ex : http://localhost:7512
-    defaultIndex: 'name_of_your_kuzzle_index'
-}
-```
 
 #### <i class="icon-upload"></i> Geodatas projection
 
