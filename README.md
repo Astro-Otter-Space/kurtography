@@ -79,7 +79,7 @@ check the [spatial reference list](http://spatialreference.org/ref/epsg/) and ed
 
 > **Note 2:** Default coordinates are from Paris, France
 
-> **Note 3:** DIf you want to attach an icon or an image to a feature (only with type Point), set in "icons" the key/value pair 'collection_name':'images/path_to_icon'
+> **Note 3:** If you want to attach an icon or an image to a feature (only with type Point), set in "icons" the key/value pair 'collection_name':'images/path_to_icon'
 
 #### <i class="icon-upload"></i> Create compiled files
 
