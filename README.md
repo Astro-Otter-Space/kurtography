@@ -20,7 +20,7 @@ Installation
 -------------
 ```
 // Clone the repository
-git clone git@github.com:HamHamFonFon/kurtogaphy.git kurtography
+git clone git@github.com:HamHamFonFon/kurtography.git kurtography
 cd kurtography
 
 // Installation of dependencies
