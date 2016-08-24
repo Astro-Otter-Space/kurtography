@@ -17,7 +17,7 @@
     "express": "^4.13.4",
     "express-favicon": "^1.0.1",
     "jade": "^1.11.0",
-    "kuzzle-sdk": "^1.7.3",
+    "kuzzle-sdk": "^2.0.1",
     "node-uuid": "^1.4.7",
     "ogr2ogr": "^0.5.1",
     "openlayers": "^3.15.1",
