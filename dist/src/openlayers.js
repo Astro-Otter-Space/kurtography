@@ -2,6 +2,7 @@ import Projection from '../services/geo-parameters'
 import notification from '../services/notification';
 import dataLayers from './dataLayers';
 import ol from 'openlayers';
+
 // Openlayers controls
 import LayerSwitcher from './layerSwitcher'
 import ControlDrawButtons from './ol3-controldrawbuttons'
@@ -10,6 +11,7 @@ import SetPosition from './ol3-resetposition';
 import RedrawSubscribeZone from './ol3-editsubscribezone';
 import RealTimeTracking from './ol3-realTimeTracking';
 import exportDatas from './ol3-export';
+
 // Openlayers 3 add-ons
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';

@@ -132,9 +132,9 @@ export default {
             if (!err) {
                 // Patch on user identifier
                 if (undefined != res.mapping.userId) {
-                    res.mapping.properties.properties.userId = res.mapping.userId;
+                    res.mapping.fields.userId = res.mapping.userId;
                 }
-                this_.state.mappingCollection = res.mapping.properties.properties;
+                this_.state.mappingCollection = res.mapping.properties.fields;
             } else {
                 notification.init({
                     type: 'error',
@@ -170,14 +170,14 @@ export default {
         // Create location point for subscribe zone
         // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
         if ('Point' == typeFeature) {
-            fDatasGeoJson.location = {
+            fDatasGeoJson.centroid = {
                 lon: fDatasGeoJson.geometry.coordinates[0],
                 lat : fDatasGeoJson.geometry.coordinates[1]
             };
         } else if ('LineString' == typeFeature || 'Polygon' == typeFeature) {
 
             var fCentroid = olMap.getFeatureCentroid(fDatasGeoJson);
-            fDatasGeoJson.location = {
+            fDatasGeoJson.centroid = {
                 lon: fCentroid.geometry.coordinates[0],
                 lat: fCentroid.geometry.coordinates[1]
             };
@@ -233,13 +233,13 @@ export default {
             var fDatasGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
             if ('Point' == feature.getGeometry().getType()) {
-                fDatasGeoJson.location = {
+                fDatasGeoJson.centroid = {
                     lon: fDatasGeoJson.geometry.coordinates[0],
                     lat : fDatasGeoJson.geometry.coordinates[1]
                 };
             } else if ('LineString' == feature.getGeometry().getType() || ('Polygon' == feature.getGeometry().getType())) {
                 var fCentroid = olMap.getFeatureCentroid(fDatasGeoJson);
-                fDatasGeoJson.location = {
+                fDatasGeoJson.centroid = {
                     lon: fCentroid.geometry.coordinates[0],
                     lat: fCentroid.geometry.coordinates[1]
                 };

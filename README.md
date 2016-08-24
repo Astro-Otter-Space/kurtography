@@ -108,42 +108,44 @@ Kuzzle Back-Office
 In Kuzzle-BO, when create a new collection, the mapping must be like :
 ```
 {
-    "type": {
-        "type": "string"
-    },
-    "geometry": {
-        "properties": {
-            "coordinates": {
-                "type": "double"
-            },
-            "type": {
-                "type": "string"
-            }
-        }
-    },
-    "location": {
-        "type": "geo_point",
-        "lat_lon": true
-    },
     "properties": {
-        "properties": {
-            "name": {
-                "type": "string"
-            },
-            "date_publish": {
-                "type": "date",
-                "format": "YYYY-MM-dd"
-            },
-            "description": {
-                "type": "string"
-            },
-            "url_image": {
-                "type": "string"
+        "type": {
+            "type": "string"
+        },
+        "location": {
+            "type": "geo_point",
+            "lat_lon": true
+        },
+        "centroid": {
+            "properties": {
+                "coordinates": {
+                    "type": "double"
+                },
+                "type": {
+                    "type": "string"
+                }
             }
-        }
-    },
-    "userId": {
-        "type": "string"
+        },
+        "fields": {
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "date_publish": {
+                    "type": "date",
+                    "format": "YYYY-MM-dd"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "url_image": {
+                    "type": "string"
+                }
+            }
+        },
+        "userId": {
+            "type": "string"
+        } 
     }
 }
 ```
