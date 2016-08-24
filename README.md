@@ -3,14 +3,12 @@ Kurtography
 
 Welcome !! Kurtography is a cartography application based on [Openlayers 3](http://openlayers.org/) and [Kuzzle](http://kuzzle.io) for Kaliop Koding Challenge
 
-/!\ (EDIT 2016-0820) Kurtography runs with Kuzzle Beta (elastic search 1.7) not last release RC5 (elastic search 2.3.4) and with kuzzle-sdk 1.0 not last release kuzzle-sdk 2.0.1. Update coming soon :)
-
 ### Table of contents
 
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.12.0
+Beta stage of development : v. 0.13.0
 
 Requirements
 -------------
