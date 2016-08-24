@@ -6,6 +6,8 @@ var optConnect = {
     defaultIndex: Config.defaultIndex,
     connect: 'auto',
     autoReconnect: true,
+    ioPort: 7512,
+    wsPort: 7513,
     headers: {
         'Access-Control-Allow-Origin' : '*'
     }
