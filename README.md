@@ -191,11 +191,35 @@ Exemple of KuzzleDocument working in Kurtography :
   "id": "AVRO9acbPyvkbVrqtBU0",
   "userId": "mySuperUser"
 }
+/!\ FIN OBSOLETE
+
+{
+  "datas": {
+    "location": {
+        "lon": 3.9609146118164054,
+        "lat": 43.624395670027354
+    },
+    "type": {
+        "Point"
+    },
+    "userId": {
+        "mySuperUser"
+    }
+  }
+  "fields": {
+    "name": "Test",
+    "description": "Test description",
+    "date_publish": {
+    },
+    "url_image": "http://url-to-my-image.com/my-image.png"
+  },
+  "id": "AVRO9acbPyvkbVrqtBU0"
+}
 ```
 
 Item     | Value | Information
 -------- | -------- | ----------
-/!\ OBSOLETE
+
 
 How to : user documentation
 -------------
