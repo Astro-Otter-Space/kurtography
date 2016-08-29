@@ -56,13 +56,12 @@ export default {
             from: 0,
             size: 100000,
             /*sort: {
-                "properties.date_publish" :{
+                "fields.date_publish": {
                     order: "desc"
                 }
             }*/
         };
 
-        //kuzzle.dataCollectionFactory(collection).fetchAllDocuments(options, function(err, res) {
         kuzzle.dataCollectionFactory(collection).advancedSearch(options, function(err, res) {
             if (!err) {
                 var result = [];
@@ -543,6 +542,9 @@ export default {
             });
         }
     },
+
+
+
 
     /**
      * Bridge between kuzzle search result and Map datas

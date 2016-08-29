@@ -1,9 +1,9 @@
-import Projection from '../services/geo-parameters';
-import notification from '../services/notification';
-import kuzzleBridge from './kuzzleBridge';
+import Projection from '../../services/geo-parameters';
+import notification from '../../services/notification';
+import kuzzleBridge from './../kuzzleBridge';
 import ol from 'openlayers';
-import olMap from './openlayers';
-import user from './user';
+import olMap from './../openlayers';
+import user from './../user';
 
 // TODO TRY : http://materialdesignblog.com/material-design-floating-action-button-for-web-that-really-stands-out/
 

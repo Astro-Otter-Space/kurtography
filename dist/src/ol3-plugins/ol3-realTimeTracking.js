@@ -1,8 +1,8 @@
-import notification from '../services/notification';
-import kuzzle from '../services/kuzzle'
-import kuzzleBridge from './kuzzleBridge';
+import notification from '../../services/notification';
+import kuzzle from '../../services/kuzzle'
+import kuzzleBridge from './../kuzzleBridge';
 import ol from 'openlayers';
-import olMap from './openlayers';
+import olMap from './../openlayers';
 import uuid from 'node-uuid';
 
 // Algo

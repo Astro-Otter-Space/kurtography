@@ -1,6 +1,6 @@
-import Projection from '../services/geo-parameters'
-import kuzzleBridge from './kuzzleBridge';
-import olMap from './openlayers';
+import Projection from '../../services/geo-parameters'
+import kuzzleBridge from './../kuzzleBridge';
+import olMap from './../openlayers';
 import ol from 'openlayers';
 
 /**

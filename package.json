@@ -1,6 +1,6 @@
 {
   "name": "Kurtography",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "Cartography application supported by Kuzzle",
   "main": "app.js",
   "scripts": {

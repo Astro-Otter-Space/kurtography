@@ -1,5 +1,5 @@
 import ol from 'openlayers';
-import olMap from './openlayers';
+import olMap from './../openlayers';
 
 // PROBLEM : why I don't have the this context in ol.control.ZoomUiButtons.prototype.myFunction_ ?
 

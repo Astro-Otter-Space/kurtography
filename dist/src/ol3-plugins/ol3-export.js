@@ -1,5 +1,5 @@
 import ol from 'openlayers';
-import olMap from './openlayers';
+import olMap from './../openlayers';
 
 ol.control.Export = function () {
 
