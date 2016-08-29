@@ -450,7 +450,7 @@ export default {
             kuzzleBridge.loadDatasFromCollection(layer.get('title'));
         }
 
-        kuzzleBridge.getPropertiesMapping(layer.get('title'));
+        //kuzzleBridge.getPropertiesMapping(layer.get('title'));
 
         if (true == flagIsAuthenticated) {
             this.state.buttonsDrawControls.setSelectedLayer(layer);

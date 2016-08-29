@@ -3,11 +3,9 @@
     "datas": {
       "properties": {
         "location": {
-          "type": "geo_point",
-          "lat_lon": true
-        },
-        "type": {
-          "type": "string"
+          "type": "geo_shape",
+          "tree": "quadtree",
+          "precision": "1m"
         },
         "userId": {
           "type": "string"

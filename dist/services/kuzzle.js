@@ -1,5 +1,5 @@
 import Kuzzle from 'kuzzle-sdk'
-import Config from './config'
+import Config from './kuzzle-config'
 import notification from './notification';
 
 var optConnect = {

@@ -1,5 +1,6 @@
 import kuzzle from '../services/kuzzle'
-import Config from '../services/config'
+import Config from '../services/kuzzle-config'
+import KuzzleDocumentEntity from './KuzzleDocumentEntity'
 import Projection from '../services/geo-parameters'
 import notification from '../services/notification';
 import ol from 'openlayers';
@@ -54,7 +55,7 @@ export default {
         var this_ = this;
         var options = {
             from: 0,
-            size: 100000,
+            size: 10000,
             /*sort: {
                 "fields.date_publish": {
                     order: "desc"
@@ -66,13 +67,9 @@ export default {
             if (!err) {
                 var result = [];
                 if(res.total > 0) {
+                    var kuzzleDocumentEntity = new KuzzleDocumentEntity();
                     result = res.documents.map(kDoc => {
-                        kDoc.content.id = kDoc.id;
-                        if(undefined != kDoc.content.userId) {
-                            kDoc.content.properties.userId = kDoc.content.userId;
-                            delete kDoc.content.userId;
-                        }
-                        return kDoc.content;
+                        return kuzzleDocumentEntity.fromKuzzleToFeature(kDoc);
                     });
 
                 } else {

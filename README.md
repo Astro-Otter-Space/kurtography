@@ -51,10 +51,10 @@ In progress...
 
 #### <i class="icon-upload"></i> Connexion to kuzzle
 
-Edit file dist\services\config.js and change values of kuzzleUrl and defaultIndex
+Edit file dist\services\kuzzle-config.js and change values of kuzzleUrl and defaultIndex
 ```
 export default {
-    kuzzleUrl: 'url_to_kuzzle_instance', // ex : http://localhost:7512
+    kuzzleUrl: 'url_to_kuzzle_instance', // ex : localhost (without "https://" and without port)
     defaultIndex: 'name_of_your_kuzzle_index'
 }
 ```
@@ -113,11 +113,9 @@ In Kuzzle-BO, when create a new collection, the mapping must be like (see dist/f
     "datas": {
       "properties": {
         "location": {
-          "type": "geo_point",
-          "lat_lon": true
-        },
-        "type": {
-          "type": "string"
+          "type": "geo_shape",
+          "tree": "quadtree",
+          "precision": "1m"
         },
         "userId": {
           "type": "string"
@@ -149,8 +147,7 @@ Datas :
 
 Item     | type | Information
 -------- | -------- | ----------
-Location | GeoPoint field | store location in lattitude/longitude (see https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html)
-Type | string | Type of feature (point, line, polygone)
+Location | GeoShape field | store location, see [Geo Shape](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html)
 UserId | string | Id of user, creator of feature
 
 
@@ -173,10 +170,9 @@ Exemple of KuzzleDocument working in Kurtography :
 {
   "datas": {
     "location": {
-        "lon": 3.9609146118164054,
-        "lat": 43.624395670027354
+        "type": "Point",
+        "coordinates": [3.9609146118164054, 43.624395670027354]
     },
-    "type": "Point",
     "userId": "smeaudre"
   },
   "fields": {
