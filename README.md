@@ -105,57 +105,53 @@ Kuzzle Back-Office
 
 #### <i class="icon-upload"></i> Collections mapping
 
-In Kuzzle-BO, when create a new collection, the mapping must be like :
+In Kuzzle-BO, when create a new collection, the mapping must be like (see dist/fixtures/mapping-collection.json)) :
 ```
 {
-    "properties": {
-        "type": {
-            "type": "string"
-        },
+  "properties": {
+    "datas": {
+      "properties": {
         "location": {
-            "type": "geo_point",
-            "lat_lon": true
+          "type": "geo_point",
+          "lat_lon": true
         },
-        "centroid": {
-            "properties": {
-                "coordinates": {
-                    "type": "double"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "fields": {
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "date_publish": {
-                    "type": "date",
-                    "format": "YYYY-MM-dd"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "url_image": {
-                    "type": "string"
-                }
-            }
+        "type": {
+          "type": "string"
         },
         "userId": {
-            "type": "string"
-        } 
+          "type": "string"
+        }
+      }
+    },
+    "fields": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "date_publish": {
+          "type": "date",
+          "format": "YYYY-MM-dd"
+        },
+        "description": {
+          "type": "string"
+        },
+        "url_image": {
+          "type": "string"
+        }
+      }
     }
+  }
 }
+
 ```
+Datas :
 Item     | type | Information
 -------- | -------- | ----------
-type | "string" | store the value "feature"
-geometry | Object | Geometry
-location | geo_point | [See the doc](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/mapping-geo-point-type.html)
-properties | Object | Store fields
-userId | String | Store the id of the user
+
+
+Fields:
+Item     | type | Information
+-------- | -------- | ----------
 
 #### <i class="icon-upload"></i> Data format
 -------------
@@ -164,6 +160,7 @@ Read [Kuzzle documentation](http://kuzzle.io/sdk-documentation/) for more inform
 
 Exemple of KuzzleDocument working in Kurtography :
 ```
+/!\ OBSOLETE
 {
   "type": "Feature",
   "geometry": {
@@ -192,7 +189,7 @@ geometry | Object | Store the feature's geometry
 properties | Object | List of datas fields recorded in kuzzle
 location | Object | Coordinates point of referential point (for line and polygon, it's centroid coordinates)
 id | string | Kuzzle document identifier
-
+/!\ OBSOLETE
 
 How to : user documentation
 -------------

@@ -1,0 +1,35 @@
+{
+  "properties": {
+    "datas": {
+      "properties": {
+        "location": {
+          "type": "geo_point",
+          "lat_lon": true
+        },
+        "type": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "fields": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "date_publish": {
+          "type": "date",
+          "format": "YYYY-MM-dd"
+        },
+        "description": {
+          "type": "string"
+        },
+        "url_image": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
