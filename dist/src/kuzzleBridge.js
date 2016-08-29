@@ -461,52 +461,45 @@ export default {
             var layer = olMap.getSelectedLayer().get('title');
             var coordonatesWGS84 = olMap.state.coordinates; //olMap.geolocation.getPosition();
 
-            //var collMapping = this.state.mappingCollection;
-            //var filterMapping = Object.keys(collMapping).map(field => {
-            //    var filterOr = {
-            //        term :{
-            //        }
-            //    };
-            //    filterOr.term['properties.'+field] = searchItem;
-            //    return filterOr;
-            //});
-            //or: filterMapping
-
             // Filter search on name of items with a geoDistance filter, sorting by geodistance asc
             var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 5000;
             var filterSearch =
             {
-                filter: {
-                    geo_distance: {
-                        distance: distanceValue,
-                        location: {
-                            lon: coordonatesWGS84[0],
-                            lat: coordonatesWGS84[1]
-                        }
-                    }
-                },
                 query: {
                     prefix: {
-                        "properties.name": searchItem
+                        "fields.name": searchItem
                     }
                 },
-                sort: [
-                    {
-                        "_geo_distance" : {
-                            "location" : {
-                                lon: coordonatesWGS84[0],
-                                lat: coordonatesWGS84[1]
-                            },
-                            "order"    : "asc",
-                            "unit"     : "m"
+                filter: {
+                    geo_shape: {
+                        "datas.location": {
+                            shape: {
+                                type: "circle",
+                                radius: distanceValue,
+                                coordinates: [
+                                    coordonatesWGS84[0],
+                                    coordonatesWGS84[1]
+                                ]
+                            }
                         }
                     }
-                ],
+                },
+
+                //sort: [
+                //    {
+                //        "_geo_distance" : {
+                //            "location" : {
+                //                lon: coordonatesWGS84[0],
+                //                lat: coordonatesWGS84[1]
+                //            },
+                //            "order"    : "asc",
+                //            "unit"     : "m"
+                //        }
+                //    }
+                //],
                 from: 0,
                 size: 10
             };
-
-            //console.log(JSON.stringify(filterSearch, null, '\t'));
 
             kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearch, (err, resp) => {
                 if(!err) {
@@ -519,12 +512,13 @@ export default {
                         var respAutoComplete = resp.documents.map(kDoc => {
                             return {
                                 value: kDoc.id,
-                                label: kDoc.content.properties.name
+                                label: kDoc.content.fields.name
                             }
                         });
                         this.state.rstAdvancedSearch = respAutoComplete;
                     }
                 } else {
+                    console.log(err);
                     notification.init({
                         type: 'error',
                         message: "Research error"
