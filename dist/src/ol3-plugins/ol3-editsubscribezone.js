@@ -134,7 +134,7 @@ ol.control.EditSubscribeRoom.prototype.drawEndFeature = function(evt)
     // reprojection en WGS84
     var centerWgs84 = ol.proj.transform([center[0], center[1]], Projection.projectionFrom, Projection.projectionTo);
 
-    olMap.state.distance = parseInt(radius);
+    olMap.state.distance = parseInt(radius); // TODO incorrecte, il faut transformer en DISTANCE EN METRES
     olMap.state.coordinates = centerWgs84;
     kuzzleBridge.subscribeCollection(olMap.getSelectedLayer(), centerWgs84);
 };

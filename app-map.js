@@ -138,9 +138,5 @@ String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
-//Array.prototype.valueOf = function(){
-//    console.log(JSON.stringify(this, null, '\t'));
-//};
-
 // https://www.dartdocs.org/documentation/mdl/1.15.2/mdlcomponents/mdlcomponents-library.html
 // http://quaintous.com/2015/07/09/react-components-with-mdl/

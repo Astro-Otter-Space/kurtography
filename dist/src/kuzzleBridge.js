@@ -459,7 +459,7 @@ export default {
         if (null != olMap.getSelectedLayer()) {
 
             var layer = olMap.getSelectedLayer().get('title');
-            var coordonatesWGS84 = olMap.state.coordinates; //olMap.geolocation.getPosition();
+            var coordonatesWGS84 = olMap.state.coordinates;
 
             // Filter search on name of items with a geoDistance filter, sorting by geodistance asc
             var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 5000;
@@ -484,23 +484,21 @@ export default {
                         }
                     }
                 },
-
-                //sort: [
-                //    {
-                //        "_geo_distance" : {
-                //            "location" : {
-                //                lon: coordonatesWGS84[0],
-                //                lat: coordonatesWGS84[1]
-                //            },
-                //            "order"    : "asc",
-                //            "unit"     : "m"
-                //        }
-                //    }
-                //],
+                sort: [
+                    {
+                        "fields.name" : {
+                            "order" : "asc"
+                        },
+                        "fields.date_publish" : {
+                            "order": "desc"
+                        }
+                    }
+                ],
                 from: 0,
                 size: 10
             };
 
+            console.log("disatance research", distanceValue);
             kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearch, (err, resp) => {
                 if(!err) {
                     if (1 > resp.total) {
@@ -508,33 +506,29 @@ export default {
                             type: 'warning',
                             message: "No document find, retry with another term."
                         });
+                        this.state.rstAdvancedSearch = [];
                     } else {
-                        var respAutoComplete = resp.documents.map(kDoc => {
+                        this.state.rstAdvancedSearch = resp.documents.map(kDoc => {
                             return {
                                 value: kDoc.id,
                                 label: kDoc.content.fields.name
                             }
                         });
-                        this.state.rstAdvancedSearch = respAutoComplete;
                     }
                 } else {
-                    console.log(err);
                     notification.init({
                         type: 'error',
                         message: "Research error"
                     });
                 }
-
             });
         } else {
             notification.init({
                 type: 'warning',
-                message: "Please, select a layer to the right."
+                message: "Please, select a layer."
             });
         }
     },
-
-
 
 
     /**

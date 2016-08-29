@@ -149,11 +149,12 @@ export default {
 
         // Retrieve geolocation with default values
         this.geolocation = new ol.Geolocation({
-            projection: ol.proj.get(this.state.projectionTo),
+            //projection: ol.proj.get(this.state.projectionTo),
             tracking: true
         });
 
         this.geolocation.set('position', [Projection.longDefault, Projection.latDefault]);
+        this.geolocation.set('accuracy', 5); // Accuracy to 5 meters
         this.state.coordinates = [lonDef, latDef];
         this.initPosition(lonDef, latDef);
 
@@ -172,6 +173,8 @@ export default {
             if(false != this_.state.acceptGeoloc) {
                 this.geolocation.on('change', function() {
 
+                    console.log(this_.geolocation.getPosition());
+
                     var lon = this_.geolocation.getPosition()[0];
                     var lat =  this_.geolocation.getPosition()[1];
                     this_.initPosition(lon, lat);
@@ -187,6 +190,7 @@ export default {
         this.geolocation.on('change:position', function() {
             var lon = this.getPosition()[0];
             var lat =  this.getPosition()[1];
+
             // Set of current coordonates
             this_.state.coordinates = [lon, lat];
             this_.initPosition(lon, lat);
@@ -521,22 +525,34 @@ export default {
 
     /**
      * Create a zone where kuzzle subscription is active
+     * TODO : PROBLEME DE PROJECTION : les distances mesurées ne correspondent pas à celle mesurées dans Google Earth
      * @param distance
      */
-    createZoneSubscription(distance)
+    createZoneSubscription(distanceMeters)
     {
         if (undefined != this.state.zoneSubscriptionLayer || null != this.state.zoneSubscriptionLayer) {
             this.state.map.removeLayer(this.state.zoneSubscriptionLayer);
         }
 
-        var coordonatesWGS84 = this.state.coordinates; // = this.geolocation.getPosition();
+        var coordonatesWGS84 = this.state.coordinates;
 
         var features = [];
-        // Transformation coordinates in Mercator projection
-        var coordinatesTr = ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
 
         // Creation of circle
-        var circle = new ol.geom.Circle([coordinatesTr[0], coordinatesTr[1]], distance);
+        var projection = this.state.view.getProjection();
+        var resolutionAtEquator = this.state.view.getResolution();
+        var center = this.state.view.getCenter();
+
+        var pointResolution = projection.getPointResolution(resolutionAtEquator, center);
+        var resolutionFactor = resolutionAtEquator/pointResolution;
+        var radius = (distanceMeters / ol.proj.METERS_PER_UNIT.m) * resolutionFactor;
+
+        console.log("Transformation : " + distanceMeters + " to " + radius);
+
+        var circle = new ol.geom.Circle(
+            ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom),
+            radius
+        );
 
         // Create feature : we transform the circle into polygon for having a geJSON of this feature
         features.push(new ol.Feature({

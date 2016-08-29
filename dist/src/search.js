@@ -23,6 +23,7 @@ export default {
 
         searchInput.addEventListener('keyup', function(e) {
             // TODO : reset the list
+            awesomplete.list = [];
             kuzzleBridge.searchDocuments(e.target.value);
             awesomplete.list = kuzzleBridge.state.rstAdvancedSearch
         }, false);
