@@ -166,59 +166,30 @@ Url image | String | Kuzzle don't store image, but can store an url
 
 #### <i class="icon-upload"></i> Data format
 -------------
-Datas are recording in [GeoJSON](http://geojson.org/) format in Kuzzle.
 Read [Kuzzle documentation](http://kuzzle.io/sdk-documentation/) for more information about KuzzleCollection and KuzzleDocument
 
 Exemple of KuzzleDocument working in Kurtography :
 ```
-/!\ OBSOLETE
-{
-  "type": "Feature",
-  "geometry": {
-    "type": "Point",
-    "coordinates": [
-      3.9609146118164054,
-      43.624395670027354
-    ]
-  },
-  "properties": {
-    "name": "Test",
-  },
-  "location": {
-    "lon": 3.9609146118164054,
-    "lat": 43.624395670027354
-  },
-  "id": "AVRO9acbPyvkbVrqtBU0",
-  "userId": "mySuperUser"
-}
-/!\ FIN OBSOLETE
-
 {
   "datas": {
     "location": {
         "lon": 3.9609146118164054,
         "lat": 43.624395670027354
     },
-    "type": {
-        "Point"
-    },
-    "userId": {
-        "mySuperUser"
-    }
+    "type": "Point",
+    "userId": "mySuperUser"
   }
   "fields": {
     "name": "Test",
     "description": "Test description",
-    "date_publish": {
-    },
+    "date_publish": "2016-08-29",
     "url_image": "http://url-to-my-image.com/my-image.png"
   },
   "id": "AVRO9acbPyvkbVrqtBU0"
 }
 ```
-
-Item     | Value | Information
--------- | -------- | ----------
+After create, the field "id" is added to datas. It's the Kuzzle Document Identifier.
+Datas from kuzzle are converting into [geojson](http://geojson.org/) for  making an openlayers feature.
 
 
 How to : user documentation
