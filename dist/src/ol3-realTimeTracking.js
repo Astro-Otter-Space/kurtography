@@ -1,6 +1,6 @@
 import notification from '../services/notification';
 import kuzzle from '../services/kuzzle'
-import dataLayers from './dataLayers';
+import kuzzleBridge from './kuzzleBridge';
 import ol from 'openlayers';
 import olMap from './openlayers';
 import uuid from 'node-uuid';
@@ -40,7 +40,7 @@ ol.control.RealTimeTracking = function (selected_layer) {
 
         // Datas from Form
         var formDatas = {};
-        Object.keys(dataLayers.state.mappingCollection).forEach(field => {
+        Object.keys(kuzzleBridge.state.mappingCollection).forEach(field => {
             if ( undefined != e.target.elements[field] && "text" == e.target.elements[field].type) {
                 formDatas[field] = e.target.elements[field].value;
             }
@@ -151,7 +151,7 @@ ol.control.RealTimeTracking.prototype.createForm = function()
     if (divFormMapping.childElementCount > 0) {
         while (divFormMapping.firstChild) divFormMapping.removeChild(divFormMapping.firstChild);
     }
-    Object.keys(dataLayers.state.mappingCollection).forEach(key => {
+    Object.keys(kuzzleBridge.state.mappingCollection).forEach(key => {
 
         var div = document.createElement('div');
         div.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
@@ -164,7 +164,7 @@ ol.control.RealTimeTracking.prototype.createForm = function()
         label.setAttribute("for", key);
 
         // Input
-        if ("string" == dataLayers.state.mappingCollection[key].type) {
+        if ("string" == kuzzleBridge.state.mappingCollection[key].type) {
             var input = document.createElement('input');
             input.type = 'text';
             input.className = 'mdl-textfield__input';
@@ -175,7 +175,7 @@ ol.control.RealTimeTracking.prototype.createForm = function()
             div.appendChild(input);
             divFormMapping.appendChild(div);
 
-        } else if ("string" == dataLayers.state.mappingCollection[key].type && "description" == key) {
+        } else if ("string" == kuzzleBridge.state.mappingCollection[key].type && "description" == key) {
             var input = document.createElement('textarea');
             input.className = 'mdl-textfield__input';
             input.type= "text";
@@ -259,7 +259,7 @@ ol.control.RealTimeTracking.prototype.createFeature = function(formDatas, typeSe
 
 
 /**
- * Create tracking document in kuzzle (like dataLayers.addDocument())
+ * Create tracking document in kuzzle (like kuzzleBridge.addDocument())
  */
 ol.control.RealTimeTracking.prototype.addDocumentTracking = function(realTimeFeature, fDatasGeoJson)
 {
@@ -268,7 +268,7 @@ ol.control.RealTimeTracking.prototype.addDocumentTracking = function(realTimeFea
 
     kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).createDocument(idFeature, fDatasGeoJson, function (err, resp) {
         if (!err) {
-            dataLayers.state.notNotifFeatureId = resp.id;
+            kuzzleBridge.state.notNotifFeatureId = resp.id;
 
             // Create feature from kuzzle response
             var f = new ol.format.GeoJSON();

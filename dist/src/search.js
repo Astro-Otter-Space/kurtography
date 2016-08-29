@@ -1,5 +1,5 @@
 import Awesomplete from 'awesomplete';
-import dataLayers from './dataLayers';
+import kuzzleBridge from './kuzzleBridge';
 
 /**
  * Search request with result in autocompletion
@@ -17,14 +17,14 @@ export default {
         // Event listener on select list
         window.addEventListener("awesomplete-select", function(e){
             var idFeature = e.text.value;
-            dataLayers.setCenterKuzzleDoc(idFeature);
+            kuzzleBridge.setCenterKuzzleDoc(idFeature);
             e.preventDefault();
         }, false);
 
         searchInput.addEventListener('keyup', function(e) {
             // TODO : reset the list
-            dataLayers.searchDocuments(e.target.value);
-            awesomplete.list = dataLayers.state.rstAdvancedSearch
+            kuzzleBridge.searchDocuments(e.target.value);
+            awesomplete.list = kuzzleBridge.state.rstAdvancedSearch
         }, false);
     },
 

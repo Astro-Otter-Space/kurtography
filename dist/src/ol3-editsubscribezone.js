@@ -1,5 +1,5 @@
 import Projection from '../services/geo-parameters'
-import dataLayers from './dataLayers';
+import kuzzleBridge from './kuzzleBridge';
 import olMap from './openlayers';
 import ol from 'openlayers';
 
@@ -136,7 +136,7 @@ ol.control.EditSubscribeRoom.prototype.drawEndFeature = function(evt)
 
     olMap.state.distance = parseInt(radius);
     olMap.state.coordinates = centerWgs84;
-    dataLayers.subscribeCollection(olMap.getSelectedLayer(), centerWgs84);
+    kuzzleBridge.subscribeCollection(olMap.getSelectedLayer(), centerWgs84);
 };
 
 

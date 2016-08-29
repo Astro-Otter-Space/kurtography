@@ -1,6 +1,6 @@
 import Projection from '../services/geo-parameters';
 import notification from '../services/notification';
-import dataLayers from './dataLayers';
+import kuzzleBridge from './kuzzleBridge';
 import ol from 'openlayers';
 import olMap from './openlayers';
 import user from './user';
@@ -146,8 +146,8 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
         }
 
         this_.setFlagDraw(false); // Desactivation of drawing flag
-        dataLayers.state.notNotifFeatureId = null; // desactivation of featureId in progress
-        dataLayers.subscribeCollection(olMap.getSelectedLayer(), olMap.state.coordinates);
+        kuzzleBridge.state.notNotifFeatureId = null; // desactivation of featureId in progress
+        kuzzleBridge.subscribeCollection(olMap.getSelectedLayer(), olMap.state.coordinates);
         e.preventDefault();
     };
 
@@ -221,7 +221,7 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
     var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
     if (undefined != this.element) {
         // Ajout new document in Kuzzle
-        dataLayers.addDocument(featureGeoJSON, feature);
+        kuzzleBridge.addDocument(featureGeoJSON, feature);
         // Because of strange bug, I delete the drawing feature who will recreated in kuzzle callback
         this.tmpVectorSource.clear();
     } else {
@@ -293,7 +293,7 @@ ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
             //var parserCircle = parser.writeCircleGeometry_()
         } else {
             // Edit document in Kuzzle
-            dataLayers.updateGeodatasDocument(feature);
+            kuzzleBridge.updateGeodatasDocument(feature);
         }
     });
 };
@@ -343,7 +343,7 @@ ol.control.ControlDrawButtons.prototype.controlDelOnMap = function (evt)
                     // Remove from interaction
                     var featureId = feature.getId();
                     selectDelInteraction.getFeatures().remove(feature);
-                    dataLayers.deleteDocument(featureId);
+                    kuzzleBridge.deleteDocument(featureId);
                 } else {
                     notification.init({
                         type: 'error',

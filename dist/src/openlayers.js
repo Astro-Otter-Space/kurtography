@@ -1,6 +1,6 @@
 import Projection from '../services/geo-parameters'
 import notification from '../services/notification';
-import dataLayers from './dataLayers';
+import kuzzleBridge from './kuzzleBridge';
 import ol from 'openlayers';
 
 // Openlayers controls
@@ -90,8 +90,8 @@ export default {
         });
 
         // Put layers in ol.layer.Group
-        if (dataLayers.state.collections.length > 0) {
-            this.state.tabLayersKuzzle = dataLayers.state.collections.map(layerName => {
+        if (kuzzleBridge.state.collections.length > 0) {
+            this.state.tabLayersKuzzle = kuzzleBridge.state.collections.map(layerName => {
                 var layer = new ol.layer.Vector({
                     title: layerName,
                     type: 'base',
@@ -445,12 +445,12 @@ export default {
 
         // Load datas and Mapping
         if (undefined != featureId && null != featureId) {
-            dataLayers.loadDatasFromCollection(layer.get('title'), featureId);
+            kuzzleBridge.loadDatasFromCollection(layer.get('title'), featureId);
         } else {
-            dataLayers.loadDatasFromCollection(layer.get('title'));
+            kuzzleBridge.loadDatasFromCollection(layer.get('title'));
         }
 
-        dataLayers.getPropertiesMapping(layer.get('title'));
+        kuzzleBridge.getPropertiesMapping(layer.get('title'));
 
         if (true == flagIsAuthenticated) {
             this.state.buttonsDrawControls.setSelectedLayer(layer);
@@ -573,7 +573,7 @@ export default {
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
 
         // Rebuild the subscribe zone
-        dataLayers.subscribeCollection(this.getSelectedLayer(), this.state.coordinates);
+        kuzzleBridge.subscribeCollection(this.getSelectedLayer(), this.state.coordinates);
     },
 
     /**
@@ -673,7 +673,7 @@ export default {
             while (divForm.firstChild) divForm.removeChild(divForm.firstChild);
         }
 
-        Object.keys(dataLayers.state.mappingCollection).forEach(key => {
+        Object.keys(kuzzleBridge.state.mappingCollection).forEach(key => {
 
             if ("userId" != key) {
                 var div = document.createElement('div');
@@ -687,7 +687,7 @@ export default {
                 label.setAttribute("for", key);
 
                 // Input
-                if ("string" == dataLayers.state.mappingCollection[key].type) {
+                if ("string" == kuzzleBridge.state.mappingCollection[key].type) {
                     var input = document.createElement('input');
                     input.type = 'text';
                     input.className = 'mdl-textfield__input';
@@ -702,7 +702,7 @@ export default {
                     div.appendChild(input);
                     divForm.appendChild(div);
 
-                } else if ("string" == dataLayers.state.mappingCollection[key].type && "description" == key) {
+                } else if ("string" == kuzzleBridge.state.mappingCollection[key].type && "description" == key) {
                     var input = document.createElement('textarea');
                     input.className = 'mdl-textfield__input';
                     input.type= "text";
