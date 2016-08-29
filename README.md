@@ -105,7 +105,8 @@ Kuzzle Back-Office
 
 #### <i class="icon-upload"></i> Collections mapping
 
-In Kuzzle-BO, when create a new collection, the mapping must be like (see dist/fixtures/mapping-collection.json)) :
+In Kuzzle-BO, when create a new collection, the mapping must be like (see dist/fixtures/mapping-collection.json) :
+
 ```
 {
   "properties": {
@@ -143,15 +144,23 @@ In Kuzzle-BO, when create a new collection, the mapping must be like (see dist/f
   }
 }
 
-```
+
 Datas :
+```
 Item     | type | Information
 -------- | -------- | ----------
+Location | GeoPoint field | store location in lattitude/longitude (see https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html)
+Type | string | Type of feature (point, line, polygone)
+UserId | string | Id of user, creator of feature
+
+```
 
 
 Fields:
+```
 Item     | type | Information
 -------- | -------- | ----------
+```
 
 #### <i class="icon-upload"></i> Data format
 -------------
