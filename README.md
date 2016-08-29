@@ -146,23 +146,23 @@ In Kuzzle-BO, when create a new collection, the mapping must be like (see dist/f
 ```
 
 Datas :
-```
+
 Item     | type | Information
 -------- | -------- | ----------
 Location | GeoPoint field | store location in lattitude/longitude (see https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html)
 Type | string | Type of feature (point, line, polygone)
 UserId | string | Id of user, creator of feature
-```
+
 
 Fields:
-```
+
 Item     | type | Information
 -------- | -------- | ----------
 Name | String | Name of your object
 Date publish | Date | Date of publish (format YYYY-MM-dd)
 Description | string | Description of object
 Url image | String | Kuzzle don't store image, but can store an url
-```
+
 
 #### <i class="icon-upload"></i> Data format
 -------------
@@ -195,11 +195,6 @@ Exemple of KuzzleDocument working in Kurtography :
 
 Item     | Value | Information
 -------- | -------- | ----------
-type | "Feature" | default value, don't change it
-geometry | Object | Store the feature's geometry
-properties | Object | List of datas fields recorded in kuzzle
-location | Object | Coordinates point of referential point (for line and polygon, it's centroid coordinates)
-id | string | Kuzzle document identifier
 /!\ OBSOLETE
 
 How to : user documentation
