@@ -177,15 +177,14 @@ Exemple of KuzzleDocument working in Kurtography :
         "lat": 43.624395670027354
     },
     "type": "Point",
-    "userId": "mySuperUser"
-  }
+    "userId": "smeaudre"
+  },
   "fields": {
     "name": "Test",
-    "description": "Test description",
+    "description": "Test ajout",
     "date_publish": "2016-08-29",
-    "url_image": "http://url-to-my-image.com/my-image.png"
-  },
-  "id": "AVRO9acbPyvkbVrqtBU0"
+    "url_image": ""
+  }
 }
 ```
 After create, the field "id" is added to datas. It's the Kuzzle Document Identifier.
