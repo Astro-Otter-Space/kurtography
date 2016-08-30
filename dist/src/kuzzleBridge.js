@@ -498,7 +498,6 @@ export default {
                 size: 10
             };
 
-            console.log("disatance research", distanceValue);
             kuzzle.dataCollectionFactory(layer).advancedSearch(filterSearch, (err, resp) => {
                 if(!err) {
                     if (1 > resp.total) {

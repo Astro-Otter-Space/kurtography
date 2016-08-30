@@ -525,7 +525,6 @@ export default {
 
     /**
      * Create a zone where kuzzle subscription is active
-     * TODO : PROBLEME DE PROJECTION : les distances mesurées ne correspondent pas à celle mesurées dans Google Earth
      * @param distance
      */
     createZoneSubscription(distanceMeters)
@@ -543,11 +542,10 @@ export default {
         var resolutionAtEquator = this.state.view.getResolution();
         var center = this.state.view.getCenter();
 
+        // Radius from distance in meters
         var pointResolution = projection.getPointResolution(resolutionAtEquator, center);
         var resolutionFactor = resolutionAtEquator/pointResolution;
         var radius = (distanceMeters / ol.proj.METERS_PER_UNIT.m) * resolutionFactor;
-
-        console.log("Transformation : " + distanceMeters + " to " + radius);
 
         var circle = new ol.geom.Circle(
             ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom),
