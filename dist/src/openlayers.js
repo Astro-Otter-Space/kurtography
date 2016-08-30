@@ -599,6 +599,7 @@ export default {
         var parser = new ol.format.GeoJSON();
         var fProperties = feature.getProperties();
         var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+
         // Show datas
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
 
@@ -619,7 +620,7 @@ export default {
         } else {
             document.getElementById("imgKdoc").classList.add("hidden");
         }
-        this.addGeometriesTab(feature.getGeometry());
+        //this.addGeometriesTab(feature.getGeometry());
 
         if (true == centerTofeature) {
             document.getElementById("infoKdoc").classList.toggle("hidden");
@@ -685,49 +686,47 @@ export default {
             while (divForm.firstChild) divForm.removeChild(divForm.firstChild);
         }
 
-        Object.keys(kuzzleBridge.state.mappingCollection).forEach(key => {
+        Object.keys(kuzzleBridge.state.mappingFieldsCollection).forEach(key => {
 
-            if ("userId" != key) {
-                var div = document.createElement('div');
-                div.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
+            var div = document.createElement('div');
+            div.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
 
-                // Label
-                var label = document.createElement('label');
-                label.className = "mdl-textfield__label";
+            // Label
+            var label = document.createElement('label');
+            label.className = "mdl-textfield__label";
 
-                label.innerHTML = key.capitalizeFirstLetter();
-                label.setAttribute("for", key);
+            label.innerHTML = key.capitalizeFirstLetter();
+            label.setAttribute("for", key);
 
-                // Input
-                if ("string" == kuzzleBridge.state.mappingCollection[key].type) {
-                    var input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'mdl-textfield__input';
-                    input.name = key;
-                    input.id = key;
+            // Input
+            if ("string" == kuzzleBridge.state.mappingFieldsCollection[key].type) {
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'mdl-textfield__input';
+                input.name = key;
+                input.id = key;
 
-                    if (key == "name"){
-                        input.setAttribute("required", "required");
-                    }
-
-                    div.appendChild(label);
-                    div.appendChild(input);
-                    divForm.appendChild(div);
-
-                } else if ("string" == kuzzleBridge.state.mappingCollection[key].type && "description" == key) {
-                    var input = document.createElement('textarea');
-                    input.className = 'mdl-textfield__input';
-                    input.type= "text";
-                    input.row = 3;
-                    input.name = key;
-                    input.id = key;
-
-                    div.appendChild(label);
-                    div.appendChild(input);
-                    divForm.appendChild(div);
+                if (key == "name"){
+                    input.setAttribute("required", "required");
                 }
-                componentHandler.upgradeElements(div);
+
+                div.appendChild(label);
+                div.appendChild(input);
+                divForm.appendChild(div);
+
+            } else if ("string" == kuzzleBridge.state.mappingFieldsCollection[key].type && "description" == key) {
+                var input = document.createElement('textarea');
+                input.className = 'mdl-textfield__input';
+                input.type= "text";
+                input.row = 3;
+                input.name = key;
+                input.id = key;
+
+                div.appendChild(label);
+                div.appendChild(input);
+                divForm.appendChild(div);
             }
+            componentHandler.upgradeElements(div);
         });
 
         document.getElementById("divAddDoc").classList.toggle("hidden");

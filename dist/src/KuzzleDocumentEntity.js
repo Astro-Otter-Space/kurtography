@@ -21,6 +21,8 @@ class KuzzleDocumentEntity {
             "geometry": datasGeometry.location,
             "properties": fields
         };
+
+        // Set the userId in the properties
         dataGeoJson.properties.userId = datasGeometry.userId;
 
         return dataGeoJson;
@@ -39,7 +41,6 @@ class KuzzleDocumentEntity {
         var coordinatesFeatures = featureGeoJson.geometry;
 
         // Create fields datas from mapping
-
         // Creation of feature
         if (null == featureGeoJson.properties) {
             var object = new Object();
@@ -53,6 +54,11 @@ class KuzzleDocumentEntity {
                 }
             });
             featureGeoJson.properties = object;
+        }
+
+        // Remove userId from properties
+        if (undefined != featureGeoJson.properties.userId) {
+            delete featureGeoJson.properties.userId;
         }
         var propertiesFeatures = featureGeoJson.properties;
 
