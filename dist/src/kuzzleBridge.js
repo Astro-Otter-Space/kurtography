@@ -5,9 +5,9 @@ import Projection from '../services/geo-parameters'
 import notification from '../services/notification';
 import ol from 'openlayers';
 import olMap from './openlayers'
-import user from './user';
 
 let subscription = null;
+let kuzzleDocumentEntity = new KuzzleDocumentEntity();
 //let this_ = this;  --> correct ?
 
 export default {
@@ -16,7 +16,7 @@ export default {
         collections: [], // List of collections
         tabLayersKuzzle: [], // Array contains layers
         notNotifFeatureId: null, // when we created a new feature od update a feature, store the featureId for not notfy it in kuzzleRoom
-        mappingCollection: null, // data mapping of selected collection
+        mappingFieldsCollection: null, // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures(),
         subscription: null,
         rstAdvancedSearch: null
@@ -47,7 +47,7 @@ export default {
     },
 
     /**
-     * Retrieve datas from collections
+     * Retrieve datas from collections and create openlayers Vector layer
      * @param collection
      */
     loadDatasFromCollection(collection, featureIdQs)
@@ -63,11 +63,13 @@ export default {
             }*/
         };
 
+        // Load mapping of collection
+        this.getPropertiesMapping(collection);
+
         kuzzle.dataCollectionFactory(collection).advancedSearch(options, function(err, res) {
             if (!err) {
                 var result = [];
                 if(res.total > 0) {
-                    var kuzzleDocumentEntity = new KuzzleDocumentEntity();
                     result = res.documents.map(kDoc => {
                         return kuzzleDocumentEntity.fromKuzzleToFeature(kDoc);
                     });
@@ -127,10 +129,7 @@ export default {
         kuzzle.dataCollectionFactory(layer).getMapping(function (err, res) {
             if (!err) {
                 // Patch on user identifier
-                if (undefined != res.mapping.userId) {
-                    res.mapping.fields.userId = res.mapping.userId;
-                }
-                this_.state.mappingCollection = res.mapping.properties.fields;
+                this_.state.mappingFieldsCollection = res.mapping.fields.properties;
             } else {
                 notification.init({
                     type: 'error',
@@ -151,60 +150,25 @@ export default {
         var this_ = this;
         var layer = olMap.getSelectedLayer().get('title');
         var idFeature = (undefined != feature.get('id')) ? feature.get('id') : null;
-        var typeFeature = feature.getGeometry().getType();
 
-        // Create empty properties from mapping
-        fDatasGeoJson.properties = {};
-        Object.keys(this.state.mappingCollection).forEach(objectMapping => {
-            if ("string" == this.state.mappingCollection[objectMapping].type && "userId" != objectMapping) {
-                fDatasGeoJson.properties[objectMapping] = "";
-            } else if ("date" == this.state.mappingCollection[objectMapping].type) {
-                fDatasGeoJson.properties[objectMapping] = new Date().toISOString().slice(0, 10);
-            }
-        });
+        var newKuzzleDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, fDatasGeoJson, null);
+        console.log(newKuzzleDocument);
 
-        // Create location point for subscribe zone
-        // If Point, we add the lon/lat data in a specific mapping for making the kuzzle subscribe
-        if ('Point' == typeFeature) {
-            fDatasGeoJson.centroid = {
-                lon: fDatasGeoJson.geometry.coordinates[0],
-                lat : fDatasGeoJson.geometry.coordinates[1]
-            };
-        } else if ('LineString' == typeFeature || 'Polygon' == typeFeature) {
-
-            var fCentroid = olMap.getFeatureCentroid(fDatasGeoJson);
-            fDatasGeoJson.centroid = {
-                lon: fCentroid.geometry.coordinates[0],
-                lat: fCentroid.geometry.coordinates[1]
-            };
-        }
-        fDatasGeoJson.userId = user.state.id;
-
-        kuzzle.dataCollectionFactory(layer).createDocument(idFeature, fDatasGeoJson, function (err, resp) {
+        kuzzle.dataCollectionFactory(layer).createDocument(idFeature, newKuzzleDocument, function (err, resp) {
             if (!err) {
                 // set of notNotifFeatureId and reconstruction of subscribe with new value of notNotifFeatureId
                 this_.state.notNotifFeatureId = resp.id;
-
+                /*
                 fDatasGeoJson.properties.userId = resp.content.userId;
                 // Setting of Kuzzle Document Identifier to identifier of the feature
                 var f = new ol.format.GeoJSON();
                 var newFeature = f.readFeature(fDatasGeoJson, {dataProjection:Projection.projectionTo, featureProjection: Projection.projectionFrom});
                 newFeature.setId(resp.id);
 
-                // If point and not in subscribe zone
-                //if ('Point' == typeFeature) {
-                //    if (false == olMap.isPointInZoneSubscribe(fDatasGeoJson)) {
-                //        olMap.getSelectedLayer().getSource().addFeature(newFeature);
-                //    }
-                //// If not point and centroid is not un subscribe zone
-                //} else {
-                //    var centroidPt = olMap.getFeatureCentroid(fDatasGeoJson);
-                //    if (false == olMap.isPointInZoneSubscribe(centroidPt)) {
-                //        olMap.getSelectedLayer().getSource().addFeature(newFeature);
-                //    }
-                //}
+
                 olMap.getSelectedLayer().getSource().addFeature(newFeature);
-                olMap.createEditDatasForm();
+                //olMap.createEditDatasForm();
+                */
             } else {
                 notification.init({
                     type: 'error',

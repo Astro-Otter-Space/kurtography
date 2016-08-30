@@ -1,11 +1,14 @@
 import kuzzle from '../services/kuzzle'
+import Config from '../services/kuzzle-config'
+import KuzzleBridge from './kuzzleBridge';
+import user from './user';
 
 class KuzzleDocumentEntity {
 
     /**
      * Transform a KuzzleDocument into GeoJson format
      * @param KuzzleDocument document
-     * @returns json {{}}
+     * @returns json dataGeoJson
      */
     fromKuzzleToFeature(document)
     {
@@ -24,14 +27,53 @@ class KuzzleDocumentEntity {
     }
 
     /**
+     * Transform a feature Geojson in KuzzleDocument
+     * @param collection
+     * @param featureGeoJson
      *
-     * @param
+     * @return KuzzleDocument document
      */
-    fromFeatureToKuzzle()
+    fromFeatureToKuzzle(collection, featureGeoJson, idKuzzleDocument)
     {
+        // Coodinates geometry
+        var coordinatesFeatures = featureGeoJson.geometry;
 
+        // Create fields datas from mapping
+
+        // Creation of feature
+        if (null == featureGeoJson.properties) {
+            var object = new Object();
+            Object.keys(KuzzleBridge.state.mappingFieldsCollection).forEach(objectMapping => {
+
+                if ("string" == KuzzleBridge.state.mappingFieldsCollection[objectMapping].type) {
+                    object[objectMapping] = "";
+
+                } else if ("date" == KuzzleBridge.state.mappingFieldsCollection[objectMapping].type) {
+                    object[objectMapping] = new Date().toISOString().slice(0, 10);
+                }
+            });
+            featureGeoJson.properties = object;
+        }
+        var propertiesFeatures = featureGeoJson.properties;
+
+        // Construction content Kuzzle Document
+        var content = {
+            datas: {
+                location: coordinatesFeatures,
+                userId: user.state.id
+            },
+            fields: propertiesFeatures
+        };
+
+        //
+        if (null != idKuzzleDocument) {
+            var document = kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(idKuzzleDocument, content);
+        } else {
+            var document = kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(content);
+        }
+
+        return document;
     }
-
 }
 
 export default KuzzleDocumentEntity;

@@ -610,8 +610,6 @@ export default {
         var datePublish = new Date(fProperties.date_publish);
         document.getElementById("dateKdoc").innerHTML = " " + dateFormat(datePublish, 'dd/mm/yyyy') + byUser;
 
-
-
         document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
         if ("" != fProperties.url_image) {
             document.getElementById("imgKdoc").classList.remove("hidden");
