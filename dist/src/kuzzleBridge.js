@@ -152,23 +152,25 @@ export default {
         var idFeature = (undefined != feature.get('id')) ? feature.get('id') : null;
 
         var newKuzzleDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, fDatasGeoJson, null);
-        console.log(newKuzzleDocument);
 
         kuzzle.dataCollectionFactory(layer).createDocument(idFeature, newKuzzleDocument, function (err, resp) {
             if (!err) {
                 // set of notNotifFeatureId and reconstruction of subscribe with new value of notNotifFeatureId
+                console.log(resp);
+
                 this_.state.notNotifFeatureId = resp.id;
-                /*
-                fDatasGeoJson.properties.userId = resp.content.userId;
+
+                // Convert KuzzleDocument into feature
+                var newFeatureGeojson = kuzzleDocumentEntity.fromKuzzleToFeature(resp);
+
                 // Setting of Kuzzle Document Identifier to identifier of the feature
                 var f = new ol.format.GeoJSON();
-                var newFeature = f.readFeature(fDatasGeoJson, {dataProjection:Projection.projectionTo, featureProjection: Projection.projectionFrom});
+                var newFeature = f.readFeature(newFeatureGeojson, {dataProjection:Projection.projectionTo, featureProjection: Projection.projectionFrom});
                 newFeature.setId(resp.id);
-
 
                 olMap.getSelectedLayer().getSource().addFeature(newFeature);
                 //olMap.createEditDatasForm();
-                */
+
             } else {
                 notification.init({
                     type: 'error',
@@ -192,18 +194,7 @@ export default {
             var parser = new ol.format.GeoJSON();
             var fDatasGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
-            if ('Point' == feature.getGeometry().getType()) {
-                fDatasGeoJson.centroid = {
-                    lon: fDatasGeoJson.geometry.coordinates[0],
-                    lat : fDatasGeoJson.geometry.coordinates[1]
-                };
-            } else if ('LineString' == feature.getGeometry().getType() || ('Polygon' == feature.getGeometry().getType())) {
-                var fCentroid = olMap.getFeatureCentroid(fDatasGeoJson);
-                fDatasGeoJson.centroid = {
-                    lon: fCentroid.geometry.coordinates[0],
-                    lat: fCentroid.geometry.coordinates[1]
-                };
-            }
+
             kuzzle.dataCollectionFactory(layer).updateDocument(kDocId, fDatasGeoJson, function (err, res) {
                 if (err) {
                     notification.init({

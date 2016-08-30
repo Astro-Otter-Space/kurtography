@@ -8,7 +8,7 @@ class KuzzleDocumentEntity {
     /**
      * Transform a KuzzleDocument into GeoJson format
      * @param KuzzleDocument document
-     * @returns json dataGeoJson
+     * @returns geojson dataGeoJson
      */
     fromKuzzleToFeature(document)
     {
