@@ -71,7 +71,7 @@ class KuzzleDocumentEntity {
             fields: propertiesFeatures
         };
 
-        //
+        console.log(content);
         if (null != idKuzzleDocument) {
             var document = kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(idKuzzleDocument, content);
         } else {

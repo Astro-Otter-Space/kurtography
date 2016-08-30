@@ -80,7 +80,7 @@ var handleSubmit = function(e) {
         }
     });
     document.getElementById("divAddDoc").classList.toggle("hidden");
-    kuzzleBridge.updatePropertiesDocument(updFeature);
+    kuzzleBridge.updateDocument(updFeature);
 };
 var form = document.forms['form-edit-properties'];
 form.addEventListener('submit', handleSubmit, false);

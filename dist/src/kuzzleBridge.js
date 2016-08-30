@@ -121,7 +121,7 @@ export default {
 
     /**
      * Store mapping of selected collection
-     * @param layer
+     * @param string layer
      */
     getPropertiesMapping(layer)
     {
@@ -142,8 +142,8 @@ export default {
 
     /**
      * Adding new KuzzleDocument
-     * @param datas
-     * @param newFeature
+     * @param json datas
+     * @param ol.Feature newFeature
      */
     addDocument(fDatasGeoJson, feature)
     {
@@ -152,7 +152,6 @@ export default {
         var idFeature = (undefined != feature.get('id')) ? feature.get('id') : null;
 
         var newKuzzleDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, fDatasGeoJson, null);
-
         kuzzle.dataCollectionFactory(layer).createDocument(idFeature, newKuzzleDocument, function (err, resp) {
             if (!err) {
                 // set of notNotifFeatureId and reconstruction of subscribe with new value of notNotifFeatureId
@@ -180,78 +179,38 @@ export default {
 
 
     /**
-     * Update geo-datas from documents
+     * Update Kuzzle Document from feature updated (geometry or properties)
+     * @param ol.Feature updFeature
      */
-    updateGeodatasDocument (feature)
-    {
-        if (feature.getId()) {
-            var layer = olMap.getSelectedLayer().get('title');
-            var kDocId = feature.getId();
-
-            this.state.notNotifFeatureId = (kDocId != this.state.notNotifFeatureId) ? kDocId : this.state.notNotifFeatureId;
-            var parser = new ol.format.GeoJSON();
-            var fDatasGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-
-
-            kuzzle.dataCollectionFactory(layer).updateDocument(kDocId, fDatasGeoJson, function (err, res) {
-                if (err) {
-                    notification.init({
-                        type: 'error',
-                        message:  "Error update geodatas kuzzle document"
-                    });
-                } else {
-                    var parser = new ol.format.GeoJSON();
-                    //res.content.properties.userId = res.content.userId;
-                    var updFeatureEdited = parser.readFeature(res.content, {featureProjection: Projection.projectionFrom});
-
-                    if (undefined != olMap.getSelectedLayer().getSource().getFeatureById(res.id)) {
-                        var updFeatureDel = olMap.getSelectedLayer().getSource().getFeatureById(res.id);
-                        olMap.getSelectedLayer().getSource().removeFeature(updFeatureDel);
-                    }
-                    olMap.getSelectedLayer().getSource().addFeature(updFeatureEdited);
-
-                    olMap.showFeaturesInformations(updFeatureEdited, false);
-                    notification.init({
-                        type: 'notice',
-                        message:  "Update geodatas kuzzle document"
-                    });
-                }
-            });
-
-        } else {
-            notification.init({
-                type: 'warning',
-                message:  "There is no identifier fot the kuzzle document."
-            });
-        }
-    },
-
-    /**
-     * Update properties of a document
-     * @param idKuzzleDoc
-     * @param propertiesDatas
-     */
-    updatePropertiesDocument(updFeature)
+    updateDocument(updFeature)
     {
         var layer = olMap.getSelectedLayer().get('title');
         var this_ = this;
         if (undefined != updFeature.getId()) {
 
+            this.state.notNotifFeatureId = (updFeature.getId() != this.state.notNotifFeatureId) ? updFeature.getId() : this.state.notNotifFeatureId;
+
             // Transform feature in geoJSON
             this.parser = new ol.format.GeoJSON();
             var featureGeoJSON = this.parser.writeFeatureObject(updFeature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
+            // Create a Kuzzle Document from updated datas
             var updDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, featureGeoJSON, updFeature.getId());
 
-            updDocument.save((err, resp) => {
+            kuzzle.dataCollectionFactory(layer).updateDocument(updFeature.getId(), updDocument.content, function (err, resp) {
+            //updDocument.save((err, resp) => {
                 if (err) {
                     notification.init({
                         type: 'error',
                         message:  "Error update kuzzle document"
                     });
                 } else {
-                    // Remove from layer the feature
-                    olMap.getSelectedLayer().getSource().removeFeature(updFeature);
+                    // Remove the feature from layer
+                    //olMap.getSelectedLayer().getSource().removeFeature(updFeature);
+                    if (undefined != olMap.getSelectedLayer().getSource().getFeatureById(resp.id)) {
+                        var updFeatureDel = olMap.getSelectedLayer().getSource().getFeatureById(resp.id);
+                        olMap.getSelectedLayer().getSource().removeFeature(updFeatureDel);
+                    }
 
                     // Convert Kuzzle Document into geojson
                     var updGeojsonEdited = kuzzleDocumentEntity.fromKuzzleToFeature(resp);
@@ -304,7 +263,7 @@ export default {
                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
                     notification.init({
                         type: 'notice',
-                        message: "Suppression kuzzle document ok."
+                        message: "The document have been removed."
                     });
                 }
             });

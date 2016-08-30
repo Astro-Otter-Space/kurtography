@@ -293,7 +293,7 @@ ol.control.ControlDrawButtons.prototype.editEndFeature = function(evt)
             //var parserCircle = parser.writeCircleGeometry_()
         } else {
             // Edit document in Kuzzle
-            kuzzleBridge.updateGeodatasDocument(feature);
+            kuzzleBridge.updateDocument(feature);
         }
     });
 };
