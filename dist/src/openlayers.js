@@ -13,7 +13,6 @@ import RealTimeTracking from './ol3-plugins/ol3-realTimeTracking';
 import exportDatas from './ol3-plugins/ol3-export';
 
 // Openlayers 3 add-ons
-import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
 // Others
 import user from './user';
@@ -617,22 +616,6 @@ export default {
 
 
     /**
-     * Verify with turf-inside if a pint is inside or outside the subscribe zone
-     * @param feature
-     * @return bool
-     */
-    isPointInZoneSubscribe(featureGeoJSON)
-    {
-        var parser = new ol.format.GeoJSON();
-
-        var zsLayerFeature = this.state.zoneSubscriptionLayer.getSource().getFeatures()[0];
-        var zsGeoJSON = parser.writeFeatureObject(zsLayerFeature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
-
-        return turfInside(featureGeoJSON, zsGeoJSON);
-    },
-
-
-    /**
      * Return the centroid of a polygon/linestring feature
      * @param featureGeoJSON : geoJson a the feature
      * @return centroid of feature
@@ -717,24 +700,6 @@ export default {
         });
 
         document.getElementById("divAddDoc").classList.toggle("hidden");
-    },
-
-
-    /**
-     * Show the selected feature in geoJson format
-     * @param fGeoJson
-     */
-    addGeoJSONTab(fGeoJson)
-    {
-        var container = document.getElementById("jsoneditor");
-        if(container.hasChildNodes()) {
-            container.removeChild( container.childNodes[0] );
-        }
-        var options = {
-            mode: 'code'
-        };
-        var editor = new jsoneditor(container, options);
-        editor.set(fGeoJson);
     },
 
     /**
