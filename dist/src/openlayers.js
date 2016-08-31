@@ -606,7 +606,7 @@ export default {
         } else {
             document.getElementById("imgKdoc").classList.add("hidden");
         }
-        //this.addGeometriesTab(feature.getGeometry());
+        this.addGeometriesTab(feature.getGeometry());
 
         if (true == centerTofeature) {
             document.getElementById("infoKdoc").classList.toggle("hidden");
