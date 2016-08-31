@@ -71,16 +71,6 @@ export default {
             }
         );
 
-        var mapQuest = new ol.layer.Tile({
-                title : 'Satellite',
-                visible : false,
-                type: 'overlays',
-                source: new ol.source.MapQuest({
-                    layer: 'sat'
-                })
-            }
-        );
-
         this.state.tabBaseLayers.push(osm);
         this.state.tabBaseLayers.push(mapQuest);
 
