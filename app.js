@@ -1,7 +1,6 @@
 // Express
 var express = require('express');
 var favicon = require('express-favicon');
-//var user = require("./dist/src/user");
 var app = express();
 
 function enableCors (req, res, next) {
@@ -31,8 +30,6 @@ app.use(express.static(__dirname + '/node_modules'));
 // Main page
 app.get('/', function(req, res) {
 
-    //user.getCurrentUser(function(){});
-    //var isLogin = (false != user.isAuthenticated()) ? user.isAuthenticated() : false;
     var isLogin = false;
     res.header("Access-Control-Allow-Origin", "http://localhost:7511");
     res.render('pages/map-ui', {
