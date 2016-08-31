@@ -4,7 +4,6 @@
   "description": "Cartography application supported by Kuzzle",
   "main": "app.js",
   "scripts": {
-    "test": "beefy app-map.js:bundle.js --live",
     "build-map": "browserify -e app-map.js -o ./public/js/bundle.js",
     "build-css": "cleancss ./dist/css/ol3-drawcontrols.css ./dist/css/style.css -o ./public/css/bundle.css",
     "start": "node app.js"
@@ -31,7 +30,6 @@
     "babel-preset-es2015": "^6.0.0",
     "babel-runtime": "^5.8.0",
     "babelify": "^7.2.0",
-    "beefy": "^2.1.5",
     "browserify": "^13.0.0"
   },
   "browserify": {
