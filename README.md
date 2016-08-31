@@ -117,6 +117,10 @@ In Kuzzle-BO, when create a new collection, the mapping must be like (see dist/f
           "tree": "quadtree",
           "precision": "1m"
         },
+        "centroid": {
+          "type": "geo_point",
+          "lat_lon": true
+        },
         "userId": {
           "type": "string"
         }
@@ -148,6 +152,7 @@ Datas :
 Item     | type | Information
 -------- | -------- | ----------
 Location | GeoShape field | store location, see [Geo Shape](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html)
+Centroid | Geo point | Store the centroid of the object (for the subscribe() kuzzle method)
 UserId | string | Id of user, creator of feature
 
 
@@ -173,6 +178,10 @@ Exemple of KuzzleDocument working in Kurtography :
         "type": "Point",
         "coordinates": [3.9609146118164054, 43.624395670027354]
     },
+    "centroid": {
+        "lon": 43.624395670027354,
+        "lat": 3.9609146118164054
+    }
     "userId": "smeaudre"
   },
   "fields": {
