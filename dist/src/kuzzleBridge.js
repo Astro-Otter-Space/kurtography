@@ -141,7 +141,7 @@ export default {
         var idFeature = (undefined != feature.get('id')) ? feature.get('id') : null;
 
         var newKuzzleDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, fDatasGeoJson, null);
-        
+
         kuzzle.dataCollectionFactory(layer).createDocument(idFeature, newKuzzleDocument, function (err, resp) {
             if (!err) {
                 // set of notNotifFeatureId and reconstruction of subscribe with new value of notNotifFeatureId
@@ -285,7 +285,11 @@ export default {
         var filter =
         {
             geoDistance: {
-
+                "datas.centroid": {
+                    lon: coordonatesWGS84[0],
+                    lat: coordonatesWGS84[1]
+                },
+                distance: distanceValue
             }
         };
 
@@ -298,46 +302,42 @@ export default {
             state: 'done'
         };
 
-        console.log(JSON.stringify(filter, null, '\t'));
+        //console.log(JSON.stringify(filter, null, '\t'));
         this.state.subscription = subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 if (null == this_.state.notNotifFeatureId || resp.result._id != this_.state.notNotifFeatureId) {
 
                     // We retrive kDoc and transform it on feature
                     if ('in' == resp.scope ) {
-
                         this_.action = resp.action;
 
-                        console.log(resp);
+                        // Fetch the document
+                        kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(resp.result._id, (err, resp) => {
 
-                        /*kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, (err, resp) => {
-                            var f = new ol.format.GeoJSON();
+                            // get Kuzzle Document and transform in feature
+                            var featureGeojsonDocument = kuzzleDocumentEntity.fromKuzzleToFeature(resp);
 
                             if ("update" == this_.action) {
-                                var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(kDoc.id);
+                                var featureDel = olMap.getSelectedLayer().getSource().getFeatureById(resp.id);
                                 if (undefined != featureDel && featureDel.getId()) {
                                     olMap.getSelectedLayer().getSource().removeFeature(featureDel);
                                 }
                             }
 
-                            var newFeature = f.readFeature(resp.content, {featureProjection: Projection.projectionFrom});
-                            if (undefined == newFeature.getId()) {
-                                newFeature.setId(kDoc.id);
-                            }
+                            var f = new ol.format.GeoJSON();
+                            var feature = f.readFeature(featureGeojsonDocument, {dataProjection:Projection.projectionTo, featureProjection: Projection.projectionFrom});
 
-                            olMap.getSelectedLayer().getSource().addFeature(newFeature);
+                            // Adding feature
+                            olMap.getSelectedLayer().getSource().addFeature(feature);
 
                             // Show new feature
-                            olMap.showFeaturesInformations(newFeature, false);
+                            olMap.showFeaturesInformations(feature, false);
 
-                            // debug
-                            console.log(this_.action + " : " + kDoc.id);
                             notification.init({
                                 type: 'notice',
-                                message: "A document have been " +  this_.action + "d in Kuzzle in your subscribe area."
+                                message: "A document have been " +  this_.action + "d in your subscribe area."
                             });
                         });
-                        */
 
                     } else if ('out' == resp.scope){
                         /**
@@ -348,7 +348,7 @@ export default {
 
                         notification.init({
                             type: 'notice',
-                            message: "A document have been deleted from Kuzzle in your subscribe area."
+                            message: "A document have been deleted in your subscribe area."
                         });
                     }
                 }

@@ -12,9 +12,10 @@ class KuzzleDocumentEntity {
      *
      * @param kuzzleDocumentId
      */
-    getDocumentById(kuzzleDocumentId)
+    getDocumentById(kuzzleDocumentId, collection)
     {
-        return kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(kuzzleDocumentId);
+        var document = kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(kuzzleDocumentId);
+        return document;
     }
 
     /**
@@ -95,7 +96,7 @@ class KuzzleDocumentEntity {
             fields: propertiesFeatures
         };
 
-        console.log(content);
+        // Create (not fetch) a KuzzleDocument from content (and id if exist)
         if (null != idKuzzleDocument) {
             var document = kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(idKuzzleDocument, content);
         } else {
