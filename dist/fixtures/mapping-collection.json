@@ -1,0 +1,37 @@
+{
+  "properties": {
+    "datas": {
+      "properties": {
+        "location": {
+          "type": "geo_shape",
+          "tree": "quadtree",
+          "precision": "1m"
+        },
+        "centroid": {
+          "type": "geo_point",
+          "lat_lon": true
+        },
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "fields": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "date_publish": {
+          "type": "date",
+          "format": "YYYY-MM-dd"
+        },
+        "description": {
+          "type": "string"
+        },
+        "url_image": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

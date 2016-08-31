@@ -1,6 +1,6 @@
-import Projection from '../services/geo-parameters'
-import dataLayers from './dataLayers';
-import olMap from './openlayers';
+import Projection from '../../services/geo-parameters'
+import kuzzleBridge from './../kuzzleBridge';
+import olMap from './../openlayers';
 import ol from 'openlayers';
 
 /**
@@ -101,6 +101,15 @@ ol.control.EditSubscribeRoom.prototype.drawEndFeature = function(evt)
     var center = feature.getGeometry().getCenter();
     var radius = feature.getGeometry().getRadius();
 
+    // Get radius in meters
+    var edgeCoordinate = [center[0] + radius, center[1]];
+    var wgs84Sphere = new ol.Sphere(6378137);
+    var radiusInMeters = wgs84Sphere.haversineDistance(
+        ol.proj.transform(center, Projection.projectionFrom, Projection.projectionTo),
+        ol.proj.transform(edgeCoordinate, Projection.projectionFrom, Projection.projectionTo)
+    );
+
+    // Draw circle
     var circle = new ol.geom.Circle([center[0], center[1]], radius);
 
     features.push(new ol.Feature({
@@ -134,9 +143,10 @@ ol.control.EditSubscribeRoom.prototype.drawEndFeature = function(evt)
     // reprojection en WGS84
     var centerWgs84 = ol.proj.transform([center[0], center[1]], Projection.projectionFrom, Projection.projectionTo);
 
-    olMap.state.distance = parseInt(radius);
+    olMap.state.distance = parseInt(radiusInMeters);
     olMap.state.coordinates = centerWgs84;
-    dataLayers.subscribeCollection(olMap.getSelectedLayer(), centerWgs84);
+
+    kuzzleBridge.subscribeCollection(olMap.getSelectedLayer(), centerWgs84);
 };
 
 

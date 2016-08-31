@@ -1,7 +1,7 @@
 var Kuzzle = require('kuzzle-sdk');
 var uuid = require('node-uuid');
 
-var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function() {
+var kuzzle = new Kuzzle('localhost', function() {
 
     var roleDefinition = {
         "indexes": {

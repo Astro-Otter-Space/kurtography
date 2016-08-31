@@ -3,14 +3,12 @@ Kurtography
 
 Welcome !! Kurtography is a cartography application based on [Openlayers 3](http://openlayers.org/) and [Kuzzle](http://kuzzle.io) for Kaliop Koding Challenge
 
-/!\ (EDIT 2016-0820) Kurtography runs with Kuzzle Beta (elastic search 1.7) not last release RC5 (elastic search 2.3.4) and with kuzzle-sdk 1.0 not last release kuzzle-sdk 2.0.1. Update coming soon :)
-
 ### Table of contents
 
 
 Plugin Status
 -------------
-Beta stage of development : v. 0.12.0
+Beta stage of development : v. 0.13.5
 
 Requirements
 -------------
@@ -53,10 +51,10 @@ In progress...
 
 #### <i class="icon-upload"></i> Connexion to kuzzle
 
-Edit file dist\services\config.js and change values of kuzzleUrl and defaultIndex
+Edit file dist\services\kuzzle-config.js and change values of kuzzleUrl and defaultIndex
 ```
 export default {
-    kuzzleUrl: 'url_to_kuzzle_instance', // ex : http://localhost:7512
+    kuzzleUrl: 'url_to_kuzzle_instance', // ex : localhost (without "https://" and without port)
     defaultIndex: 'name_of_your_kuzzle_index'
 }
 ```
@@ -107,91 +105,95 @@ Kuzzle Back-Office
 
 #### <i class="icon-upload"></i> Collections mapping
 
-In Kuzzle-BO, when create a new collection, the mapping must be like :
+In Kuzzle-BO, when create a new collection, the mapping must be like (see dist/fixtures/mapping-collection.json) :
+
 ```
 {
-    "type": {
-        "type": "string"
-    },
-    "geometry": {
-        "properties": {
-            "coordinates": {
-                "type": "double"
-            },
-            "type": {
-                "type": "string"
-            }
+  "properties": {
+    "datas": {
+      "properties": {
+        "location": {
+          "type": "geo_shape",
+          "tree": "quadtree",
+          "precision": "1m"
+        },
+        "centroid": {
+          "type": "geo_point",
+          "lat_lon": true
+        },
+        "userId": {
+          "type": "string"
         }
+      }
     },
-    "location": {
-        "type": "geo_point",
-        "lat_lon": true
-    },
-    "properties": {
-        "properties": {
-            "name": {
-                "type": "string"
-            },
-            "date_publish": {
-                "type": "date",
-                "format": "YYYY-MM-dd"
-            },
-            "description": {
-                "type": "string"
-            },
-            "url_image": {
-                "type": "string"
-            }
+    "fields": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "date_publish": {
+          "type": "date",
+          "format": "YYYY-MM-dd"
+        },
+        "description": {
+          "type": "string"
+        },
+        "url_image": {
+          "type": "string"
         }
-    },
-    "userId": {
-        "type": "string"
+      }
     }
+  }
 }
 ```
+
+Datas :
+
 Item     | type | Information
 -------- | -------- | ----------
-type | "string" | store the value "feature"
-geometry | Object | Geometry
-location | geo_point | [See the doc](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/mapping-geo-point-type.html)
-properties | Object | Store fields
-userId | String | Store the id of the user
+Location | GeoShape field | store location, see [Geo Shape](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html)
+Centroid | Geo point | Store the centroid of the object (for the subscribe() kuzzle method)
+UserId | string | Id of user, creator of feature
+
+
+Fields:
+
+Item     | type | Information
+-------- | -------- | ----------
+Name | String | Name of your object
+Date publish | Date | Date of publish (format YYYY-MM-dd)
+Description | string | Description of object
+Url image | String | Kuzzle don't store image, but can store an url
+
 
 #### <i class="icon-upload"></i> Data format
 -------------
-Datas are recording in [GeoJSON](http://geojson.org/) format in Kuzzle.
 Read [Kuzzle documentation](http://kuzzle.io/sdk-documentation/) for more information about KuzzleCollection and KuzzleDocument
 
 Exemple of KuzzleDocument working in Kurtography :
 ```
 {
-  "type": "Feature",
-  "geometry": {
-    "type": "Point",
-    "coordinates": [
-      3.9609146118164054,
-      43.624395670027354
-    ]
+  "datas": {
+    "location": {
+        "type": "Point",
+        "coordinates": [3.9609146118164054, 43.624395670027354]
+    },
+    "centroid": {
+        "lon": 43.624395670027354,
+        "lat": 3.9609146118164054
+    }
+    "userId": "smeaudre"
   },
-  "properties": {
+  "fields": {
     "name": "Test",
-  },
-  "location": {
-    "lon": 3.9609146118164054,
-    "lat": 43.624395670027354
-  },
-  "id": "AVRO9acbPyvkbVrqtBU0",
-  "userId": "mySuperUser"
+    "description": "Test ajout",
+    "date_publish": "2016-08-29",
+    "url_image": ""
+  }
 }
 ```
-
-Item     | Value | Information
--------- | -------- | ----------
-type | "Feature" | default value, don't change it
-geometry | Object | Store the feature's geometry
-properties | Object | List of datas fields recorded in kuzzle
-location | Object | Coordinates point of referential point (for line and polygon, it's centroid coordinates)
-id | string | Kuzzle document identifier
+After create, the field "id" is added to datas. It's the Kuzzle Document Identifier.
+Datas from kuzzle are converting into [geojson](http://geojson.org/) for  making an openlayers feature.
 
 
 How to : user documentation

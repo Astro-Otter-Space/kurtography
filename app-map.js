@@ -1,4 +1,4 @@
-import dataLayers from './dist/src/dataLayers';
+import kuzzleBridge from './dist/src/kuzzleBridge';
 import auth from './dist/services/auth'
 import search from './dist/src/search';
 
@@ -27,7 +27,7 @@ console.log("             ````          ");
 
 
 // Load collections
-dataLayers.listCollections();
+kuzzleBridge.listCollections();
 // Load research
 search.init();
 
@@ -72,7 +72,7 @@ document.querySelector('a[data-link="logout"]').addEventListener('click', functi
 var handleSubmit = function(e) {
     e.preventDefault();
     var objPropertiesFeature = new Array();
-    var updFeature = dataLayers.getSource().getFeatureById(dataLayers.state.notNotifFeatureId);
+    var updFeature = kuzzleBridge.getSource().getFeatureById(kuzzleBridge.state.notNotifFeatureId);
     Array.from(e.target.elements).forEach(element => {
         if ("text" == element.type && "undefined" != element.type) {
             objPropertiesFeature[element.name] = element.value;
@@ -80,7 +80,7 @@ var handleSubmit = function(e) {
         }
     });
     document.getElementById("divAddDoc").classList.toggle("hidden");
-    dataLayers.updatePropertiesDocument(updFeature);
+    kuzzleBridge.updateDocument(updFeature);
 };
 var form = document.forms['form-edit-properties'];
 form.addEventListener('submit', handleSubmit, false);
@@ -137,10 +137,6 @@ formRegister.addEventListener('submit', handleRegister, false);
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
-
-//Array.prototype.valueOf = function(){
-//    console.log(JSON.stringify(this, null, '\t'));
-//};
 
 // https://www.dartdocs.org/documentation/mdl/1.15.2/mdlcomponents/mdlcomponents-library.html
 // http://quaintous.com/2015/07/09/react-components-with-mdl/

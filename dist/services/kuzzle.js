@@ -1,11 +1,13 @@
 import Kuzzle from 'kuzzle-sdk'
-import Config from './config'
+import Config from './kuzzle-config'
 import notification from './notification';
 
 var optConnect = {
     defaultIndex: Config.defaultIndex,
     connect: 'auto',
     autoReconnect: true,
+    ioPort: 7512,
+    wsPort: 7513,
     headers: {
         'Access-Control-Allow-Origin' : '*'
     }

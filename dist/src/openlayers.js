@@ -1,15 +1,17 @@
 import Projection from '../services/geo-parameters'
 import notification from '../services/notification';
-import dataLayers from './dataLayers';
+import kuzzleBridge from './kuzzleBridge';
 import ol from 'openlayers';
+
 // Openlayers controls
-import LayerSwitcher from './layerSwitcher'
-import ControlDrawButtons from './ol3-controldrawbuttons'
-import ZoomControl from './ol3-zoomuibuttons';
-import SetPosition from './ol3-resetposition';
-import RedrawSubscribeZone from './ol3-editsubscribezone';
-import RealTimeTracking from './ol3-realTimeTracking';
-import exportDatas from './ol3-export';
+import LayerSwitcher from './ol3-plugins/layerSwitcher'
+import ControlDrawButtons from './ol3-plugins/ol3-controldrawbuttons'
+import ZoomControl from './ol3-plugins/ol3-zoomuibuttons';
+import SetPosition from './ol3-plugins/ol3-resetposition';
+import RedrawSubscribeZone from './ol3-plugins/ol3-editsubscribezone';
+import RealTimeTracking from './ol3-plugins/ol3-realTimeTracking';
+import exportDatas from './ol3-plugins/ol3-export';
+
 // Openlayers 3 add-ons
 import turfInside from 'turf-inside';
 import turfCentroid from 'turf-centroid';
@@ -69,18 +71,7 @@ export default {
             }
         );
 
-        var mapQuest = new ol.layer.Tile({
-                title : 'Satellite',
-                visible : false,
-                type: 'overlays',
-                source: new ol.source.MapQuest({
-                    layer: 'sat'
-                })
-            }
-        );
-
         this.state.tabBaseLayers.push(osm);
-        this.state.tabBaseLayers.push(mapQuest);
 
         this.state.groupBaseMaps = new ol.layer.Group({
             title: "Kuzzle group",
@@ -88,8 +79,8 @@ export default {
         });
 
         // Put layers in ol.layer.Group
-        if (dataLayers.state.collections.length > 0) {
-            this.state.tabLayersKuzzle = dataLayers.state.collections.map(layerName => {
+        if (kuzzleBridge.state.collections.length > 0) {
+            this.state.tabLayersKuzzle = kuzzleBridge.state.collections.map(layerName => {
                 var layer = new ol.layer.Vector({
                     title: layerName,
                     type: 'base',
@@ -147,11 +138,12 @@ export default {
 
         // Retrieve geolocation with default values
         this.geolocation = new ol.Geolocation({
-            projection: ol.proj.get(this.state.projectionTo),
+            //projection: ol.proj.get(this.state.projectionTo),
             tracking: true
         });
 
         this.geolocation.set('position', [Projection.longDefault, Projection.latDefault]);
+        this.geolocation.set('accuracy', 5); // Accuracy to 5 meters
         this.state.coordinates = [lonDef, latDef];
         this.initPosition(lonDef, latDef);
 
@@ -170,6 +162,8 @@ export default {
             if(false != this_.state.acceptGeoloc) {
                 this.geolocation.on('change', function() {
 
+                    console.log(this_.geolocation.getPosition());
+
                     var lon = this_.geolocation.getPosition()[0];
                     var lat =  this_.geolocation.getPosition()[1];
                     this_.initPosition(lon, lat);
@@ -185,6 +179,7 @@ export default {
         this.geolocation.on('change:position', function() {
             var lon = this.getPosition()[0];
             var lat =  this.getPosition()[1];
+
             // Set of current coordonates
             this_.state.coordinates = [lon, lat];
             this_.initPosition(lon, lat);
@@ -443,12 +438,12 @@ export default {
 
         // Load datas and Mapping
         if (undefined != featureId && null != featureId) {
-            dataLayers.loadDatasFromCollection(layer.get('title'), featureId);
+            kuzzleBridge.loadDatasFromCollection(layer.get('title'), featureId);
         } else {
-            dataLayers.loadDatasFromCollection(layer.get('title'));
+            kuzzleBridge.loadDatasFromCollection(layer.get('title'));
         }
 
-        dataLayers.getPropertiesMapping(layer.get('title'));
+        //kuzzleBridge.getPropertiesMapping(layer.get('title'));
 
         if (true == flagIsAuthenticated) {
             this.state.buttonsDrawControls.setSelectedLayer(layer);
@@ -521,20 +516,30 @@ export default {
      * Create a zone where kuzzle subscription is active
      * @param distance
      */
-    createZoneSubscription(distance)
+    createZoneSubscription(distanceMeters)
     {
         if (undefined != this.state.zoneSubscriptionLayer || null != this.state.zoneSubscriptionLayer) {
             this.state.map.removeLayer(this.state.zoneSubscriptionLayer);
         }
 
-        var coordonatesWGS84 = this.state.coordinates; // = this.geolocation.getPosition();
+        var coordonatesWGS84 = this.state.coordinates;
 
         var features = [];
-        // Transformation coordinates in Mercator projection
-        var coordinatesTr = ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom);
 
         // Creation of circle
-        var circle = new ol.geom.Circle([coordinatesTr[0], coordinatesTr[1]], distance);
+        var projection = this.state.view.getProjection();
+        var resolutionAtEquator = this.state.view.getResolution();
+        var center = this.state.view.getCenter();
+
+        // Radius from distance in meters
+        var pointResolution = projection.getPointResolution(resolutionAtEquator, center);
+        var resolutionFactor = resolutionAtEquator/pointResolution;
+        var radius = (distanceMeters / ol.proj.METERS_PER_UNIT.m) * resolutionFactor;
+
+        var circle = new ol.geom.Circle(
+            ol.proj.transform([coordonatesWGS84[0], coordonatesWGS84[1]], this.state.projectionTo, this.state.projectionFrom),
+            radius
+        );
 
         // Create feature : we transform the circle into polygon for having a geJSON of this feature
         features.push(new ol.Feature({
@@ -571,7 +576,7 @@ export default {
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
 
         // Rebuild the subscribe zone
-        dataLayers.subscribeCollection(this.getSelectedLayer(), this.state.coordinates);
+        kuzzleBridge.subscribeCollection(this.getSelectedLayer(), this.state.coordinates);
     },
 
     /**
@@ -580,9 +585,8 @@ export default {
      */
     showFeaturesInformations(feature, centerTofeature = true)
     {
-        var parser = new ol.format.GeoJSON();
         var fProperties = feature.getProperties();
-        var fGeoJson = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+
         // Show datas
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
 
@@ -594,8 +598,6 @@ export default {
         var datePublish = new Date(fProperties.date_publish);
         document.getElementById("dateKdoc").innerHTML = " " + dateFormat(datePublish, 'dd/mm/yyyy') + byUser;
 
-
-
         document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
         if ("" != fProperties.url_image) {
             document.getElementById("imgKdoc").classList.remove("hidden");
@@ -605,7 +607,7 @@ export default {
         } else {
             document.getElementById("imgKdoc").classList.add("hidden");
         }
-        this.addGeometriesTab(feature.getGeometry());
+        //this.addGeometriesTab(feature.getGeometry());
 
         if (true == centerTofeature) {
             document.getElementById("infoKdoc").classList.toggle("hidden");
@@ -671,49 +673,47 @@ export default {
             while (divForm.firstChild) divForm.removeChild(divForm.firstChild);
         }
 
-        Object.keys(dataLayers.state.mappingCollection).forEach(key => {
+        Object.keys(kuzzleBridge.state.mappingFieldsCollection).forEach(key => {
 
-            if ("userId" != key) {
-                var div = document.createElement('div');
-                div.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
+            var div = document.createElement('div');
+            div.className = "mdl-textfield mdl-js-textfield mdl-textfield--floating-label";
 
-                // Label
-                var label = document.createElement('label');
-                label.className = "mdl-textfield__label";
+            // Label
+            var label = document.createElement('label');
+            label.className = "mdl-textfield__label";
 
-                label.innerHTML = key.capitalizeFirstLetter();
-                label.setAttribute("for", key);
+            label.innerHTML = key.capitalizeFirstLetter();
+            label.setAttribute("for", key);
 
-                // Input
-                if ("string" == dataLayers.state.mappingCollection[key].type) {
-                    var input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'mdl-textfield__input';
-                    input.name = key;
-                    input.id = key;
+            // Input
+            if ("string" == kuzzleBridge.state.mappingFieldsCollection[key].type) {
+                var input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'mdl-textfield__input';
+                input.name = key;
+                input.id = key;
 
-                    if (key == "name"){
-                        input.setAttribute("required", "required");
-                    }
-
-                    div.appendChild(label);
-                    div.appendChild(input);
-                    divForm.appendChild(div);
-
-                } else if ("string" == dataLayers.state.mappingCollection[key].type && "description" == key) {
-                    var input = document.createElement('textarea');
-                    input.className = 'mdl-textfield__input';
-                    input.type= "text";
-                    input.row = 3;
-                    input.name = key;
-                    input.id = key;
-
-                    div.appendChild(label);
-                    div.appendChild(input);
-                    divForm.appendChild(div);
+                if (key == "name"){
+                    input.setAttribute("required", "required");
                 }
-                componentHandler.upgradeElements(div);
+
+                div.appendChild(label);
+                div.appendChild(input);
+                divForm.appendChild(div);
+
+            } else if ("string" == kuzzleBridge.state.mappingFieldsCollection[key].type && "description" == key) {
+                var input = document.createElement('textarea');
+                input.className = 'mdl-textfield__input';
+                input.type= "text";
+                input.row = 3;
+                input.name = key;
+                input.id = key;
+
+                div.appendChild(label);
+                div.appendChild(input);
+                divForm.appendChild(div);
             }
+            componentHandler.upgradeElements(div);
         });
 
         document.getElementById("divAddDoc").classList.toggle("hidden");

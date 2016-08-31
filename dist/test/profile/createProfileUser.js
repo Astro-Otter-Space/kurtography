@@ -1,6 +1,6 @@
 var Kuzzle = require('kuzzle-sdk');
 
-var kuzzle = new Kuzzle('http://kurtography.challenge.kuzzle.io:7512', function() {
+var kuzzle = new Kuzzle('localhost', function() {
 
     var roles = {
         "roles": [
