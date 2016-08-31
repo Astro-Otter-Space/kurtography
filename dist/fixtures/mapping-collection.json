@@ -7,6 +7,10 @@
           "tree": "quadtree",
           "precision": "1m"
         },
+        "centroid": {
+          "type": "geo_point",
+          "lat_lon": true
+        },
         "userId": {
           "type": "string"
         }

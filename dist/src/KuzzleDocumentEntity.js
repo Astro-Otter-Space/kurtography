@@ -2,8 +2,20 @@ import kuzzle from '../services/kuzzle'
 import Config from '../services/kuzzle-config'
 import KuzzleBridge from './kuzzleBridge';
 import user from './user';
+import turfCentroid from 'turf-centroid';
+
 
 class KuzzleDocumentEntity {
+
+
+    /**
+     *
+     * @param kuzzleDocumentId
+     */
+    getDocumentById(kuzzleDocumentId)
+    {
+        return kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(kuzzleDocumentId);
+    }
 
     /**
      * Transform a KuzzleDocument into GeoJson format
@@ -13,6 +25,7 @@ class KuzzleDocumentEntity {
     fromKuzzleToFeature(document)
     {
         var datasGeometry = document.content.datas;
+        // /!\ we don't need field "datasGeometry.centroid" for the feature
         var fields = document.content.fields;
 
         var dataGeoJson = {
@@ -40,6 +53,13 @@ class KuzzleDocumentEntity {
         // Coodinates geometry
         var coordinatesFeatures = featureGeoJson.geometry;
 
+        // Centroid of document
+        /**
+         * ol.Feature centroid
+         */
+        var centroid = turfCentroid(featureGeoJson);
+        var coordinatesCentroid = centroid.geometry.coordinates;
+
         // Create fields datas from mapping
         // Creation of feature
         if (null == featureGeoJson.properties) {
@@ -66,6 +86,10 @@ class KuzzleDocumentEntity {
         var content = {
             datas: {
                 location: coordinatesFeatures,
+                centroid: {
+                    lon: coordinatesCentroid[0],
+                    lat: coordinatesCentroid[1]
+                } ,
                 userId: user.state.id
             },
             fields: propertiesFeatures

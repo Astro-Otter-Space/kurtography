@@ -109,17 +109,6 @@ export default {
 
 
     /**
-     * Retrieve a kuzzle document by his ID
-     * @param idKDoc
-     * @return KuzzleDocument
-     */
-    loadDataById (idKDoc)
-    {
-        var kDocument = kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).documentFactory(idKDoc).save();
-        return kDocument;
-    },
-
-    /**
      * Store mapping of selected collection
      * @param string layer
      */
@@ -152,6 +141,7 @@ export default {
         var idFeature = (undefined != feature.get('id')) ? feature.get('id') : null;
 
         var newKuzzleDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, fDatasGeoJson, null);
+        
         kuzzle.dataCollectionFactory(layer).createDocument(idFeature, newKuzzleDocument, function (err, resp) {
             if (!err) {
                 // set of notNotifFeatureId and reconstruction of subscribe with new value of notNotifFeatureId
@@ -287,16 +277,18 @@ export default {
         }
 
         var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 5000;
+
+        /**
+         * /!\ Filter on geo_shape is not implemented in kuzzle yet !!
+         */
+
         var filter =
         {
             geoDistance: {
-                distance: distanceValue,
-                location: {
-                    lon: coordonatesWGS84[0],
-                    lat: coordonatesWGS84[1]
-                }
+
             }
         };
+
         var options = {
             // We want created messages only
             scope: 'all',
@@ -306,16 +298,19 @@ export default {
             state: 'done'
         };
 
-        //console.log(JSON.stringify(filter, null, '\t'));
+        console.log(JSON.stringify(filter, null, '\t'));
         this.state.subscription = subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 if (null == this_.state.notNotifFeatureId || resp.result._id != this_.state.notNotifFeatureId) {
 
                     // We retrive kDoc and transform it on feature
                     if ('in' == resp.scope ) {
-                        var kDoc = this_.loadDataById(resp.result._id);
+
                         this_.action = resp.action;
-                        kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, (err, resp) => {
+
+                        console.log(resp);
+
+                        /*kuzzle.dataCollectionFactory(layer.get('title')).fetchDocument(kDoc.id, (err, resp) => {
                             var f = new ol.format.GeoJSON();
 
                             if ("update" == this_.action) {
@@ -342,7 +337,7 @@ export default {
                                 message: "A document have been " +  this_.action + "d in Kuzzle in your subscribe area."
                             });
                         });
-
+                        */
 
                     } else if ('out' == resp.scope){
                         /**
