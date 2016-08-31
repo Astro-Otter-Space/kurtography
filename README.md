@@ -12,8 +12,8 @@ Beta stage of development : v. 0.13.5
 
 Requirements
 -------------
- - [NodeJS and NPM](https://nodejs.org/en/)
- - [A Kuzzle instance](http://kuzzle.io/guide/), [installation](https://github.com/kuzzleio/kuzzle#installation)
+ - [NodeJS (4.x min) and NPM](https://nodejs.org/en/)
+ - [A Kuzzle instance](http://kuzzle.io/guide/) (1.0.0-RC5 min), [installation](https://github.com/kuzzleio/kuzzle#installation)
  - If you want to export the datas in geometric format, install [GDAL/OGR Binaries](http://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries), [ogr2ogr](https://www.npmjs.com/package/ogr2ogr)
 
 Installation
