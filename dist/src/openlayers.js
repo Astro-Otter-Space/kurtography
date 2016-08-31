@@ -72,7 +72,6 @@ export default {
         );
 
         this.state.tabBaseLayers.push(osm);
-        this.state.tabBaseLayers.push(mapQuest);
 
         this.state.groupBaseMaps = new ol.layer.Group({
             title: "Kuzzle group",
