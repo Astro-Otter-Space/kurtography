@@ -482,6 +482,7 @@ export default {
             subscriptionByUserId.unsubscribe();
         }
 
+        // TODO : make filter for user connected ONLY
         var filter =
         {
             //and:[
@@ -507,7 +508,9 @@ export default {
 
                 if ("publish" == resp.action && 'in' == resp.scope) {
                     console.log(resp.result._source);
+
                     var notifAlert = document.getElementById('NotificationUser');
+                    var menuNotification = document.getElementById('listNotificationUser');
 
                     if (! notifAlert.hasAttribute('data-badge')) {
                         notifAlert.setAttribute('data-badge', 1);
@@ -516,6 +519,13 @@ export default {
                         notifAlert.setAttribute('data-badge', nbNotif + 1);
                     }
 
+                    /*var li = document.createElement('li');
+                    li.addClass('mdl-menu__item');
+                    li.innerHTML = resp.result._source.message;
+
+                    menuNotification.appendChild(li);
+
+                    menuNotification.classList.add('is-visible');*/
                 }
 
             } else {

@@ -10,10 +10,15 @@ header#navbar.mdl-layout__header.mdl-layout__header--transparent
                     input.mdl-textfield__input#kuzzleSearch(type="text")
                     label.mdl-textfield__label(for="kuzzleSearch") Expandable Input
 
-        span#NotificationUser.mdl-badge.mdl-badge--overlap.hidden
+        span#NotificationUser.mdl-badge.mdl-badge--no-background.mdl-badge--overlap.hidden
             i.material-icons notifications_none
+
         button#demo-menu-lower-right.mdl-button.mdl-js-button.mdl-button--icon
             i.material-icons more_vert
+
+        // Menu listant les notification reçus
+        ul#listNotificationUser.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect.hidden(for="NotificationUser")
+            li.mdl-menu__item
 
         ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="demo-menu-lower-right")
             li.mdl-menu__item

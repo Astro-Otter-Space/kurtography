@@ -617,13 +617,13 @@ export default {
         buttonNotificate.setAttribute('title', 'Notificate ' + fProperties.userId + ' about ' + fProperties.name);
         buttonNotificate.addEventListener('click', function() {
             "use strict";
+            // Add timeout of 3 seconds
             kuzzleBridge.sendNotificationToUser(feature.getId());
 
             notification.init({
                 type: 'notice',
                 message: 'You have notified ' + fProperties.userId + ' about ' + fProperties.name
             });
-
         }, false);
 
         if (true == centerTofeature) {
