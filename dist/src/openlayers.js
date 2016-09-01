@@ -401,9 +401,13 @@ export default {
 
             // This adding must be placed after the onchange...
             this.state.map.addControl(this.state.buttonsDrawControls);
+
+            // Show notificate button
+            document.getElementById('NotificationUser').classList.remove('hidden');
         } else {
             this.state.map.removeControl(this.state.buttonsDrawControls);
             this.state.map.removeControl(this.state.realTimeTracking);
+            document.getElementById('NotificationUser').classList.add("hidden");
         }
     },
 
@@ -607,6 +611,20 @@ export default {
             document.getElementById("imgKdoc").classList.add("hidden");
         }
         this.addGeometriesTab(feature.getGeometry());
+
+        // Add specififs id on button notificate
+        var buttonNotificate = document.getElementsByClassName('notificate_owner')[0];
+        buttonNotificate.setAttribute('title', 'Notificate ' + fProperties.userId + ' about ' + fProperties.name);
+        buttonNotificate.addEventListener('click', function() {
+            "use strict";
+            kuzzleBridge.notificateUser(feature.getId());
+
+            notification.init({
+                type: 'notice',
+                message: 'You have notified ' + fProperties.userId + ' about ' + fProperties.name
+            });
+
+        }, false);
 
         if (true == centerTofeature) {
             document.getElementById("infoKdoc").classList.toggle("hidden");

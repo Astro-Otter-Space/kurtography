@@ -444,6 +444,30 @@ export default {
         }
     },
 
+    /**
+     *
+     * @param kuzzleIdentifier
+     */
+    notificateUser(kuzzleIdentifier)
+    {
+        var collection = olMap.getSelectedLayer().get('title');
+        kuzzle.dataCollectionFactory(collection).fetchDocument(kuzzleIdentifier, (err, resp) => {
+
+            if (!err) {
+                var kuzzleDocument = resp;
+
+                kuzzle.dataCollectionFactory(kuzzleDocument.collection).publishMessage({coucou: 'coucou'}, (err, respM) => {
+                    console.log(respM);
+                });
+
+            } else {
+                notification.init({
+                    type: 'warning',
+                    message: "Error on fetch document."
+                });
+            }
+        });
+    },
 
     /**
      * Bridge between kuzzle search result and Map datas
