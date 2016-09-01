@@ -454,6 +454,9 @@ export default {
             if(false != this.state.acceptGeoloc) {
                 this.state.realTimeTracking.setSelectedLayer(layer);
             }
+
+            // create subscribe for the user logged
+            kuzzleBridge.receiveNotification(user.state.id);
         }
 
         if (true == flagIsAuthenticated) {
@@ -579,7 +582,7 @@ export default {
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
 
         // Rebuild the subscribe zone
-        kuzzleBridge.subscribeCollection(this.getSelectedLayer(), this.state.coordinates);
+        kuzzleBridge.subscribeByGeoDistance(this.getSelectedLayer(), this.state.coordinates);
     },
 
     /**
@@ -617,7 +620,7 @@ export default {
         buttonNotificate.setAttribute('title', 'Notificate ' + fProperties.userId + ' about ' + fProperties.name);
         buttonNotificate.addEventListener('click', function() {
             "use strict";
-            kuzzleBridge.notificateUser(feature.getId());
+            kuzzleBridge.sendNotificationToUser(feature.getId());
 
             notification.init({
                 type: 'notice',

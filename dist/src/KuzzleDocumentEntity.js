@@ -105,6 +105,9 @@ class KuzzleDocumentEntity {
 
         return document;
     }
+
+
+
 }
 
 export default KuzzleDocumentEntity;

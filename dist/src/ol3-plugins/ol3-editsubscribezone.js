@@ -146,7 +146,7 @@ ol.control.EditSubscribeRoom.prototype.drawEndFeature = function(evt)
     olMap.state.distance = parseInt(radiusInMeters);
     olMap.state.coordinates = centerWgs84;
 
-    kuzzleBridge.subscribeCollection(olMap.getSelectedLayer(), centerWgs84);
+    kuzzleBridge.subscribeByGeoDistance(olMap.getSelectedLayer(), centerWgs84);
 };
 
 

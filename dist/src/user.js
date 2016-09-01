@@ -1,4 +1,5 @@
 import kuzzle from '../services/kuzzle'
+import kuzzleBridge from './kuzzleBridge'
 import olMap from './openlayers';
 /**
  * /!\ @source : https://github.com/kuzzleio/kuzzle-challenge-klack/blob/master/src/store/user.js
@@ -46,6 +47,8 @@ export default {
         this.state.id = null;
         this.state.username = null;
         this.state.pictureId = null;
+
+        kuzzleBridge.state.subscriptionByUserId.unsubscribe();
 
         olMap.initControlsIfConnected(this.isAuthenticated());
     }

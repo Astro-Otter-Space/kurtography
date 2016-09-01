@@ -147,7 +147,7 @@ ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
 
         this_.setFlagDraw(false); // Desactivation of drawing flag
         kuzzleBridge.state.notNotifFeatureId = null; // desactivation of featureId in progress
-        kuzzleBridge.subscribeCollection(olMap.getSelectedLayer(), olMap.state.coordinates);
+        kuzzleBridge.subscribeByGeoDistance(olMap.getSelectedLayer(), olMap.state.coordinates);
         e.preventDefault();
     };
 

@@ -6,7 +6,8 @@ import notification from '../services/notification';
 import ol from 'openlayers';
 import olMap from './openlayers'
 
-let subscription = null;
+let subscriptionGeoDistance = null;
+let subscriptionByUserId = null;
 let kuzzleDocumentEntity = new KuzzleDocumentEntity();
 //let this_ = this;  --> correct ?
 
@@ -18,7 +19,8 @@ export default {
         notNotifFeatureId: null, // when we created a new feature od update a feature, store the featureId for not notfy it in kuzzleRoom
         mappingFieldsCollection: null, // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures(),
-        subscription: null,
+        subscriptionGeoDistance: null,
+        subscriptionByUserId: null,
         rstAdvancedSearch: null
     },
 
@@ -52,15 +54,9 @@ export default {
      */
     loadDatasFromCollection(collection, featureIdQs)
     {
-        var this_ = this;
         var options = {
             from: 0,
             size: 10000,
-            /*sort: {
-                "fields.date_publish": {
-                    order: "desc"
-                }
-            }*/
         };
 
         // Load mapping of collection
@@ -263,17 +259,15 @@ export default {
 
     /**
      * Subscribe to item from currentPosition with a radius specified by distance
-     * https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-geo-distance-filter.html
      * @param layer
-     * @param currentPosition
-     * @param int distance : distance of radius in meters (default unity)
+     * @param coordonatesWGS84
      */
-    subscribeCollection(layer, coordonatesWGS84)
+    subscribeByGeoDistance(layer, coordonatesWGS84)
     {
         var this_ = this;
-        if (this.state.subscription || subscription) {
-            this.state.subscription.unsubscribe();
-            subscription.unsubscribe();
+        if (this.state.subscriptionGeoDistance || subscriptionGeoDistance) {
+            this.state.subscriptionGeoDistance.unsubscribe();
+            subscriptionGeoDistance.unsubscribe();
         }
 
         var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 5000;
@@ -281,7 +275,6 @@ export default {
         /**
          * /!\ Filter on geo_shape is not implemented in kuzzle yet !!
          */
-
         var filter =
         {
             geoDistance: {
@@ -303,12 +296,13 @@ export default {
         };
 
         //console.log(JSON.stringify(filter, null, '\t'));
-        this.state.subscription = subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
+        this.state.subscriptionGeoDistance = subscriptionGeoDistance = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
             if (!err) {
                 if (null == this_.state.notNotifFeatureId || resp.result._id != this_.state.notNotifFeatureId) {
 
                     // We retrive kDoc and transform it on feature
-                    if ('in' == resp.scope ) {
+                    if ('in' == resp.scope && ('create' == resp.action || 'update' == resp.action) ) {
+
                         this_.action = resp.action;
 
                         // Fetch the document
@@ -366,8 +360,7 @@ export default {
 
     /**
      * Kuzzle request for search
-     * @param search
-     * @param layer
+     * @param searchItem
      */
     searchDocuments(searchItem)
     {
@@ -448,7 +441,7 @@ export default {
      *
      * @param kuzzleIdentifier
      */
-    notificateUser(kuzzleIdentifier)
+    sendNotificationToUser(kuzzleIdentifier)
     {
         var collection = olMap.getSelectedLayer().get('title');
         kuzzle.dataCollectionFactory(collection).fetchDocument(kuzzleIdentifier, (err, resp) => {
@@ -456,9 +449,15 @@ export default {
             if (!err) {
                 var kuzzleDocument = resp;
 
-                kuzzle.dataCollectionFactory(kuzzleDocument.collection).publishMessage({coucou: 'coucou'}, (err, respM) => {
-                    console.log(respM);
-                });
+                var contentMessage= {
+                    userId: kuzzleDocument.content.datas.userId,
+                    documentId: kuzzleDocument.id,
+                    message: 'notification about ' + kuzzleDocument.content.properties.name
+                };
+                //var messageDocument = kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(contentMessage);
+
+                // Publish message on document
+                kuzzle.dataCollectionFactory(kuzzleDocument.collection).publishMessage(contentMessage, );
 
             } else {
                 notification.init({
@@ -468,6 +467,43 @@ export default {
             }
         });
     },
+
+    /**
+     * /!\ Only if user is connected
+     *
+     */
+    //receiveNotification(userId)
+    //{
+    //    if (this.state.subscriptionByUserId || subscriptionByUserId) {
+    //        this.state.subscriptionByUserId.unsubscribe();
+    //        subscriptionByUserId.unsubscribe();
+    //    }
+    //
+    //    var filter = {
+    //        term: {
+    //            firstName: userId
+    //        }
+    //    };
+    //
+    //    var options = {
+    //        // We want created messages only
+    //        scope: 'in',
+    //        // We treate our messages as any other messages
+    //        subscribeToSelf: true,
+    //        // We want only messages once they are stored (and volatile are always done)
+    //        state: 'pending'
+    //    };
+    //
+    //    this.state.subscriptionByUserId = kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).subscribe(filter, options, (err, resp) => {
+    //        if (!err) {
+    //
+    //        } else {
+    //            if ('publish' == resp.action) {
+    //                console.log('New notification for ' + userId );
+    //            }
+    //        }
+    //    });
+    //},
 
     /**
      * Bridge between kuzzle search result and Map datas
