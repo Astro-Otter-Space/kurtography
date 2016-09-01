@@ -40,6 +40,8 @@ export default {
 
             document.querySelector('a[data-link="auth"]').parentNode.setAttribute("disabled", "disabled");
             document.querySelector('a[data-link="logout"]').parentNode.removeAttribute("disabled");
+
+            kuzzleBridge.receiveNotification(kuzzleUser.id);
         });
     },
 

@@ -9,7 +9,6 @@ import olMap from './openlayers'
 let subscriptionGeoDistance = null;
 let subscriptionByUserId = null;
 let kuzzleDocumentEntity = new KuzzleDocumentEntity();
-//let this_ = this;  --> correct ?
 
 export default {
 
@@ -51,6 +50,7 @@ export default {
     /**
      * Retrieve datas from collections and create openlayers Vector layer
      * @param collection
+     * @param featureIdQs
      */
     loadDatasFromCollection(collection, featureIdQs)
     {
@@ -106,7 +106,7 @@ export default {
 
     /**
      * Store mapping of selected collection
-     * @param string layer
+     * @param layer
      */
     getPropertiesMapping(layer)
     {
@@ -127,8 +127,8 @@ export default {
 
     /**
      * Adding new KuzzleDocument
-     * @param json datas
-     * @param ol.Feature newFeature
+     * @param fDatasGeoJson
+     * @param ol.Feature feature
      */
     addDocument(fDatasGeoJson, feature)
     {
@@ -224,9 +224,7 @@ export default {
 
     /**
      * Delete document from Kuzzle and delete from map
-     * @param idDocument
-     * @param layer
-     * @returns {boolean}
+     * @param featureId
      */
     deleteDocument(featureId)
     {
@@ -449,15 +447,17 @@ export default {
             if (!err) {
                 var kuzzleDocument = resp;
 
-                var contentMessage= {
+                var contentMessage = {
                     userId: kuzzleDocument.content.datas.userId,
                     documentId: kuzzleDocument.id,
-                    message: 'notification about ' + kuzzleDocument.content.properties.name
+                    type: "notification_user",
+                    message: 'notification about ' + kuzzleDocument.content.fields.name
                 };
+                console.log(contentMessage);
                 //var messageDocument = kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(contentMessage);
 
                 // Publish message on document
-                kuzzle.dataCollectionFactory(kuzzleDocument.collection).publishMessage(contentMessage, );
+                kuzzle.dataCollectionFactory(Config.defaultIndex,kuzzleDocument.collection).publishMessage(contentMessage);
 
             } else {
                 notification.init({
@@ -472,38 +472,60 @@ export default {
      * /!\ Only if user is connected
      *
      */
-    //receiveNotification(userId)
-    //{
-    //    if (this.state.subscriptionByUserId || subscriptionByUserId) {
-    //        this.state.subscriptionByUserId.unsubscribe();
-    //        subscriptionByUserId.unsubscribe();
-    //    }
-    //
-    //    var filter = {
-    //        term: {
-    //            firstName: userId
-    //        }
-    //    };
-    //
-    //    var options = {
-    //        // We want created messages only
-    //        scope: 'in',
-    //        // We treate our messages as any other messages
-    //        subscribeToSelf: true,
-    //        // We want only messages once they are stored (and volatile are always done)
-    //        state: 'pending'
-    //    };
-    //
-    //    this.state.subscriptionByUserId = kuzzle.dataCollectionFactory(olMap.getSelectedLayer().get('title')).subscribe(filter, options, (err, resp) => {
-    //        if (!err) {
-    //
-    //        } else {
-    //            if ('publish' == resp.action) {
-    //                console.log('New notification for ' + userId );
-    //            }
-    //        }
-    //    });
-    //},
+    receiveNotification(userId)
+    {
+
+        console.log("Create Room for notification of volatile message for user " + userId);
+
+        if (this.state.subscriptionByUserId || subscriptionByUserId) {
+            this.state.subscriptionByUserId.unsubscribe();
+            subscriptionByUserId.unsubscribe();
+        }
+
+        var filter =
+        {
+            //and:[
+                //{
+                    //term: {
+                      //  type: 'notification_user'
+                    //}
+               // },
+                //{
+                    //term: {
+                      //  userId: userId
+                    //}
+                //}
+            //]
+        };
+
+        var options = {
+            state: 'done'
+        };
+
+        this.state.subscriptionByUserId = subscriptionByUserId = kuzzle.dataCollectionFactory(Config.defaultIndex, 'test_collection').subscribe(filter, options, (err, resp) => {
+            if (!err) {
+
+                if ("publish" == resp.action && 'in' == resp.scope) {
+                    console.log(resp.result._source);
+                    var notifAlert = document.getElementById('NotificationUser');
+
+                    if (! notifAlert.hasAttribute('data-badge')) {
+                        notifAlert.setAttribute('data-badge', 1);
+                    } else {
+                        var nbNotif = parseInt(notifAlert.getAttribute('data-badge'));
+                        notifAlert.setAttribute('data-badge', nbNotif + 1);
+                    }
+
+                }
+
+            } else {
+                notification.init({
+                   type: 'error',
+                    message: 'Problem with notification sending'
+                });
+            }
+        });
+    },
 
     /**
      * Bridge between kuzzle search result and Map datas

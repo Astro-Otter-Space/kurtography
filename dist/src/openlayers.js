@@ -454,9 +454,6 @@ export default {
             if(false != this.state.acceptGeoloc) {
                 this.state.realTimeTracking.setSelectedLayer(layer);
             }
-
-            // create subscribe for the user logged
-            kuzzleBridge.receiveNotification(user.state.id);
         }
 
         if (true == flagIsAuthenticated) {
