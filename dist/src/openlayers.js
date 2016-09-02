@@ -589,11 +589,15 @@ export default {
      */
     showFeaturesInformations(feature, centerTofeature = true)
     {
-        console.log(feature.getId());
 
         var this_ = this;
-        this.featureId = feature.getId();
-        var fProperties =  this.fProperties = feature.getProperties();
+        var fProperties = this.fProperties = feature.getProperties();
+
+        // Event on button
+        var buttonNotificate = document.getElementsByClassName('notificate_owner')[0];
+        buttonNotificate.setAttribute('title', 'Notificate ' + fProperties.userId + ' about ' + fProperties.name);
+        buttonNotificate.dataset.featureId = feature.getId();
+        buttonNotificate.removeEventListener("click", this.sendNotificationToOwner, false);
 
         // Show datas
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
@@ -619,22 +623,17 @@ export default {
 
         // Sending notification
         var sendNotificationToOwner = this.sendNotificationToOwner = function(e) {
-            e.preventDefault();
-            console.log(this_.featureId);
-
-            //kuzzleBridge.sendNotificationToUser(this_.featureId);
+            e.target.removeEventListener(e.type, arguments);
+            kuzzleBridge.sendNotificationToUser(e.currentTarget.dataset.featureId);
             notification.init({
                 type: 'notice',
                 message: 'You have notified ' + this_.fProperties.userId + ' about ' + this_.fProperties.name
             });
+            e.preventDefault();
         };
 
-
-        var buttonNotificate = document.getElementsByClassName('notificate_owner');
-        buttonNotificate.setAttribute('title', 'Notificate ' + fProperties.userId + ' about ' + fProperties.name);
-
-        buttonNotificate.removeEventListener('click', this.sendNotificationToOwner, false);
-        buttonNotificate.addEventListener('click', this.sendNotificationToOwner, false);
+        buttonNotificate.removeEventListener("dblclick", this.sendNotificationToOwner, false);
+        buttonNotificate.addEventListener("click", this.sendNotificationToOwner, false);
 
         if (true == centerTofeature) {
             document.getElementById("infoKdoc").classList.toggle("hidden");
