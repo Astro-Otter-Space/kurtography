@@ -472,11 +472,8 @@ export default {
      * /!\ Only if user is connected
      *
      */
-    receiveNotification(userId)
+    receiveNotification(kuzzleUserId)
     {
-
-        console.log("Create Room for notification of volatile message for user " + userId);
-
         if (this.state.subscriptionByUserId || subscriptionByUserId) {
             this.state.subscriptionByUserId.unsubscribe();
             subscriptionByUserId.unsubscribe();
@@ -485,18 +482,18 @@ export default {
         // TODO : make filter for user connected ONLY
         var filter =
         {
-            //and:[
-                //{
-                    //term: {
-                      //  type: 'notification_user'
-                    //}
-               // },
-                //{
-                    //term: {
-                      //  userId: userId
-                    //}
-                //}
-            //]
+            and:[
+                {
+                    term: {
+                        type: 'notification_user'
+                    }
+                },
+                {
+                    term: {
+                        userId: kuzzleUserId
+                    }
+                }
+            ]
         };
 
         var options = {
@@ -509,29 +506,38 @@ export default {
                 if ("publish" == resp.action && 'in' == resp.scope) {
                     console.log(resp.result._source);
 
-                    var notifAlert = document.getElementById('NotificationUser');
-                    var menuNotification = document.getElementById('listNotificationUser');
+                    var btnNotifAlert = document.getElementById('BtnNotificationUser');
+                    btnNotifAlert.childNodes[0].innerHTML = 'notifications';
 
+                    var notifAlert = document.getElementById('NotificationUser');
                     if (! notifAlert.hasAttribute('data-badge')) {
                         notifAlert.setAttribute('data-badge', 1);
                     } else {
                         var nbNotif = parseInt(notifAlert.getAttribute('data-badge'));
                         notifAlert.setAttribute('data-badge', nbNotif + 1);
                     }
+                    notifAlert.classList.remove('hidden');
 
-                    /*var li = document.createElement('li');
-                    li.addClass('mdl-menu__item');
-                    li.innerHTML = resp.result._source.message;
+                    var menuNotification = document.getElementById('listNotificationUser');
+
+                    var li = document.createElement('li');
+                    li.className = "mdl-list__item  mdl-menu__item--full-bleed-divider";
+
+                    var span = document.createElement('span');
+                    span.className = "mdl-list__item-primary-content";
+                    span.innerHTML = resp.result._source.message;
+
+                    li.appendChild(span);
+                    componentHandler.upgradeElements(li);
 
                     menuNotification.appendChild(li);
-
-                    menuNotification.classList.add('is-visible');*/
+                    menuNotification.classList.add('is-visible');
                 }
 
             } else {
                 notification.init({
                    type: 'error',
-                    message: 'Problem with notification sending'
+                    message: 'Problem receiving notification'
                 });
             }
         });

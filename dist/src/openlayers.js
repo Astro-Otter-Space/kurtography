@@ -403,11 +403,12 @@ export default {
             this.state.map.addControl(this.state.buttonsDrawControls);
 
             // Show notificate button
-            document.getElementById('NotificationUser').classList.remove('hidden');
+            document.getElementById('BtnNotificationUser').classList.remove('hidden');
+
         } else {
             this.state.map.removeControl(this.state.buttonsDrawControls);
             this.state.map.removeControl(this.state.realTimeTracking);
-            document.getElementById('NotificationUser').classList.add("hidden");
+            document.getElementById('BtnNotificationUser').classList.add("hidden");
         }
     },
 
