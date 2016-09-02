@@ -2,9 +2,10 @@ import kuzzle from '../services/kuzzle'
 import Config from '../services/kuzzle-config'
 import KuzzleDocumentEntity from './KuzzleDocumentEntity'
 import Projection from '../services/geo-parameters'
-import notification from '../services/notification';
-import ol from 'openlayers';
+import notification from '../services/notification'
+import ol from 'openlayers'
 import olMap from './openlayers'
+import users from './user'
 
 let subscriptionGeoDistance = null;
 let subscriptionByUserId = null;
@@ -439,22 +440,22 @@ export default {
      *
      * @param kuzzleIdentifier
      */
-    sendNotificationToUser(kuzzleIdentifier)
+    sendNotificationToUser(kuzzleDocumentId)
     {
         var collection = olMap.getSelectedLayer().get('title');
-        kuzzle.dataCollectionFactory(collection).fetchDocument(kuzzleIdentifier, (err, resp) => {
+        kuzzle.dataCollectionFactory(collection).fetchDocument(kuzzleDocumentId, (err, resp) => {
 
             if (!err) {
                 var kuzzleDocument = resp;
 
                 var contentMessage = {
-                    userId: kuzzleDocument.content.datas.userId,
+                    senderId: (users.isAuthenticated()) ? users.state.id : 'Anonymous',
+                    receiverId: kuzzleDocument.content.datas.userId,
                     documentId: kuzzleDocument.id,
-                    type: "notification_user",
-                    message: 'notification about ' + kuzzleDocument.content.fields.name
+                    documentName: kuzzleDocument.content.fields.name,
+                    type: "notification_user"
                 };
                 console.log(contentMessage);
-                //var messageDocument = kuzzle.dataCollectionFactory(Config.defaultIndex, collection).documentFactory(contentMessage);
 
                 // Publish message on document
                 kuzzle.dataCollectionFactory(Config.defaultIndex,kuzzleDocument.collection).publishMessage(contentMessage);
@@ -479,7 +480,6 @@ export default {
             subscriptionByUserId.unsubscribe();
         }
 
-        // TODO : make filter for user connected ONLY
         var filter =
         {
             and:[
@@ -490,7 +490,7 @@ export default {
                 },
                 {
                     term: {
-                        userId: kuzzleUserId
+                        receiverId: kuzzleUserId
                     }
                 }
             ]
@@ -500,14 +500,24 @@ export default {
             state: 'done'
         };
 
+        // TODO : change collection
         this.state.subscriptionByUserId = subscriptionByUserId = kuzzle.dataCollectionFactory(Config.defaultIndex, 'test_collection').subscribe(filter, options, (err, resp) => {
             if (!err) {
 
                 if ("publish" == resp.action && 'in' == resp.scope) {
-                    console.log(resp.result._source);
 
+                    var source = resp.result._source;
+                    var message = source.senderId + ' send you a notification about ' + source.documentName;
+
+                    // Reload DOM
                     var btnNotifAlert = document.getElementById('BtnNotificationUser');
-                    btnNotifAlert.childNodes[0].innerHTML = 'notifications';
+                    while (btnNotifAlert.firstChild) {
+                        btnNotifAlert.removeChild(btnNotifAlert.firstChild);
+                    }
+                    var buttonIcon = document.createElement("i");
+                    buttonIcon.classList.add("material-icons");
+                    buttonIcon.appendChild(document.createTextNode("notifications"));
+                    btnNotifAlert.appendChild(buttonIcon);
 
                     var notifAlert = document.getElementById('NotificationUser');
                     if (! notifAlert.hasAttribute('data-badge')) {
@@ -521,17 +531,13 @@ export default {
                     var menuNotification = document.getElementById('listNotificationUser');
 
                     var li = document.createElement('li');
-                    li.className = "mdl-list__item  mdl-menu__item--full-bleed-divider";
-
-                    var span = document.createElement('span');
-                    span.className = "mdl-list__item-primary-content";
-                    span.innerHTML = resp.result._source.message;
-
-                    li.appendChild(span);
-                    componentHandler.upgradeElements(li);
-
+                    li.classList.add("mdl-menu__item", "mdl-menu__item--full-bleed-divider");
+                    li.appendChild(document.createTextNode(message));
                     menuNotification.appendChild(li);
-                    menuNotification.classList.add('is-visible');
+                    //menuNotification.classList.add('is-visible');
+
+                    componentHandler.upgradeElement(li);
+                    componentHandler.upgradeElement(menuNotification);
                 }
 
             } else {

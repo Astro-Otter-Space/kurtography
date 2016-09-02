@@ -1,7 +1,9 @@
 header#navbar.mdl-layout__header.mdl-layout__header--transparent
     div.mdl-layout__header-row
-        span.mdl-layout-title Kurtography Bêta
+        span.mdl-layout-title Kurtography
         div.mdl-layout-spacer
+
+        // Research
         form(action="#")
             div.mdl-textfield.mdl-js-textfield.mdl-textfield--expandable
                 label.mdl-button.mdl-js-button.mdl-button--icon(for="kuzzleSearch")
@@ -10,16 +12,15 @@ header#navbar.mdl-layout__header.mdl-layout__header--transparent
                     input.mdl-textfield__input#kuzzleSearch(type="text")
                     label.mdl-textfield__label(for="kuzzleSearch") Expandable Input
 
-        button#BtnNotificationUser.notification-navbar.mdl-button.mdl-js-button.mdl-button--icon.hidden
+        // User notification (only if connected) : button and menu
+        button#BtnNotificationUser.mdl-button.mdl-js-button.mdl-js-ripple-effect.mdl-button--icon.hidden
             i.material-icons notifications_none
-        span#NotificationUser.notification-navbar.mdl-badge.hidden
+        ul#listNotificationUser.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect.hidden(for="BtnNotificationUser")
+        span#NotificationUser.mdl-badge.hidden
 
+        // Button and menu login/register/logout
         button#demo-menu-lower-right.mdl-button.mdl-js-button.mdl-button--icon
             i.material-icons more_vert
-
-        // Menu listant les notification reçus
-        ul#listNotificationUser.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect.hidden(for="BtnNotificationUser")
-
         ul.mdl-menu.mdl-menu--bottom-right.mdl-js-menu.mdl-js-ripple-effect(for="demo-menu-lower-right")
             li.mdl-menu__item
                 a.mdl-navigation__link(data-link="auth", href="#auth")
