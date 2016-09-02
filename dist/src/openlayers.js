@@ -589,7 +589,11 @@ export default {
      */
     showFeaturesInformations(feature, centerTofeature = true)
     {
-        var fProperties = feature.getProperties();
+        console.log(feature.getId());
+
+        var this_ = this;
+        this.featureId = feature.getId();
+        var fProperties =  this.fProperties = feature.getProperties();
 
         // Show datas
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
@@ -613,19 +617,24 @@ export default {
         }
         this.addGeometriesTab(feature.getGeometry());
 
-        // Add specififs id on button notificate
-        var buttonNotificate = document.getElementsByClassName('notificate_owner')[0];
-        buttonNotificate.setAttribute('title', 'Notificate ' + fProperties.userId + ' about ' + fProperties.name);
-        buttonNotificate.addEventListener('click', function() {
-            "use strict";
-            // Add timeout of 3 seconds
-            kuzzleBridge.sendNotificationToUser(feature.getId());
+        // Sending notification
+        var sendNotificationToOwner = this.sendNotificationToOwner = function(e) {
+            e.preventDefault();
+            console.log(this_.featureId);
 
+            //kuzzleBridge.sendNotificationToUser(this_.featureId);
             notification.init({
                 type: 'notice',
-                message: 'You have notified ' + fProperties.userId + ' about ' + fProperties.name
+                message: 'You have notified ' + this_.fProperties.userId + ' about ' + this_.fProperties.name
             });
-        }, false);
+        };
+
+
+        var buttonNotificate = document.getElementsByClassName('notificate_owner');
+        buttonNotificate.setAttribute('title', 'Notificate ' + fProperties.userId + ' about ' + fProperties.name);
+
+        buttonNotificate.removeEventListener('click', this.sendNotificationToOwner, false);
+        buttonNotificate.addEventListener('click', this.sendNotificationToOwner, false);
 
         if (true == centerTofeature) {
             document.getElementById("infoKdoc").classList.toggle("hidden");
