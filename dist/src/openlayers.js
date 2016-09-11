@@ -80,7 +80,7 @@ export default {
         // Put layers in ol.layer.Group
         if (kuzzleBridge.state.collections.length > 0) {
             this.state.tabLayersKuzzle = kuzzleBridge.state.collections.map(layerName => {
-                var layer = new ol.layer.Vector({
+                return new ol.layer.Vector({
                     title: layerName,
                     type: 'base',
                     visible: false,
@@ -99,7 +99,6 @@ export default {
                         }
                     }
                 });
-                return layer;
             });
 
             // Create a group layer for Kuzzle layers
@@ -147,8 +146,9 @@ export default {
         this.initPosition(lonDef, latDef);
 
         // If user blocking geolocalisation, set on default point and set default point as geolocation
-        this.geolocation.on('error', function(error){
+        this.geolocation.on('error', function(error) {
             this_.state.acceptGeoloc = false;
+            console.log(error);
             notification.init({
                 type: 'warning',
                 message : 'You should accept geolocation on your browser :)'
@@ -190,7 +190,7 @@ export default {
 
         // Adding controls
         this.initControls();
-        user.getCurrentUser(() => {})
+        user.getCurrentUser(() => {});
         //this.initControlsIfConnected();
 
         // Show feature data + listener
@@ -261,13 +261,12 @@ export default {
         this.state.map.addControl(this.state.layerSwitcher);
 
         /**
-         * @type {initControls.handleChangeUnity}
+         * @type {initControls.handleChangeScale}
          */
-        var handleChangeScale = this.handleChangeScale = function(e) {
+        this.handleChangeScale = function(e) {
 
             var min = parseInt(this.dataset.min);
             var max = parseInt(this.dataset.max);
-            var factorScale = parseInt(this.value);
             var zoom = parseInt(this.dataset.zoom);
 
             if (undefined != this_.state.zoneSubscriptionLayer) {
@@ -290,11 +289,12 @@ export default {
                 document.getElementById('valueDistance').innerHTML = lblDistance;
             }
         };
+
         /**
          *
          * @type {initControls.handleChangeDistance}
          */
-        var handleChangeDistance = this.handleChangeDistance = function(e) {
+        this.handleChangeDistance = function(e) {
             e.preventDefault();
 
             // If chane, remove and rebuild the subscribe zone
@@ -366,7 +366,7 @@ export default {
             var this_ = this;
             // RealTime Tracking
             if(false != this.state.acceptGeoloc) {
-                var realTimeTracking = this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
+                this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
                 this.state.map.addControl(this.state.realTimeTracking);
             }
 
@@ -415,6 +415,8 @@ export default {
     /**
      * Set all events when change layer
      * @param layer
+     * @param featureId
+     * @param flagIsAuthenticated
      */
     setEventsSelectedLayer(layer, featureId, flagIsAuthenticated) {
 
@@ -518,7 +520,7 @@ export default {
 
     /**
      * Create a zone where kuzzle subscription is active
-     * @param distance
+     * @param distanceMeters
      */
     createZoneSubscription(distanceMeters)
     {
@@ -556,8 +558,8 @@ export default {
         });
 
         // Random color #RRGGBB
-        var color = '#' + '0123456789abcdef'.split('').map(function(v,i,a){
-                return i>5 ? null : a[Math.floor(Math.random()*16)] }).join('');
+        //var color = '#' + '0123456789abcdef'.split('').map(function(v,i,a){
+        //        return i>5 ? null : a[Math.floor(Math.random()*16)] }).join('');
 
         // Create vector layer
         this.state.zoneSubscriptionLayer = new ol.layer.Vector({
@@ -586,6 +588,7 @@ export default {
     /**
      * Show feature information by feature
      * @param feature
+     * @param centerTofeature Boolean
      */
     showFeaturesInformations(feature, centerTofeature = true)
     {
@@ -604,7 +607,7 @@ export default {
 
         var byUser = "";
         if (undefined != fProperties.userId) {
-            var byUser = " by " + fProperties.userId;
+            byUser = " by " + fProperties.userId;
         }
 
         var datePublish = new Date(fProperties.date_publish);
@@ -622,7 +625,7 @@ export default {
         this.addGeometriesTab(feature.getGeometry());
 
         // Sending notification
-        var sendNotificationToOwner = this.sendNotificationToOwner = function(e) {
+        this.sendNotificationToOwner = function(e) {
             e.target.removeEventListener(e.type, arguments);
             kuzzleBridge.sendNotificationToUser(e.currentTarget.dataset.featureId);
             notification.init({
@@ -644,13 +647,12 @@ export default {
 
     /**
      * Return the centroid of a polygon/linestring feature
-     * @param featureGeoJSON : geoJson a the feature
+     * @param featureGeoJSON : feature in geojson format
      * @return centroid of feature
      */
     getFeatureCentroid(featureGeoJSON)
     {
-        var centroidPt = turfCentroid(featureGeoJSON);
-        return centroidPt;
+        return turfCentroid(featureGeoJSON);
     },
 
 
@@ -670,13 +672,10 @@ export default {
 
 
     /**
-     * Set datas from proporties in the popup
-     * @param properties
-     * @returns {Element}
+     * Generate form for input datas in kuzzle
      */
     createEditDatasForm()
     {
-        var this_ = this;
         var divForm = document.getElementById("divFormInput");
 
         if (divForm.childElementCount > 0) {
@@ -712,15 +711,15 @@ export default {
                 divForm.appendChild(div);
 
             } else if ("string" == kuzzleBridge.state.mappingFieldsCollection[key].type && "description" == key) {
-                var input = document.createElement('textarea');
-                input.className = 'mdl-textfield__input';
-                input.type= "text";
-                input.row = 3;
-                input.name = key;
-                input.id = key;
+                var textArea = document.createElement('textarea');
+                textArea.className = 'mdl-textfield__input';
+                textArea.type= "text";
+                textArea.row = 3;
+                textArea.name = key;
+                textArea.id = key;
 
                 div.appendChild(label);
-                div.appendChild(input);
+                div.appendChild(textArea);
                 divForm.appendChild(div);
             }
             componentHandler.upgradeElements(div);
@@ -854,7 +853,7 @@ export default {
      */
     getStylesFeatures()
     {
-        var styles = {
+        return {
 
             'Point': [new ol.style.Style({
                 image: new ol.style.Circle({
@@ -891,8 +890,6 @@ export default {
                 })
             })]
         };
-
-        return styles;
     },
 
     /**
