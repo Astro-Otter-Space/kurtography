@@ -55,10 +55,13 @@ export default {
      */
     loadDatasFromCollection(collection, featureIdQs)
     {
+        var this_ = this;
         var options = {
             from: 0,
             size: 10000,
         };
+
+        this.featureIdQs = featureIdQs;
 
         // Load mapping of collection
         this.getPropertiesMapping(collection);
@@ -91,8 +94,8 @@ export default {
                 olMap.getSelectedLayer().setSource(kSource);
                 olMap.getSelectedLayer().setZIndex(20);
 
-                if (undefined != featureIdQs) {
-                    var featureQs = olMap.getSelectedLayer().getSource().getFeatureById(featureIdQs);
+                if (undefined != this_.featureIdQs) {
+                    var featureQs = olMap.getSelectedLayer().getSource().getFeatureById(this_.featureIdQs);
                     olMap.showFeaturesInformations(featureQs, true);
                 }
             } else {
@@ -185,7 +188,6 @@ export default {
             var updDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, featureGeoJSON, updFeature.getId());
 
             kuzzle.dataCollectionFactory(layer).updateDocument(updFeature.getId(), updDocument.content, function (err, resp) {
-            //updDocument.save((err, resp) => {
                 if (err) {
                     notification.init({
                         type: 'error',
@@ -295,8 +297,9 @@ export default {
         };
 
         //console.log(JSON.stringify(filter, null, '\t'));
-        this.state.subscriptionGeoDistance = subscriptionGeoDistance = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
+        this.state.subscriptionGeoDistance = subscriptionGeoDistance = kuzzle.dataCollectionFactory(layer.get('title'), Config.defaultIndex).subscribe(filter, options, (err, resp) => {
             if (!err) {
+
                 if (null == this_.state.notNotifFeatureId || resp.result._id != this_.state.notNotifFeatureId) {
 
                     // We retrive kDoc and transform it on feature
@@ -455,10 +458,9 @@ export default {
                     documentName: kuzzleDocument.content.fields.name,
                     type: "notification_user"
                 };
-                console.log(contentMessage);
 
                 // Publish message on document
-                kuzzle.dataCollectionFactory(Config.defaultIndex,kuzzleDocument.collection).publishMessage(contentMessage);
+                kuzzle.dataCollectionFactory(kuzzleDocument.collection, Config.defaultIndex).publishMessage(contentMessage);
 
             } else {
                 notification.init({
@@ -471,7 +473,7 @@ export default {
 
     /**
      * /!\ Only if user is connected
-     *
+     * TODO : test with many collections and many users
      */
     receiveNotification(kuzzleUserId)
     {
@@ -500,8 +502,9 @@ export default {
             state: 'done'
         };
 
-        // TODO : change collection
-        this.state.subscriptionByUserId = subscriptionByUserId = kuzzle.dataCollectionFactory(Config.defaultIndex, 'test_collection').subscribe(filter, options, (err, resp) => {
+        var collection = (undefined != olMap.getSelectedLayer()) ? olMap.getSelectedLayer().get('title') : 'collection_none' ;
+
+        this.state.subscriptionByUserId = subscriptionByUserId = kuzzle.dataCollectionFactory(collection, Config.defaultIndex).subscribe(filter, options, (err, resp) => {
             if (!err) {
 
                 if ("publish" == resp.action && 'in' == resp.scope) {
@@ -538,6 +541,8 @@ export default {
 
                     componentHandler.upgradeElement(li);
                     componentHandler.upgradeElement(menuNotification);
+
+
                 }
 
             } else {

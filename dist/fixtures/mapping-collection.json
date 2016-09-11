@@ -13,6 +13,9 @@
         },
         "userId": {
           "type": "string"
+        },
+        "nbNotifications": {
+          "type": "integer"
         }
       }
     },

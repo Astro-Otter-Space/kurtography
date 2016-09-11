@@ -449,8 +449,6 @@ export default {
             kuzzleBridge.loadDatasFromCollection(layer.get('title'));
         }
 
-        //kuzzleBridge.getPropertiesMapping(layer.get('title'));
-
         if (true == flagIsAuthenticated) {
             this.state.buttonsDrawControls.setSelectedLayer(layer);
             // Not sure if correct but it's working :|
@@ -460,6 +458,8 @@ export default {
         }
 
         if (true == flagIsAuthenticated) {
+            kuzzleBridge.receiveNotification(user.state.id);
+
             // Enabled control draw buttons
             document.getElementById("Point").disabled = false;
             document.getElementById("LineString").disabled = false;
@@ -473,8 +473,6 @@ export default {
             document.getElementById("trackingButton").disabled = false;
             document.getElementById("stopTrackingButton").disabled = false;
         }
-        // Set the export links
-        //this.editExportLinks();
     },
 
     /**
@@ -596,6 +594,8 @@ export default {
         var this_ = this;
         var fProperties = this.fProperties = feature.getProperties();
 
+        this.feature = feature;
+
         // Event on button
         var buttonNotificate = document.getElementsByClassName('notificate_owner')[0];
         buttonNotificate.setAttribute('title', 'Notificate ' + fProperties.userId + ' about ' + fProperties.name);
@@ -605,6 +605,7 @@ export default {
         // Show datas
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
 
+        // Date publish
         var byUser = "";
         if (undefined != fProperties.userId) {
             byUser = " by " + fProperties.userId;
@@ -613,6 +614,7 @@ export default {
         var datePublish = new Date(fProperties.date_publish);
         document.getElementById("dateKdoc").innerHTML = " " + dateFormat(datePublish, 'dd/mm/yyyy') + byUser;
 
+        // Image
         document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
         if ("" != fProperties.url_image) {
             document.getElementById("imgKdoc").classList.remove("hidden");
@@ -622,12 +624,29 @@ export default {
         } else {
             document.getElementById("imgKdoc").classList.add("hidden");
         }
+
+        if (undefined != fProperties.nbNotifications) {
+            var txtPerson = (1 < fProperties.nbNotifications) ? ' persons ' : ' person ';
+            document.getElementById("nbNotifications").innerHTML = fProperties.nbNotifications + txtPerson + 'have seen ' + fProperties.name;
+        }
+
         this.addGeometriesTab(feature.getGeometry());
 
         // Sending notification
         this.sendNotificationToOwner = function(e) {
             e.target.removeEventListener(e.type, arguments);
+
+            // Send a notification to the owner
             kuzzleBridge.sendNotificationToUser(e.currentTarget.dataset.featureId);
+
+            // Update the feature in Kuzzle
+            var objPropertiesFeature = new Array();
+            objPropertiesFeature['nbNotifications'] = this_.fProperties.nbNotifications + 1;
+            this_.feature.setProperties(objPropertiesFeature);
+
+            kuzzleBridge.updateDocument(this_.feature);
+
+            // Show notification
             notification.init({
                 type: 'notice',
                 message: 'You have notified ' + this_.fProperties.userId + ' about ' + this_.fProperties.name

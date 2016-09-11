@@ -39,6 +39,9 @@ class KuzzleDocumentEntity {
         // Set the userId in the properties
         dataGeoJson.properties.userId = datasGeometry.userId;
 
+        // Set the number of notification
+        dataGeoJson.properties.nbNotifications = datasGeometry.nbNotifications;
+
         return dataGeoJson;
     }
 
@@ -78,9 +81,18 @@ class KuzzleDocumentEntity {
         }
 
         // Remove userId from properties
+        var userId = user.state.id;
         if (undefined != featureGeoJson.properties.userId) {
+            userId = featureGeoJson.properties.userId;
             delete featureGeoJson.properties.userId;
         }
+
+        var nbNotifications = 0;
+        if (undefined != featureGeoJson.properties.nbNotifications) {
+            nbNotifications = featureGeoJson.properties.nbNotifications;
+            delete featureGeoJson.properties.nbNotifications;
+        }
+
         var propertiesFeatures = featureGeoJson.properties;
 
         // Construction content Kuzzle Document
@@ -91,7 +103,8 @@ class KuzzleDocumentEntity {
                     lon: coordinatesCentroid[0],
                     lat: coordinatesCentroid[1]
                 } ,
-                userId: user.state.id
+                userId: userId,
+                nbNotifications: nbNotifications
             },
             fields: propertiesFeatures
         };
@@ -105,9 +118,6 @@ class KuzzleDocumentEntity {
 
         return document;
     }
-
-
-
 }
 
 export default KuzzleDocumentEntity;

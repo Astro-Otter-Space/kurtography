@@ -27,6 +27,5 @@ export default {
             kuzzleBridge.searchDocuments(e.target.value);
             awesomplete.list = kuzzleBridge.state.rstAdvancedSearch
         }, false);
-    },
-
+    }
 }
