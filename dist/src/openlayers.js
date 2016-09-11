@@ -4,13 +4,13 @@ import kuzzleBridge from './kuzzleBridge';
 import ol from 'openlayers';
 
 // Openlayers controls
-import LayerSwitcher from './ol3-plugins/layerSwitcher'
+import LayerSwitcher from './ol3-plugins/ol3-layerSwitcher'
 import ControlDrawButtons from './ol3-plugins/ol3-controldrawbuttons'
 import ZoomControl from './ol3-plugins/ol3-zoomuibuttons';
-import SetPosition from './ol3-plugins/ol3-resetposition';
+import ResetPosition from './ol3-plugins/ol3-resetposition';
 import RedrawSubscribeZone from './ol3-plugins/ol3-editsubscribezone';
 import RealTimeTracking from './ol3-plugins/ol3-realTimeTracking';
-import exportDatas from './ol3-plugins/ol3-export';
+import ExportDatas from './ol3-plugins/ol3-export';
 
 // Openlayers 3 add-ons
 import turfCentroid from 'turf-centroid';
@@ -334,8 +334,8 @@ export default {
         this.state.map.addControl(resetPosition);
 
         // Redraw the subscribe zone
-        var RedrawSubscribeZone = new ol.control.EditSubscribeRoom();
-        this.state.map.addControl(RedrawSubscribeZone);
+        var redrawSubscribeZone = new ol.control.EditSubscribeRoom();
+        this.state.map.addControl(redrawSubscribeZone);
 
         // Export datas
         var exportDatas = new ol.control.Export();
