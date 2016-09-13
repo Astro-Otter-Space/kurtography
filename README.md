@@ -122,6 +122,9 @@ In Kuzzle-BO, when create a new collection, the mapping must be like (see dist/f
         },
         "userId": {
           "type": "string"
+        },
+        "nbNotifications": {
+          "type": "integer"
         }
       }
     },
@@ -153,7 +156,7 @@ Item     | type | Information
 Location | GeoShape field | store location, see [Geo Shape](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html)
 Centroid | Geo point | Store the centroid of the object (for the subscribe() kuzzle method)
 UserId | string | Id of user, creator of feature
-
+Number notifications | Integer | Set the number of views of the item
 
 Fields:
 
@@ -181,7 +184,8 @@ Exemple of KuzzleDocument working in Kurtography :
         "lon": 43.624395670027354,
         "lat": 3.9609146118164054
     }
-    "userId": "smeaudre"
+    "userId": "HamHamFonFon",
+    "nbNotifications": 0
   },
   "fields": {
     "name": "Test",
@@ -274,7 +278,7 @@ Features will be avalaible soon:
 
 Author(s)
 -------------
-Stéphane MÉAUDRE
+Stéphane MÉAUDRE - HamHamFonFon
  <stephane.meaudre@gmail.com> <smeaudre@kaliop.com>
 
 Licence
