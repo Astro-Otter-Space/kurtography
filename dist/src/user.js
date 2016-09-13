@@ -1,4 +1,5 @@
 import kuzzle from '../services/kuzzle'
+import kuzzleBridge from './kuzzleBridge'
 import olMap from './openlayers';
 /**
  * /!\ @source : https://github.com/kuzzleio/kuzzle-challenge-klack/blob/master/src/store/user.js
@@ -37,8 +38,8 @@ export default {
             // Set the controls who need authentification
             olMap.initControlsIfConnected(this.isAuthenticated());
 
-            document.querySelector('a[data-link="auth"]').parentNode.setAttribute("disabled", "disabled");
-            document.querySelector('a[data-link="logout"]').parentNode.removeAttribute("disabled");
+            document.querySelector('a[data-link="auth"]').parentNode.classList.add('hidden');
+            document.querySelector('a[data-link="logout"]').parentNode.classList.remove('hidden');
         });
     },
 
@@ -46,6 +47,11 @@ export default {
         this.state.id = null;
         this.state.username = null;
         this.state.pictureId = null;
+
+        document.querySelector('a[data-link="auth"]').parentNode.classList.remove('hidden');
+        document.querySelector('a[data-link="logout"]').parentNode.classList.add('hidden');
+
+        kuzzleBridge.state.subscriptionByUserId.unsubscribe();
 
         olMap.initControlsIfConnected(this.isAuthenticated());
     }

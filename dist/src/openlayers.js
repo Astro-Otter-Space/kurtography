@@ -4,13 +4,13 @@ import kuzzleBridge from './kuzzleBridge';
 import ol from 'openlayers';
 
 // Openlayers controls
-import LayerSwitcher from './ol3-plugins/layerSwitcher'
+import LayerSwitcher from './ol3-plugins/ol3-layerSwitcher'
 import ControlDrawButtons from './ol3-plugins/ol3-controldrawbuttons'
 import ZoomControl from './ol3-plugins/ol3-zoomuibuttons';
-import SetPosition from './ol3-plugins/ol3-resetposition';
+import ResetPosition from './ol3-plugins/ol3-resetposition';
 import RedrawSubscribeZone from './ol3-plugins/ol3-editsubscribezone';
 import RealTimeTracking from './ol3-plugins/ol3-realTimeTracking';
-import exportDatas from './ol3-plugins/ol3-export';
+import ExportDatas from './ol3-plugins/ol3-export';
 
 // Openlayers 3 add-ons
 import turfCentroid from 'turf-centroid';
@@ -80,7 +80,7 @@ export default {
         // Put layers in ol.layer.Group
         if (kuzzleBridge.state.collections.length > 0) {
             this.state.tabLayersKuzzle = kuzzleBridge.state.collections.map(layerName => {
-                var layer = new ol.layer.Vector({
+                return new ol.layer.Vector({
                     title: layerName,
                     type: 'base',
                     visible: false,
@@ -99,7 +99,6 @@ export default {
                         }
                     }
                 });
-                return layer;
             });
 
             // Create a group layer for Kuzzle layers
@@ -147,8 +146,9 @@ export default {
         this.initPosition(lonDef, latDef);
 
         // If user blocking geolocalisation, set on default point and set default point as geolocation
-        this.geolocation.on('error', function(error){
+        this.geolocation.on('error', function(error) {
             this_.state.acceptGeoloc = false;
+            console.log(error);
             notification.init({
                 type: 'warning',
                 message : 'You should accept geolocation on your browser :)'
@@ -190,7 +190,7 @@ export default {
 
         // Adding controls
         this.initControls();
-        user.getCurrentUser(() => {})
+        user.getCurrentUser(() => {});
         //this.initControlsIfConnected();
 
         // Show feature data + listener
@@ -261,13 +261,12 @@ export default {
         this.state.map.addControl(this.state.layerSwitcher);
 
         /**
-         * @type {initControls.handleChangeUnity}
+         * @type {initControls.handleChangeScale}
          */
-        var handleChangeScale = this.handleChangeScale = function(e) {
+        this.handleChangeScale = function(e) {
 
             var min = parseInt(this.dataset.min);
             var max = parseInt(this.dataset.max);
-            var factorScale = parseInt(this.value);
             var zoom = parseInt(this.dataset.zoom);
 
             if (undefined != this_.state.zoneSubscriptionLayer) {
@@ -290,11 +289,12 @@ export default {
                 document.getElementById('valueDistance').innerHTML = lblDistance;
             }
         };
+
         /**
          *
          * @type {initControls.handleChangeDistance}
          */
-        var handleChangeDistance = this.handleChangeDistance = function(e) {
+        this.handleChangeDistance = function(e) {
             e.preventDefault();
 
             // If chane, remove and rebuild the subscribe zone
@@ -334,8 +334,8 @@ export default {
         this.state.map.addControl(resetPosition);
 
         // Redraw the subscribe zone
-        var RedrawSubscribeZone = new ol.control.EditSubscribeRoom();
-        this.state.map.addControl(RedrawSubscribeZone);
+        var redrawSubscribeZone = new ol.control.EditSubscribeRoom();
+        this.state.map.addControl(redrawSubscribeZone);
 
         // Export datas
         var exportDatas = new ol.control.Export();
@@ -366,7 +366,7 @@ export default {
             var this_ = this;
             // RealTime Tracking
             if(false != this.state.acceptGeoloc) {
-                var realTimeTracking = this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
+                this.state.realTimeTracking = new ol.control.RealTimeTracking(this.getSelectedLayer());
                 this.state.map.addControl(this.state.realTimeTracking);
             }
 
@@ -401,15 +401,22 @@ export default {
 
             // This adding must be placed after the onchange...
             this.state.map.addControl(this.state.buttonsDrawControls);
+
+            // Show notificate button
+            document.getElementById('BtnNotificationUser').classList.remove('hidden');
+
         } else {
             this.state.map.removeControl(this.state.buttonsDrawControls);
             this.state.map.removeControl(this.state.realTimeTracking);
+            document.getElementById('BtnNotificationUser').classList.add("hidden");
         }
     },
 
     /**
      * Set all events when change layer
      * @param layer
+     * @param featureId
+     * @param flagIsAuthenticated
      */
     setEventsSelectedLayer(layer, featureId, flagIsAuthenticated) {
 
@@ -442,8 +449,6 @@ export default {
             kuzzleBridge.loadDatasFromCollection(layer.get('title'));
         }
 
-        //kuzzleBridge.getPropertiesMapping(layer.get('title'));
-
         if (true == flagIsAuthenticated) {
             this.state.buttonsDrawControls.setSelectedLayer(layer);
             // Not sure if correct but it's working :|
@@ -453,6 +458,8 @@ export default {
         }
 
         if (true == flagIsAuthenticated) {
+            kuzzleBridge.receiveNotification(user.state.id);
+
             // Enabled control draw buttons
             document.getElementById("Point").disabled = false;
             document.getElementById("LineString").disabled = false;
@@ -466,8 +473,6 @@ export default {
             document.getElementById("trackingButton").disabled = false;
             document.getElementById("stopTrackingButton").disabled = false;
         }
-        // Set the export links
-        //this.editExportLinks();
     },
 
     /**
@@ -513,7 +518,7 @@ export default {
 
     /**
      * Create a zone where kuzzle subscription is active
-     * @param distance
+     * @param distanceMeters
      */
     createZoneSubscription(distanceMeters)
     {
@@ -551,8 +556,8 @@ export default {
         });
 
         // Random color #RRGGBB
-        var color = '#' + '0123456789abcdef'.split('').map(function(v,i,a){
-                return i>5 ? null : a[Math.floor(Math.random()*16)] }).join('');
+        //var color = '#' + '0123456789abcdef'.split('').map(function(v,i,a){
+        //        return i>5 ? null : a[Math.floor(Math.random()*16)] }).join('');
 
         // Create vector layer
         this.state.zoneSubscriptionLayer = new ol.layer.Vector({
@@ -575,28 +580,41 @@ export default {
         this.state.map.addLayer(this.state.zoneSubscriptionLayer);
 
         // Rebuild the subscribe zone
-        kuzzleBridge.subscribeCollection(this.getSelectedLayer(), this.state.coordinates);
+        kuzzleBridge.subscribeByGeoDistance(this.getSelectedLayer(), this.state.coordinates);
     },
 
     /**
      * Show feature information by feature
      * @param feature
+     * @param centerTofeature Boolean
      */
     showFeaturesInformations(feature, centerTofeature = true)
     {
-        var fProperties = feature.getProperties();
+
+        var this_ = this;
+        var fProperties = this.fProperties = feature.getProperties();
+
+        this.feature = feature;
+
+        // Event on button
+        var buttonNotificate = document.getElementsByClassName('notificate_owner')[0];
+        buttonNotificate.setAttribute('title', 'Notificate ' + fProperties.userId + ' about ' + fProperties.name);
+        buttonNotificate.dataset.featureId = feature.getId();
+        buttonNotificate.removeEventListener("click", this.sendNotificationToOwner, false);
 
         // Show datas
         document.getElementById("nameKdoc").innerHTML = fProperties.name;
 
+        // Date publish
         var byUser = "";
         if (undefined != fProperties.userId) {
-            var byUser = " by " + fProperties.userId;
+            byUser = " by " + fProperties.userId;
         }
 
         var datePublish = new Date(fProperties.date_publish);
         document.getElementById("dateKdoc").innerHTML = " " + dateFormat(datePublish, 'dd/mm/yyyy') + byUser;
 
+        // Image
         document.getElementById("descriptionKdoc").innerHTML = fProperties.description;
         if ("" != fProperties.url_image) {
             document.getElementById("imgKdoc").classList.remove("hidden");
@@ -606,7 +624,38 @@ export default {
         } else {
             document.getElementById("imgKdoc").classList.add("hidden");
         }
+
+        if (undefined != fProperties.nbNotifications) {
+            var txtPerson = (1 < fProperties.nbNotifications) ? ' persons ' : ' person ';
+            document.getElementById("nbNotifications").innerHTML = fProperties.nbNotifications + txtPerson + 'have seen ' + fProperties.name;
+        }
+
         this.addGeometriesTab(feature.getGeometry());
+
+        // Sending notification
+        this.sendNotificationToOwner = function(e) {
+            e.target.removeEventListener(e.type, arguments);
+
+            // Send a notification to the owner
+            kuzzleBridge.sendNotificationToUser(e.currentTarget.dataset.featureId);
+
+            // Update the feature in Kuzzle
+            var objPropertiesFeature = new Array();
+            objPropertiesFeature['nbNotifications'] = this_.fProperties.nbNotifications + 1;
+            this_.feature.setProperties(objPropertiesFeature);
+
+            kuzzleBridge.updateDocument(this_.feature);
+
+            // Show notification
+            notification.init({
+                type: 'notice',
+                message: 'You have notified ' + this_.fProperties.userId + ' about ' + this_.fProperties.name
+            });
+            e.preventDefault();
+        };
+
+        buttonNotificate.removeEventListener("dblclick", this.sendNotificationToOwner, false);
+        buttonNotificate.addEventListener("click", this.sendNotificationToOwner, false);
 
         if (true == centerTofeature) {
             document.getElementById("infoKdoc").classList.toggle("hidden");
@@ -617,13 +666,12 @@ export default {
 
     /**
      * Return the centroid of a polygon/linestring feature
-     * @param featureGeoJSON : geoJson a the feature
+     * @param featureGeoJSON : feature in geojson format
      * @return centroid of feature
      */
     getFeatureCentroid(featureGeoJSON)
     {
-        var centroidPt = turfCentroid(featureGeoJSON);
-        return centroidPt;
+        return turfCentroid(featureGeoJSON);
     },
 
 
@@ -643,13 +691,10 @@ export default {
 
 
     /**
-     * Set datas from proporties in the popup
-     * @param properties
-     * @returns {Element}
+     * Generate form for input datas in kuzzle
      */
     createEditDatasForm()
     {
-        var this_ = this;
         var divForm = document.getElementById("divFormInput");
 
         if (divForm.childElementCount > 0) {
@@ -685,15 +730,15 @@ export default {
                 divForm.appendChild(div);
 
             } else if ("string" == kuzzleBridge.state.mappingFieldsCollection[key].type && "description" == key) {
-                var input = document.createElement('textarea');
-                input.className = 'mdl-textfield__input';
-                input.type= "text";
-                input.row = 3;
-                input.name = key;
-                input.id = key;
+                var textArea = document.createElement('textarea');
+                textArea.className = 'mdl-textfield__input';
+                textArea.type= "text";
+                textArea.row = 3;
+                textArea.name = key;
+                textArea.id = key;
 
                 div.appendChild(label);
-                div.appendChild(input);
+                div.appendChild(textArea);
                 divForm.appendChild(div);
             }
             componentHandler.upgradeElements(div);
@@ -827,7 +872,7 @@ export default {
      */
     getStylesFeatures()
     {
-        var styles = {
+        return {
 
             'Point': [new ol.style.Style({
                 image: new ol.style.Circle({
@@ -864,8 +909,6 @@ export default {
                 })
             })]
         };
-
-        return styles;
     },
 
     /**

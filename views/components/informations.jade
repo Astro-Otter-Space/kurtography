@@ -2,23 +2,36 @@ div#infoKdoc.mdl-layout.mdl-js-layout.mdl-color--grey-100.hidden
     main.mdl-layout__content
         div.mdl-grid
             div.mdl-card.mdl-cell.mdl-cell--12-col.mdl-cell--8-col-tablet.mdl-shadow--2dp
+                // Header
                 div.mdl-card__menu
                     button#mdlClose.mdl-button.mdl-button--icon.mdl-js-button.mdl-js-ripple-effect
                         i.material-icons close
                 figure.mdl-card__media
                     img#imgKdoc(src="http://tfirdaus.github.io/mdl/images/laptop.jpg", alt="")
+
+                // Center : Title and description
                 div.mdl-card__title
                     h1.mdl-card__title-text#nameKdoc
                 div.mdl-card__supporting-text
                     p#descriptionKdoc
+                    p#nbNotifications
                     table.mdl-data-table.mdl-js-data-table#tabFGeometry
+
+                // Bottom
                 div.mdl-card__actions.mdl-card--border
+                    // Info publish and owner
                     div.mdl-card__supporting-text
                         | Published on
                         span#dateKdoc
                         span#userKdoc
                     div.mdl-layout-spacer
-                    button#share-post-1.mdl-button.mdl-button--icon.mdl-button--colored
+
+                    // Bouton sending notification
+                    button.notificate_owner.mdl-button.mdl-button--icon.mdl-button--colored
+                        i.material-icons notifications
+
+                    // Button and menu share social network
+                    button#share-post-1.mdl-button.mdl-button--icon.mdl-button--colored(title="Share on social network")
                         i.material-icons share
                     ul.mdl-menu.mdl-menu--top-right.mdl-js-menu(for="share-post-1")
                         li.mdl-menu__item

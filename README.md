@@ -74,8 +74,7 @@ export default {
 }
 ```
 
-> **Note:** Don't change "projectionFrom" value, it's the projection using by Openlayers. If you want to record yours datas in Kuzzle with an other projection,
-check the [spatial reference list](http://spatialreference.org/ref/epsg/) and edit "projectionTo" value. Default value is 'EPSG:4326' who is the WGS-84 projection (using in GPS, Google Map...)
+> **Note:** Don't change "projectionFrom" and "projectionTo" values. "projectionFrom" is the projection using by Openlayers. Kuzzle, who use Elastic Search, recorded geografic datas only in 'EPSG:4326' who is the WGS-84 projection (using in GPS, Google Map...)
 
 > **Note 2:** Default coordinates are from Paris, France
 

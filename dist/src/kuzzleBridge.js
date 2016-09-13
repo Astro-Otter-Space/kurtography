@@ -2,13 +2,14 @@ import kuzzle from '../services/kuzzle'
 import Config from '../services/kuzzle-config'
 import KuzzleDocumentEntity from './KuzzleDocumentEntity'
 import Projection from '../services/geo-parameters'
-import notification from '../services/notification';
-import ol from 'openlayers';
+import notification from '../services/notification'
+import ol from 'openlayers'
 import olMap from './openlayers'
+import users from './user'
 
-let subscription = null;
+let subscriptionGeoDistance = null;
+let subscriptionByUserId = null;
 let kuzzleDocumentEntity = new KuzzleDocumentEntity();
-//let this_ = this;  --> correct ?
 
 export default {
 
@@ -18,7 +19,8 @@ export default {
         notNotifFeatureId: null, // when we created a new feature od update a feature, store the featureId for not notfy it in kuzzleRoom
         mappingFieldsCollection: null, // data mapping of selected collection
         tabStyles: olMap.getStylesFeatures(),
-        subscription: null,
+        subscriptionGeoDistance: null,
+        subscriptionByUserId: null,
         rstAdvancedSearch: null
     },
 
@@ -49,6 +51,7 @@ export default {
     /**
      * Retrieve datas from collections and create openlayers Vector layer
      * @param collection
+     * @param featureIdQs
      */
     loadDatasFromCollection(collection, featureIdQs)
     {
@@ -56,12 +59,9 @@ export default {
         var options = {
             from: 0,
             size: 10000,
-            /*sort: {
-                "fields.date_publish": {
-                    order: "desc"
-                }
-            }*/
         };
+
+        this.featureIdQs = featureIdQs;
 
         // Load mapping of collection
         this.getPropertiesMapping(collection);
@@ -94,8 +94,8 @@ export default {
                 olMap.getSelectedLayer().setSource(kSource);
                 olMap.getSelectedLayer().setZIndex(20);
 
-                if (undefined != featureIdQs) {
-                    var featureQs = olMap.getSelectedLayer().getSource().getFeatureById(featureIdQs);
+                if (undefined != this_.featureIdQs) {
+                    var featureQs = olMap.getSelectedLayer().getSource().getFeatureById(this_.featureIdQs);
                     olMap.showFeaturesInformations(featureQs, true);
                 }
             } else {
@@ -110,7 +110,7 @@ export default {
 
     /**
      * Store mapping of selected collection
-     * @param string layer
+     * @param layer
      */
     getPropertiesMapping(layer)
     {
@@ -131,8 +131,8 @@ export default {
 
     /**
      * Adding new KuzzleDocument
-     * @param json datas
-     * @param ol.Feature newFeature
+     * @param fDatasGeoJson
+     * @param ol.Feature feature
      */
     addDocument(fDatasGeoJson, feature)
     {
@@ -188,7 +188,6 @@ export default {
             var updDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, featureGeoJSON, updFeature.getId());
 
             kuzzle.dataCollectionFactory(layer).updateDocument(updFeature.getId(), updDocument.content, function (err, resp) {
-            //updDocument.save((err, resp) => {
                 if (err) {
                     notification.init({
                         type: 'error',
@@ -228,9 +227,7 @@ export default {
 
     /**
      * Delete document from Kuzzle and delete from map
-     * @param idDocument
-     * @param layer
-     * @returns {boolean}
+     * @param featureId
      */
     deleteDocument(featureId)
     {
@@ -263,17 +260,15 @@ export default {
 
     /**
      * Subscribe to item from currentPosition with a radius specified by distance
-     * https://www.elastic.co/guide/en/elasticsearch/reference/1.7/query-dsl-geo-distance-filter.html
      * @param layer
-     * @param currentPosition
-     * @param int distance : distance of radius in meters (default unity)
+     * @param coordonatesWGS84
      */
-    subscribeCollection(layer, coordonatesWGS84)
+    subscribeByGeoDistance(layer, coordonatesWGS84)
     {
         var this_ = this;
-        if (this.state.subscription || subscription) {
-            this.state.subscription.unsubscribe();
-            subscription.unsubscribe();
+        if (this.state.subscriptionGeoDistance || subscriptionGeoDistance) {
+            this.state.subscriptionGeoDistance.unsubscribe();
+            subscriptionGeoDistance.unsubscribe();
         }
 
         var distanceValue = (undefined != olMap.state.distance)? olMap.state.distance : 5000;
@@ -281,7 +276,6 @@ export default {
         /**
          * /!\ Filter on geo_shape is not implemented in kuzzle yet !!
          */
-
         var filter =
         {
             geoDistance: {
@@ -303,12 +297,14 @@ export default {
         };
 
         //console.log(JSON.stringify(filter, null, '\t'));
-        this.state.subscription = subscription = kuzzle.dataCollectionFactory(layer.get('title')).subscribe(filter, options, (err, resp) => {
+        this.state.subscriptionGeoDistance = subscriptionGeoDistance = kuzzle.dataCollectionFactory(layer.get('title'), Config.defaultIndex).subscribe(filter, options, (err, resp) => {
             if (!err) {
+
                 if (null == this_.state.notNotifFeatureId || resp.result._id != this_.state.notNotifFeatureId) {
 
                     // We retrive kDoc and transform it on feature
-                    if ('in' == resp.scope ) {
+                    if ('in' == resp.scope && ('create' == resp.action || 'update' == resp.action) ) {
+
                         this_.action = resp.action;
 
                         // Fetch the document
@@ -366,8 +362,7 @@ export default {
 
     /**
      * Kuzzle request for search
-     * @param search
-     * @param layer
+     * @param searchItem
      */
     searchDocuments(searchItem)
     {
@@ -444,6 +439,120 @@ export default {
         }
     },
 
+    /**
+     *
+     * @param kuzzleIdentifier
+     */
+    sendNotificationToUser(kuzzleDocumentId)
+    {
+        var collection = olMap.getSelectedLayer().get('title');
+        kuzzle.dataCollectionFactory(collection).fetchDocument(kuzzleDocumentId, (err, resp) => {
+
+            if (!err) {
+                var kuzzleDocument = resp;
+
+                var contentMessage = {
+                    senderId: (users.isAuthenticated()) ? users.state.id : 'Anonymous',
+                    receiverId: kuzzleDocument.content.datas.userId,
+                    documentId: kuzzleDocument.id,
+                    documentName: kuzzleDocument.content.fields.name,
+                    type: "notification_user"
+                };
+
+                // Publish message on document
+                kuzzle.dataCollectionFactory(kuzzleDocument.collection, Config.defaultIndex).publishMessage(contentMessage);
+
+            } else {
+                notification.init({
+                    type: 'warning',
+                    message: "Error on fetch document."
+                });
+            }
+        });
+    },
+
+    /**
+     * /!\ Only if user is connected
+     * TODO : test with many collections and many users
+     */
+    receiveNotification(kuzzleUserId)
+    {
+        if (this.state.subscriptionByUserId || subscriptionByUserId) {
+            this.state.subscriptionByUserId.unsubscribe();
+            subscriptionByUserId.unsubscribe();
+        }
+
+        var filter =
+        {
+            and:[
+                {
+                    term: {
+                        type: 'notification_user'
+                    }
+                },
+                {
+                    term: {
+                        receiverId: kuzzleUserId
+                    }
+                }
+            ]
+        };
+
+        var options = {
+            state: 'done'
+        };
+
+        var collection = (undefined != olMap.getSelectedLayer()) ? olMap.getSelectedLayer().get('title') : 'collection_none' ;
+
+        this.state.subscriptionByUserId = subscriptionByUserId = kuzzle.dataCollectionFactory(collection, Config.defaultIndex).subscribe(filter, options, (err, resp) => {
+            if (!err) {
+
+                if ("publish" == resp.action && 'in' == resp.scope) {
+
+                    var source = resp.result._source;
+                    var message = source.senderId + ' send you a notification about ' + source.documentName;
+
+                    // Reload DOM
+                    var btnNotifAlert = document.getElementById('BtnNotificationUser');
+                    while (btnNotifAlert.firstChild) {
+                        btnNotifAlert.removeChild(btnNotifAlert.firstChild);
+                    }
+                    var buttonIcon = document.createElement("i");
+                    buttonIcon.classList.add("material-icons");
+                    buttonIcon.appendChild(document.createTextNode("notifications"));
+                    btnNotifAlert.appendChild(buttonIcon);
+
+                    var notifAlert = document.getElementById('NotificationUser');
+                    if (! notifAlert.hasAttribute('data-badge')) {
+                        notifAlert.setAttribute('data-badge', 1);
+                    } else {
+                        var nbNotif = parseInt(notifAlert.getAttribute('data-badge'));
+                        notifAlert.setAttribute('data-badge', nbNotif + 1);
+                    }
+                    notifAlert.classList.remove('hidden');
+
+                    var menuNotification = document.getElementById('listNotificationUser');
+
+                    var li = document.createElement('li');
+                    li.classList.add("mdl-menu__item", "mdl-menu__item--full-bleed-divider");
+                    li.appendChild(document.createTextNode(message));
+                    menuNotification.appendChild(li);
+                    //menuNotification.classList.add('is-visible');
+
+                    componentHandler.upgradeElement(li);
+                    componentHandler.upgradeElement(menuNotification);
+
+
+                }
+
+            } else {
+                notification.init({
+                   type: 'error',
+                    message: 'Problem receiving notification'
+                });
+            }
+        });
+    },
 
     /**
      * Bridge between kuzzle search result and Map datas
