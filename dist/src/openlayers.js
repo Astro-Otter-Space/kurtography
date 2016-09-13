@@ -65,7 +65,7 @@ export default {
         var osm = new ol.layer.Tile({
                 title : 'Open Street Map',
                 visible : true,
-                type: 'overlays',
+                type: 'base',
                 source: new ol.source.OSM()
             }
         );
@@ -82,7 +82,7 @@ export default {
             this.state.tabLayersKuzzle = kuzzleBridge.state.collections.map(layerName => {
                 return new ol.layer.Vector({
                     title: layerName,
-                    type: 'base',
+                    type: 'overlays',
                     visible: false,
                     style: function (feature, resolution) {
                         if (undefined != GeoParameters.icons[layerName] && layerName in GeoParameters.icons) {
@@ -453,8 +453,6 @@ export default {
         } else {
             kuzzleBridge.loadDatasFromCollection(layer.get('title'));
         }
-
-        console.log(user.isAuthenticated());
 
         // Au cas ou...
         if (user.isAuthenticated()) {

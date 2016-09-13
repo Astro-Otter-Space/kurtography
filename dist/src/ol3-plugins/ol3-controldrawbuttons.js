@@ -18,8 +18,6 @@ import user from './../user';
  */
 ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
 
-    console.log(selected_layer.get('title'));
-
     // Get options
     var options = opt_options || {};
     options.draw.Ending = true;

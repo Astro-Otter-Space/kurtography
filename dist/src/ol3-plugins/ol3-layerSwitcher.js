@@ -69,7 +69,7 @@ ol.control.LayerSwitcher.prototype.setMap = function(map) {
 ol.control.LayerSwitcher.prototype.ensureTopVisibleBaseLayerShown_ = function() {
     var lastVisibleBaseLyr;
     ol.control.LayerSwitcher.forEachRecursive(this.getMap(), function(l, idx, a) {
-        if (l.get('type') === 'base' && l.getVisible()) {
+        if (l.get('type') === 'overlays' && l.getVisible()) {
             lastVisibleBaseLyr = l;
         }
     });
@@ -87,17 +87,17 @@ ol.control.LayerSwitcher.prototype.setVisible_ = function(lyr, visible) {
     var map = this.getMap();
     lyr.setVisible(visible);
 
-    if (visible && lyr.get('type') === 'base') {
-        // Hide all other base layers regardless of grouping
+    if (visible && lyr.get('type') === 'overlays') {
+        // Show all other base layers regardless of grouping
         ol.control.LayerSwitcher.forEachRecursive(map, function(l, idx, a) {
-            if (l != lyr && l.get('type') === 'base') {
-                l.setVisible(false);
+            if (l != lyr && l.get('type') === 'overlays') {
+                l.setVisible(true);
             }
         });
 
-    } else if (visible && lyr.get('type') === 'overlays'){
+    } else if (visible && lyr.get('type') === 'base'){
         ol.control.LayerSwitcher.forEachRecursive(map, function(l, idx, a) {
-            if (l != lyr && l.get('type') === 'overlays') {
+            if (l != lyr && l.get('type') === 'base') {
                 l.setVisible(false);
             }
         });
@@ -131,13 +131,13 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr) {
 
         if ('base' === lyr.get('type') || 'overlays' === lyr.get('type')) {
 
-            if ('overlays' === lyr.get('type')) {
+            if ('base' === lyr.get('type')) {
                 //iLabel.innerHTML = "layers";
                 var labelSwitch = document.createElement('i');
                 labelSwitch.className = "material-icons mdl-list__item-icon";
                 labelSwitch.innerHTML = "public";
 
-            } else if ('base' === lyr.get('type')) {
+            } else if ('overlays' === lyr.get('type')) {
                 // Switch + label
                 var labelSwitch = document.createElement('label');
                 labelSwitch.className = "mdl-switch mdl-js-switch mdl-js-ripple-effect";
@@ -178,7 +178,7 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr) {
             inputRadio.value = lyrId;
 
             // TODO : visibility is set to switcher, inputRadio is only use for selected layer
-            if ('overlays' === lyr.get('type')) {
+            if ('base' === lyr.get('type')) {
                 inputRadio.checked = lyr.get('visible');
                 inputRadio.onchange = function(e) {
                     this_.setVisible_(lyr, e.target.checked);
@@ -198,7 +198,7 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr) {
         }
 
         spanFirst.appendChild(labelSwitch);
-        if ('overlays' === lyr.get('type')) {
+        if ('base' === lyr.get('type')) {
             spanFirst.appendChild(lyrTitle);
         }
 
