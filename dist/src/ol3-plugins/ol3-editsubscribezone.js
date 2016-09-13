@@ -1,4 +1,4 @@
-import Projection from '../../services/geo-parameters'
+import GeoParameters from '../../services/geo-parameters'
 import kuzzleBridge from './../kuzzleBridge';
 import olMap from './../openlayers';
 import ol from 'openlayers';
@@ -105,8 +105,8 @@ ol.control.EditSubscribeRoom.prototype.drawEndFeature = function(evt)
     var edgeCoordinate = [center[0] + radius, center[1]];
     var wgs84Sphere = new ol.Sphere(6378137);
     var radiusInMeters = wgs84Sphere.haversineDistance(
-        ol.proj.transform(center, Projection.projectionFrom, Projection.projectionTo),
-        ol.proj.transform(edgeCoordinate, Projection.projectionFrom, Projection.projectionTo)
+        ol.proj.transform(center, GeoParameters.projectionFrom, GeoParameters.projectionTo),
+        ol.proj.transform(edgeCoordinate, GeoParameters.projectionFrom, GeoParameters.projectionTo)
     );
 
     // Draw circle
@@ -141,7 +141,7 @@ ol.control.EditSubscribeRoom.prototype.drawEndFeature = function(evt)
     this.map.removeInteraction(this.drawCircle);
 
     // reprojection en WGS84
-    var centerWgs84 = ol.proj.transform([center[0], center[1]], Projection.projectionFrom, Projection.projectionTo);
+    var centerWgs84 = ol.proj.transform([center[0], center[1]], GeoParameters.projectionFrom, GeoParameters.projectionTo);
 
     olMap.state.distance = parseInt(radiusInMeters);
     olMap.state.coordinates = centerWgs84;

@@ -1,4 +1,4 @@
-import Projection from '../../services/geo-parameters';
+import GeoParameters from '../../services/geo-parameters';
 import notification from '../../services/notification';
 import kuzzleBridge from './../kuzzleBridge';
 import ol from 'openlayers';
@@ -17,6 +17,8 @@ import user from './../user';
  *
  */
 ol.control.ControlDrawButtons = function (selected_layer, opt_options) {
+
+    console.log(selected_layer.get('title'));
 
     // Get options
     var options = opt_options || {};
@@ -218,7 +220,7 @@ ol.control.ControlDrawButtons.prototype.drawEndFeature = function(evt)
 
     // Problem with recuperation of a circle geometry : https://github.com/openlayers/ol3/pull/3434
     // Addind feature to source vector in EPSG:4326
-    var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+    var featureGeoJSON = parser.writeFeatureObject(feature, {dataProjection: GeoParameters.projectionTo, featureProjection: GeoParameters.projectionFrom});
     if (undefined != this.element) {
         // Ajout new document in Kuzzle
         kuzzleBridge.addDocument(featureGeoJSON, feature);

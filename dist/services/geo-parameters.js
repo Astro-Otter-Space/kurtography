@@ -4,6 +4,7 @@ export default {
     latDefault: 48.856614,
     longDefault: 2.352222,
     icons: {
-        'Lost cats': 'images/cat-24.png'
+        'chats': 'images/cat-24.png',
+        'chiens': 'images/dog-24.png'
     }
 }

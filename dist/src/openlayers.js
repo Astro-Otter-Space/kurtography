@@ -1,4 +1,4 @@
-import Projection from '../services/geo-parameters'
+import GeoParameters from '../services/geo-parameters'
 import notification from '../services/notification';
 import kuzzleBridge from './kuzzleBridge';
 import ol from 'openlayers';
@@ -33,8 +33,8 @@ export default {
         tabBaseLayers: [],
         groupKuzzleLayers:null,
         groupBaseMaps: null,
-        projectionFrom: Projection.projectionFrom,
-        projectionTo: Projection.projectionTo,
+        projectionFrom: GeoParameters.projectionFrom,
+        projectionTo: GeoParameters.projectionTo,
         coordinates: [],
         selectedLayer: null,
         distance: 5000,
@@ -85,13 +85,13 @@ export default {
                     type: 'base',
                     visible: false,
                     style: function (feature, resolution) {
-                        if (undefined != Projection.icons[layerName] && layerName in Projection.icons) {
+                        if (undefined != GeoParameters.icons[layerName] && layerName in GeoParameters.icons) {
                             return new ol.style.Style({
                                 image: new ol.style.Icon({
                                     anchor: [0.5, 18.5],
                                     anchorXUnits: 'fraction',
                                     anchorYUnits: 'pixels',
-                                    src: Projection.icons[layerName]
+                                    src: GeoParameters.icons[layerName]
                                 })
                             })
                         } else {
@@ -131,8 +131,8 @@ export default {
 
 
         // If user block geolocation, set to default location
-        var lonDef = Projection.longDefault;
-        var latDef = Projection.latDefault;
+        var lonDef = GeoParameters.longDefault;
+        var latDef = GeoParameters.latDefault;
 
         // Retrieve geolocation with default values
         this.geolocation = new ol.Geolocation({
@@ -140,7 +140,7 @@ export default {
             tracking: true
         });
 
-        this.geolocation.set('position', [Projection.longDefault, Projection.latDefault]);
+        this.geolocation.set('position', [GeoParameters.longDefault, GeoParameters.latDefault]);
         this.geolocation.set('accuracy', 5); // Accuracy to 5 meters
         this.state.coordinates = [lonDef, latDef];
         this.initPosition(lonDef, latDef);
@@ -257,6 +257,9 @@ export default {
         var this_ = this;
 
         // Adding Layer switcher
+        var options = {
+            'connected' : false
+        }
         this.state.layerSwitcher = new ol.control.LayerSwitcher();
         this.state.map.addControl(this.state.layerSwitcher);
 
@@ -317,17 +320,20 @@ export default {
         document.getElementById('zoneRadius').addEventListener('change', this.handleChangeDistance, false);
 
         // Detection of selected layer
-        ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
-            l.on("change:visible", function(e) {
-                var lyr = e.target;
-                if ('base' === l.get('type')) {
-                    if (lyr.getVisible() == true) {
-                        this_.setEventsSelectedLayer(lyr, null, false);
-                    }
-                }
-
-            });
-        });
+        // EDIT : detection of edit layer is on LayerSwitcher
+        //ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
+        //    console.log(idx,a);
+        //
+        //    l.on("change:visible", function(e) {
+        //        var lyr = e.target;
+        //        if ('base' === l.get('type')) {
+        //            if (lyr.getVisible() == true) {
+        //                this_.setEventsSelectedLayer(lyr, null, false);
+        //            }
+        //        }
+        //
+        //    });
+        //});
 
         // Reset to the position
         var resetPosition = new ol.control.ResetPosition();
@@ -387,17 +393,16 @@ export default {
                 this.setEventsSelectedLayer(this.getSelectedLayer(), null, flagIsAuthenticated);
             }
 
-            ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
-                l.on("change:visible", function(e) {
-                    var lyr = e.target;
-                    if ('base' === l.get('type')) {
-                        if (lyr.getVisible() == true) {
-                            this_.setEventsSelectedLayer(lyr, null, flagIsAuthenticated);
-                        }
-                    }
-
-                });
-            });
+            //ol.control.LayerSwitcher.forEachRecursive(this.state.map.getLayerGroup(), function(l, idx, a) {
+            //    l.on("change:visible", function(e) {
+            //        var lyr = e.target;
+            //        if ('base' === l.get('type')) {
+            //            if (lyr.getVisible() == true) {
+            //                this_.setEventsSelectedLayer(lyr, null, flagIsAuthenticated);
+            //            }
+            //        }
+            //    });
+            //});
 
             // This adding must be placed after the onchange...
             this.state.map.addControl(this.state.buttonsDrawControls);
@@ -449,6 +454,15 @@ export default {
             kuzzleBridge.loadDatasFromCollection(layer.get('title'));
         }
 
+        console.log(user.isAuthenticated());
+
+        // Au cas ou...
+        if (user.isAuthenticated()) {
+            kuzzleBridge.receiveNotification(user.state.id);
+            flagIsAuthenticated = true;
+
+        }
+
         if (true == flagIsAuthenticated) {
             this.state.buttonsDrawControls.setSelectedLayer(layer);
             // Not sure if correct but it's working :|
@@ -458,7 +472,6 @@ export default {
         }
 
         if (true == flagIsAuthenticated) {
-            kuzzleBridge.receiveNotification(user.state.id);
 
             // Enabled control draw buttons
             document.getElementById("Point").disabled = false;
@@ -696,6 +709,8 @@ export default {
     createEditDatasForm()
     {
         var divForm = document.getElementById("divFormInput");
+        document.getElementById('formTitle').appendChild(document.createTextNode('Add document in ' + this.getSelectedLayer().get('title')));
+
 
         if (divForm.childElementCount > 0) {
             while (divForm.firstChild) divForm.removeChild(divForm.firstChild);
@@ -763,7 +778,7 @@ export default {
 
             case 'Point' :
 
-                var coordinates = ol.proj.transform(fGeometry.getCoordinates(), Projection.projectionFrom, Projection.projectionTo);
+                var coordinates = ol.proj.transform(fGeometry.getCoordinates(), GeoParameters.projectionFrom, GeoParameters.projectionTo);
 
                 var trLon = document.createElement('tr');
                 var tdLonLabel = document.createElement('td'); tdLonLabel.innerHTML = 'Longitude';

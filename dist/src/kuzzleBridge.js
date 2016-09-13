@@ -1,7 +1,7 @@
 import kuzzle from '../services/kuzzle'
 import Config from '../services/kuzzle-config'
 import KuzzleDocumentEntity from './KuzzleDocumentEntity'
-import Projection from '../services/geo-parameters'
+import GeoParameters from '../services/geo-parameters'
 import notification from '../services/notification'
 import ol from 'openlayers'
 import olMap from './openlayers'
@@ -87,7 +87,7 @@ export default {
                 };
 
                 // Construction of geoDatas from content
-                var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: Projection.projectionFrom});
+                var kGeoJSON = new ol.format.GeoJSON().readFeatures(dataGeoJSON, {featureProjection: GeoParameters.projectionFrom});
                 var kSource = new ol.source.Vector({
                     features: kGeoJSON
                 });
@@ -152,7 +152,7 @@ export default {
 
                 // Setting of Kuzzle Document Identifier to identifier of the feature
                 var f = new ol.format.GeoJSON();
-                var newFeature = f.readFeature(newFeatureGeojson, {dataProjection:Projection.projectionTo, featureProjection: Projection.projectionFrom});
+                var newFeature = f.readFeature(newFeatureGeojson, {dataProjection: GeoParameters.projectionTo, featureProjection: GeoParameters.projectionFrom});
                 newFeature.setId(resp.id);
 
                 olMap.getSelectedLayer().getSource().addFeature(newFeature);
@@ -182,7 +182,7 @@ export default {
 
             // Transform feature in geoJSON
             this.parser = new ol.format.GeoJSON();
-            var featureGeoJSON = this.parser.writeFeatureObject(updFeature, {dataProjection: Projection.projectionTo, featureProjection: Projection.projectionFrom});
+            var featureGeoJSON = this.parser.writeFeatureObject(updFeature, {dataProjection: GeoParameters.projectionTo, featureProjection: GeoParameters.projectionFrom});
 
             // Create a Kuzzle Document from updated datas
             var updDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, featureGeoJSON, updFeature.getId());
@@ -203,7 +203,7 @@ export default {
 
                     // Convert Kuzzle Document into geojson
                     var updGeojsonEdited = kuzzleDocumentEntity.fromKuzzleToFeature(resp);
-                    var updFeatureEdited = this_.parser.readFeature(updGeojsonEdited, {dataProjection:Projection.projectionTo, featureProjection: Projection.projectionFrom});
+                    var updFeatureEdited = this_.parser.readFeature(updGeojsonEdited, {dataProjection: GeoParameters.projectionTo, featureProjection: GeoParameters.projectionFrom});
 
                     // Add updated feature to the layer and open informations
                     olMap.getSelectedLayer().getSource().addFeature(updFeatureEdited);
@@ -321,7 +321,7 @@ export default {
                             }
 
                             var f = new ol.format.GeoJSON();
-                            var feature = f.readFeature(featureGeojsonDocument, {dataProjection:Projection.projectionTo, featureProjection: Projection.projectionFrom});
+                            var feature = f.readFeature(featureGeojsonDocument, {dataProjection: GeoParameters.projectionTo, featureProjection: GeoParameters.projectionFrom});
 
                             // Adding feature
                             olMap.getSelectedLayer().getSource().addFeature(feature);

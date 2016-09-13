@@ -1,5 +1,5 @@
-import ol from 'openlayers';
-
+import ol from 'openlayers'
+import olMap from './../openlayers'
 /**
  * OpenLayers 3 Layer Switcher Control.
  * See [the examples](./examples) for usage.
@@ -124,50 +124,85 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr) {
         var lyrTitle = document.createTextNode(lyr.get('title'));
         var lyrId = lyr.get('title').replace(/\s+/g, '-');
 
-        var span = document.createElement('span');
-        span.className = "mdl-list__item-primary-content";
 
-        var iLabel = document.createElement('i');
-        iLabel.className = "material-icons mdl-list__item-icon";
+        var spanFirst = document.createElement('span');
+        spanFirst.className = "mdl-list__item-primary-content";
+
 
         if ('base' === lyr.get('type') || 'overlays' === lyr.get('type')) {
 
-            if ('base' === lyr.get('type')) {
-                iLabel.innerHTML = "layers";
-            } else {
-                iLabel.innerHTML = "public";
+            if ('overlays' === lyr.get('type')) {
+                //iLabel.innerHTML = "layers";
+                var labelSwitch = document.createElement('i');
+                labelSwitch.className = "material-icons mdl-list__item-icon";
+                labelSwitch.innerHTML = "public";
+
+            } else if ('base' === lyr.get('type')) {
+                // Switch + label
+                var labelSwitch = document.createElement('label');
+                labelSwitch.className = "mdl-switch mdl-js-switch mdl-js-ripple-effect";
+                labelSwitch.setAttribute('for', 'show_' + lyrId);
+
+                var inputSwitch = document.createElement('input');
+                inputSwitch.type = 'checkbox';
+                inputSwitch.name = lyr.get('type');
+                inputSwitch.className = "mdl-switch__input";
+                inputSwitch.id = 'show_' + lyrId;
+                inputSwitch.value = 'show_' + lyrId;
+
+                inputSwitch.onchange = function(e) {
+                    this_.setVisible_(lyr, e.target.checked);
+                };
+
+                var spanSwitch = document.createElement('span');
+                spanSwitch.className = "mdl-switch__label";
+                spanSwitch.appendChild(lyrTitle);
+
+                labelSwitch.appendChild(inputSwitch);
+                labelSwitch.appendChild(spanSwitch);
             }
 
+            // Input Radio
             var spanInput = document.createElement('span');
             spanInput.className = "mdl-list__item-secondary-action";
 
-            var labelInput = document.createElement('label');
-            labelInput.className = "inline-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect";
-            labelInput.setAttribute("for", lyrId);
+            var labelInputRadio = document.createElement('label');
+            labelInputRadio.className = "inline-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect";
+            labelInputRadio.setAttribute("for", lyrId);
 
-            var input = document.createElement('input');
-            input.type = 'radio';
-            input.name = lyr.get('type');
-            input.className = "mdl-radio__button";
-            input.id = lyrId;
-            input.value = lyrId;
+            var inputRadio = document.createElement('input');
+            inputRadio.type = 'radio';
+            inputRadio.name = lyr.get('type');
+            inputRadio.className = "mdl-radio__button";
+            inputRadio.id = lyrId;
+            inputRadio.value = lyrId;
 
-            input.checked = lyr.get('visible');
-            input.onchange = function(e) {
-                this_.setVisible_(lyr, e.target.checked);
-            };
+            // TODO : visibility is set to switcher, inputRadio is only use for selected layer
+            if ('overlays' === lyr.get('type')) {
+                inputRadio.checked = lyr.get('visible');
+                inputRadio.onchange = function(e) {
+                    this_.setVisible_(lyr, e.target.checked);
+                };
+            } else {
+                inputRadio.onchange = function(e) {
+                    olMap.setEventsSelectedLayer(lyr, null, false);
+                };
+            }
 
-            labelInput.appendChild(input);
-            spanInput.appendChild(labelInput);
+
+            labelInputRadio.appendChild(inputRadio);
+            spanInput.appendChild(labelInputRadio);
 
         } else {
-            iLabel.innerHTML = "public";
+            labelSwitch.innerHTML = "public";
         }
 
-        span.appendChild(iLabel);
-        span.appendChild(lyrTitle);
+        spanFirst.appendChild(labelSwitch);
+        if ('overlays' === lyr.get('type')) {
+            spanFirst.appendChild(lyrTitle);
+        }
 
-        li.appendChild(span);
+        li.appendChild(spanFirst);
         if (undefined != spanInput){
             li.appendChild(spanInput);
             componentHandler.upgradeElements(li);
