@@ -35,7 +35,7 @@ ol.inherits(ol.control.LayerSwitcher, ol.control.Control);
  */
 ol.control.LayerSwitcher.prototype.renderPanel = function() {
 
-    this.ensureTopVisibleBaseLayerShown_();
+    //this.ensureTopVisibleBaseLayerShown_();
 
     while(this.element.firstChild) {
         this.element.removeChild(this.element.firstChild);
@@ -87,15 +87,8 @@ ol.control.LayerSwitcher.prototype.setVisible_ = function(lyr, visible) {
     var map = this.getMap();
     lyr.setVisible(visible);
 
-    if (visible && lyr.get('type') === 'overlays') {
-        // Show all other base layers regardless of grouping
-        ol.control.LayerSwitcher.forEachRecursive(map, function(l, idx, a) {
-            if (l != lyr && l.get('type') === 'overlays') {
-                l.setVisible(true);
-            }
-        });
-
-    } else if (visible && lyr.get('type') === 'base'){
+    // If layer is type "base", we hide the others layers
+    if (visible && lyr.get('type') === 'base'){
         ol.control.LayerSwitcher.forEachRecursive(map, function(l, idx, a) {
             if (l != lyr && l.get('type') === 'base') {
                 l.setVisible(false);
@@ -124,10 +117,8 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr) {
         var lyrTitle = document.createTextNode(lyr.get('title'));
         var lyrId = lyr.get('title').replace(/\s+/g, '-');
 
-
         var spanFirst = document.createElement('span');
         spanFirst.className = "mdl-list__item-primary-content";
-
 
         if ('base' === lyr.get('type') || 'overlays' === lyr.get('type')) {
 
@@ -150,10 +141,6 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr) {
                 inputSwitch.id = 'show_' + lyrId;
                 inputSwitch.value = 'show_' + lyrId;
 
-                inputSwitch.onchange = function(e) {
-                    this_.setVisible_(lyr, e.target.checked);
-                };
-
                 var spanSwitch = document.createElement('span');
                 spanSwitch.className = "mdl-switch__label";
                 spanSwitch.appendChild(lyrTitle);
@@ -168,27 +155,31 @@ ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr) {
 
             var labelInputRadio = document.createElement('label');
             labelInputRadio.className = "inline-list-radio mdl-radio mdl-js-radio mdl-js-ripple-effect";
-            labelInputRadio.setAttribute("for", lyrId);
+            labelInputRadio.setAttribute("for", 'setLayer_' + lyrId);
 
             var inputRadio = document.createElement('input');
             inputRadio.type = 'radio';
             inputRadio.name = lyr.get('type');
             inputRadio.className = "mdl-radio__button";
-            inputRadio.id = lyrId;
+            inputRadio.id = 'setLayer_' + lyrId;
             inputRadio.value = lyrId;
 
-            // TODO : visibility is set to switcher, inputRadio is only use for selected layer
             if ('base' === lyr.get('type')) {
                 inputRadio.checked = lyr.get('visible');
                 inputRadio.onchange = function(e) {
                     this_.setVisible_(lyr, e.target.checked);
                 };
             } else {
+                inputSwitch.checked = lyr.get('visible');
+                inputSwitch.onchange = function(e) {
+                    this_.setVisible_(lyr, e.target.checked);
+                    olMap.setShowDatas(lyr);
+                };
+
                 inputRadio.onchange = function(e) {
                     olMap.setEventsSelectedLayer(lyr, null, false);
                 };
             }
-
 
             labelInputRadio.appendChild(inputRadio);
             spanInput.appendChild(labelInputRadio);

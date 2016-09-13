@@ -195,20 +195,23 @@ export default {
 
         // Show feature data + listener
         this.state.map.on('click', function(evt) {
-            var feature = this_.state.map.forEachFeatureAtPixel(evt.pixel,
+            var datasFeature = this_.state.map.forEachFeatureAtPixel(evt.pixel,
                 function(feature, layer) {
-                    return feature;
+                    return {
+                        'feature': feature,
+                        'layer_title': layer.get('title')
+                    };
                 }
             );
 
-            if (undefined != feature && undefined != feature.getId()) {
-                this_.setOpenGraphContent(feature);
+            if (undefined != datasFeature.feature && undefined != datasFeature.feature.getId()) {
+                this_.setOpenGraphContent(datasFeature.feature);
 
                 if (false == user.isAuthenticated()) {
-                    this_.showFeaturesInformations(feature, true);
+                    this_.showFeaturesInformations(datasFeature.feature, datasFeature.layer_title, true);
                 } else {
                     if (false == this_.state.buttonsDrawControls.getFlagDraw()) {
-                        this_.showFeaturesInformations(feature, true);
+                        this_.showFeaturesInformations(datasFeature.feature, datasFeature.layer_title, true);
                     }
                 }
             }
@@ -357,6 +360,7 @@ export default {
                     document.getElementById(idRadioLayer).parentNode.MaterialRadio.check();
                     l.setVisible(true);
                     this_.setEventsSelectedLayer(l, paramsUrl.id, false);
+                    this_.setShowDatas(l, paramsUrl.id);
                 }
             });
         }
@@ -418,6 +422,19 @@ export default {
     },
 
     /**
+     * Retrieve datas from kuzzle
+     * @param layer
+     * @param featureId
+     */
+    setShowDatas(layer, featureId) {
+        if (undefined != featureId && null != featureId) {
+            kuzzleBridge.loadDatasFromCollection(layer, featureId);
+        } else {
+            kuzzleBridge.loadDatasFromCollection(layer);
+        }
+    },
+
+    /**
      * Set all events when change layer
      * @param layer
      * @param featureId
@@ -447,18 +464,13 @@ export default {
         });
         document.getElementById('zoneRadius').disabled = false;
 
-        // Load datas and Mapping
-        if (undefined != featureId && null != featureId) {
-            kuzzleBridge.loadDatasFromCollection(layer.get('title'), featureId);
-        } else {
-            kuzzleBridge.loadDatasFromCollection(layer.get('title'));
-        }
+        // Load Mapping
+        kuzzleBridge.getPropertiesMapping(layer.get('title'));
 
         // Au cas ou...
         if (user.isAuthenticated()) {
             kuzzleBridge.receiveNotification(user.state.id);
             flagIsAuthenticated = true;
-
         }
 
         if (true == flagIsAuthenticated) {
@@ -599,12 +611,13 @@ export default {
      * @param feature
      * @param centerTofeature Boolean
      */
-    showFeaturesInformations(feature, centerTofeature = true)
+    showFeaturesInformations(feature, layerTitle, centerTofeature = true)
     {
 
         var this_ = this;
         var fProperties = this.fProperties = feature.getProperties();
 
+        this.layerTitle = layerTitle;
         this.feature = feature;
 
         // Event on button

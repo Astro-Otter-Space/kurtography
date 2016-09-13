@@ -53,7 +53,7 @@ export default {
      * @param collection
      * @param featureIdQs
      */
-    loadDatasFromCollection(collection, featureIdQs)
+    loadDatasFromCollection(layer, featureIdQs)
     {
         var this_ = this;
         var options = {
@@ -61,10 +61,12 @@ export default {
             size: 10000,
         };
 
+        var collection = layer.get('title');
+
         this.featureIdQs = featureIdQs;
 
         // Load mapping of collection
-        this.getPropertiesMapping(collection);
+        //this.getPropertiesMapping(collection);
 
         kuzzle.dataCollectionFactory(collection).advancedSearch(options, function(err, res) {
             if (!err) {
@@ -91,12 +93,12 @@ export default {
                 var kSource = new ol.source.Vector({
                     features: kGeoJSON
                 });
-                olMap.getSelectedLayer().setSource(kSource);
-                olMap.getSelectedLayer().setZIndex(20);
+                /*olMap.getSelectedLayer()*/layer.setSource(kSource);
+                /*olMap.getSelectedLayer()*/layer.setZIndex(20);
 
                 if (undefined != this_.featureIdQs) {
-                    var featureQs = olMap.getSelectedLayer().getSource().getFeatureById(this_.featureIdQs);
-                    olMap.showFeaturesInformations(featureQs, true);
+                    var featureQs = /*olMap.getSelectedLayer()*/layer.getSource().getFeatureById(this_.featureIdQs);
+                    olMap.showFeaturesInformations(featureQs, layer.get('title'), true);
                 }
             } else {
                 notification.init({
@@ -110,12 +112,12 @@ export default {
 
     /**
      * Store mapping of selected collection
-     * @param layer
+     * @param collection
      */
-    getPropertiesMapping(layer)
+    getPropertiesMapping(collection)
     {
         var this_ = this;
-        kuzzle.dataCollectionFactory(layer).getMapping(function (err, res) {
+        kuzzle.dataCollectionFactory(collection).getMapping(function (err, res) {
             if (!err) {
                 // Patch on user identifier
                 this_.state.mappingFieldsCollection = res.mapping.fields.properties;
@@ -174,8 +176,8 @@ export default {
      */
     updateDocument(updFeature)
     {
-        var layer = olMap.getSelectedLayer().get('title');
         var this_ = this;
+        this.layer = olMap.getSelectedLayer().get('title');
         if (undefined != updFeature.getId()) {
 
             this.state.notNotifFeatureId = (updFeature.getId() != this.state.notNotifFeatureId) ? updFeature.getId() : this.state.notNotifFeatureId;
@@ -185,9 +187,9 @@ export default {
             var featureGeoJSON = this.parser.writeFeatureObject(updFeature, {dataProjection: GeoParameters.projectionTo, featureProjection: GeoParameters.projectionFrom});
 
             // Create a Kuzzle Document from updated datas
-            var updDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(layer, featureGeoJSON, updFeature.getId());
+            var updDocument = kuzzleDocumentEntity.fromFeatureToKuzzle(this.layer, featureGeoJSON, updFeature.getId());
 
-            kuzzle.dataCollectionFactory(layer).updateDocument(updFeature.getId(), updDocument.content, function (err, resp) {
+            kuzzle.dataCollectionFactory(this.layer).updateDocument(updFeature.getId(), updDocument.content, function (err, resp) {
                 if (err) {
                     notification.init({
                         type: 'error',
@@ -207,7 +209,7 @@ export default {
 
                     // Add updated feature to the layer and open informations
                     olMap.getSelectedLayer().getSource().addFeature(updFeatureEdited);
-                    olMap.showFeaturesInformations(updFeatureEdited, false);
+                    olMap.showFeaturesInformations(updFeatureEdited, this_.layer.get('title'), false);
 
                     notification.init({
                         type: 'notice',
@@ -266,6 +268,7 @@ export default {
     subscribeByGeoDistance(layer, coordonatesWGS84)
     {
         var this_ = this;
+        this.layer = layer;
         if (this.state.subscriptionGeoDistance || subscriptionGeoDistance) {
             this.state.subscriptionGeoDistance.unsubscribe();
             subscriptionGeoDistance.unsubscribe();
@@ -297,7 +300,7 @@ export default {
         };
 
         //console.log(JSON.stringify(filter, null, '\t'));
-        this.state.subscriptionGeoDistance = subscriptionGeoDistance = kuzzle.dataCollectionFactory(layer.get('title'), Config.defaultIndex).subscribe(filter, options, (err, resp) => {
+        this.state.subscriptionGeoDistance = subscriptionGeoDistance = kuzzle.dataCollectionFactory(this.layer.get('title'), Config.defaultIndex).subscribe(filter, options, (err, resp) => {
             if (!err) {
 
                 if (null == this_.state.notNotifFeatureId || resp.result._id != this_.state.notNotifFeatureId) {
@@ -327,7 +330,7 @@ export default {
                             olMap.getSelectedLayer().getSource().addFeature(feature);
 
                             // Show new feature
-                            olMap.showFeaturesInformations(feature, false);
+                            olMap.showFeaturesInformations(feature, this.layer.get('title'), false);
 
                             notification.init({
                                 type: 'notice',
@@ -443,9 +446,9 @@ export default {
      *
      * @param kuzzleIdentifier
      */
-    sendNotificationToUser(kuzzleDocumentId)
+    sendNotificationToUser(kuzzleDocumentId, layerTitle)
     {
-        var collection = olMap.getSelectedLayer().get('title');
+        var collection = layerTitle; //olMap.getSelectedLayer().get('title');
         kuzzle.dataCollectionFactory(collection).fetchDocument(kuzzleDocumentId, (err, resp) => {
 
             if (!err) {
@@ -561,7 +564,7 @@ export default {
     setCenterKuzzleDoc(kdocId)
     {
         var kFeature = olMap.getSelectedLayer().getSource().getFeatureById(kdocId);
-        olMap.showFeaturesInformations(kFeature);
+        olMap.showFeaturesInformations(kFeature, olMap.getSelectedLayer().get('title'), true);
     },
 
     /**
