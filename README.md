@@ -1,6 +1,8 @@
 Kurtography
 ===================
 
+[![Build Status](https://travis-ci.org/HamHamFonFon/kurtography.svg?branch=master)](https://travis-ci.org/HamHamFonFon/kurtography)
+
 Welcome !! Kurtography is a cartography application based on [Openlayers 3](http://openlayers.org/) and [Kuzzle](http://kuzzle.io) for Kaliop Koding Challenge
 
 ### Table of contents
